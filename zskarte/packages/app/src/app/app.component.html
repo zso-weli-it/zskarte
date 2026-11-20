@@ -1,0 +1,22 @@
+@if (navigation.showLanguageSelector()) {
+  <app-language-selector [class.onHelpPage]="navigation.isHelpPage()"></app-language-selector>
+}
+<main
+  [style.height.px]="height"
+  [class.journal-address-preview]="journalAddressPreview()"
+  [class.help-page]="navigation.isHelpPage()"
+>
+  @if ((operationId() && !navigation.isHelpPage()) && showNavLink) {
+    <nav class="main-tabs mat-elevation-z3" mat-tab-nav-bar [tabPanel]="tabPanel">
+      @for (link of navLinks; track link.link) {
+        <a mat-tab-link [routerLink]="link.link" routerLinkActive #rla="routerLinkActive" [active]="rla.isActive">
+          {{ i18n.get(link.label) }}
+        </a>
+      }
+    </nav>
+    <app-sidebar-wrapper></app-sidebar-wrapper>
+  }
+  <mat-tab-nav-panel #tabPanel>
+    <router-outlet></router-outlet>
+  </mat-tab-nav-panel>
+</main>

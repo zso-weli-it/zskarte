@@ -1,0 +1,12 @@
+<quill-editor
+  [(ngModel)]="content"
+  [format]="'object'"
+  [formats]="['addressToken', 'placeholderBlot']"
+  [modules]="{ toolbar: false, keyboard: { bindings: quillBindings } }"
+  placeholder=""
+  (onEditorCreated)="onEditorCreated($event)"
+  (onContentChanged)="onContentChanged($event)"
+  (onBlur)="onTouched()"
+  [readOnly]="disabled"
+></quill-editor>
+<ng-content></ng-content>

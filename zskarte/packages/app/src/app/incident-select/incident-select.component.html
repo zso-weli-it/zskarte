@@ -1,0 +1,34 @@
+<mat-form-field appearance="outline" subscriptSizing="dynamic">
+  <mat-label>{{ i18n.get('eventState') }}</mat-label>
+  <mat-chip-grid #chipGrid [disabled]="incidents.disabled">
+    @for (id of incidents.value; track id) {
+      @if (getIncident(id); as incident) {
+        <mat-chip-row (removed)="remove(id)">
+          <div class="trigger-row">
+            <img [src]="incident.icon" />
+            <span>{{ incident.name }}</span>
+          </div>
+          <button matChipRemove>
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip-row>
+      }
+    }
+  </mat-chip-grid>
+  <input
+    #incidentInput
+    [formControl]="incidentSearchControl"
+    [matChipInputFor]="chipGrid"
+    [matAutocomplete]="auto"
+    [placeholder]="i18n.get('search')"
+  />
+  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+    @for (incident of filteredIncidents(); track incident.id) {
+      <mat-option [value]="incident.id">
+        <div class="row">
+          <img [src]="incident.icon" /><span>{{ incident.name }}</span>
+        </div>
+      </mat-option>
+    }
+  </mat-autocomplete>
+</mat-form-field>

@@ -1,0 +1,28 @@
+:host {
+  height: 100%;
+  width: 100%;
+}
+
+.full {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.hiddenmap {
+  z-index: 0;
+  visibility: hidden;
+}
+
+.journalmap {
+  width: calc(100% - 50rem);
+  min-width: 25%;
+}
+
+:host-context(.journal-address-preview) {
+  app-map.hiddenmap {
+    visibility: visible;
+  }
+}

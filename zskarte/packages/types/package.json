@@ -1,0 +1,18 @@
+{
+  "name": "@zskarte/types",
+  "version": "0.0.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "files": ["dist"],
+  "author": "",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "ol": "^10.7.0",
+    "typescript": "^5.9.3"
+  }
+}

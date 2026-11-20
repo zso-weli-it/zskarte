@@ -1,0 +1,26 @@
+<app-dialog-header>
+  @if (data.title) {
+    <h2>{{ data.title }}</h2>
+  } @else {
+    <h2>{{ i18n.get('carefull') }}</h2>
+  }
+</app-dialog-header>
+<app-dialog-body>
+  @if (data.html) {
+    <div [innerHTML]="data.html"></div>
+  } @else if (data.error) {
+    <div [innerText]="data.error" class="error"></div>
+  } @else {
+    <div [innerText]="data.text || data"></div>
+  }
+</app-dialog-body>
+<app-dialog-footer>
+  <button
+    mat-flat-button
+    color="primary"
+    [mat-dialog-close]="true"
+    cdkFocusInitial
+    (click)="close()"
+    [innerText]="data?.actionLabel || i18n.get('close')"
+  ></button>
+</app-dialog-footer>

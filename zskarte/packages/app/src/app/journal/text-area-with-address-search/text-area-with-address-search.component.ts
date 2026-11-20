@@ -1,0 +1,499 @@
+import { CommonModule } from '@angular/common';
+import { Component, ElementRef, HostListener, effect, inject, input, signal, viewChild } from '@angular/core';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatAutocompleteModule, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { SearchAutocompleteComponent } from 'src/app/search/search-autocomplete/search-autocomplete.component';
+import { isAddressTriggerAt } from 'src/app/search/address-trigger';
+import { ADDRESS_TOKEN_REGEX, SearchService, getGlobalAddressTokenRegex } from 'src/app/search/search.service';
+import { I18NService } from 'src/app/state/i18n.service';
+import { ZsMapStateService } from 'src/app/state/state.service';
+import {
+  IResultSet,
+  IZsGlobalSearchConfig,
+  IZsJournalMessageEditConfig,
+  IZsMapSearchResult,
+} from '../../../../../types/state/interfaces';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { ContenteditableComponent } from 'src/app/contenteditable/contenteditable.component';
+import { debounceLeading } from 'src/app/helper/debounce';
+import { MatButtonModule } from '@angular/material/button';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { QuillBlotService } from 'src/app/contenteditable/quill-blot.service';
+
+@Component({
+  selector: 'app-text-area-with-address-search',
+  imports: [
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    ReactiveFormsModule,
+    FormsModule,
+    CommonModule,
+    SearchAutocompleteComponent,
+    MatAutocompleteModule,
+    OverlayModule,
+    ContenteditableComponent,
+  ],
+  templateUrl: './text-area-with-address-search.component.html',
+  styleUrl: './text-area-with-address-search.component.scss',
+})
+export class TextAreaWithAddressSearchComponent {
+  private _state = inject(ZsMapStateService);
+  private _search = inject(SearchService);
+  private quillBlotService = inject(QuillBlotService);
+  readonly i18n = inject(I18NService);
+  readonly label = input<string>('');
+  readonly formVisible = input(false);
+  messageContentControl = input<FormControl>(new FormControl());
+
+  readonly addressSearchTerm = signal('');
+  readonly addressSelection = signal(false);
+  readonly foundLocations = signal<IResultSet[]>([]);
+  readonly autocompleteTrigger = viewChild.required(MatAutocompleteTrigger);
+  readonly addresSearchField = viewChild.required<ElementRef<HTMLInputElement>>('addresSearchField');
+
+  readonly showMap = signal(false);
+  readonly showAllAddresses = signal(false);
+  readonly showLinkedText = signal(true);
+  readonly settingsVisible = signal(false);
+  readonly textContentInput = viewChild.required<ElementRef<HTMLTextAreaElement>>('textContent');
+  readonly linkedTextContent = viewChild.required<ContenteditableComponent>('linkedTextContent');
+  textContentSelectedArea: [number, number] = [0, 0];
+
+  private addrEditElem: HTMLElement | null = null;
+  addressSelectionPosition = { x: 0, y: 0 };
+
+  constructor(private elementRef: ElementRef) {
+    const config = this._state.getJournalMessageEditConfig();
+    if (config) {
+      this.showMap.set(config.showMap);
+      this.showAllAddresses.set(config.showAllAddresses);
+      this.showLinkedText.set(config.showLinkedText);
+    }
+
+    effect(() => {
+      if (!this.formVisible()) {
+        this.addressSelection.set(false);
+        this._search.addressPreview.set(false);
+      }
+    });
+    effect(() => {
+      //save values in local vars to make sure the effect is triggered on all changes, also if it would evaluate to true without it.
+      const showMap = this.showMap();
+      const addressPreview = this._search.addressPreview();
+      const showAllAddresses = this.showAllAddresses();
+      const acivateMapView = this.formVisible() && (showMap || addressPreview || showAllAddresses);
+      this._state.setJournalAddressPreview(acivateMapView);
+    });
+    effect(() => {
+      if (!this.addressSelection()) {
+        if (this.addrEditElem) {
+          this.addrEditElem.classList.remove('edit-active');
+          this.addrEditElem = null;
+        }
+        this.quillBlotService.removePlaceholderBlot();
+      }
+    });
+    effect(() => {
+      //do not call `this.updateShownFeature();` here as this would not get triggered by angular's effect logic
+      if (this.formVisible() && this.showAllAddresses()) {
+        this._search.showAllFeature(this.messageContentControl().value, true);
+      } else {
+        this._state.updateSearchResultFeatures([]);
+      }
+    });
+    effect(() => {
+      //if showLinkedText is updated
+      this.showLinkedText();
+      const formControl = this.messageContentControl();
+      if (formControl) {
+        //make sure displayed value is updated if changed in other view
+        const value = formControl.value;
+        formControl.setValue(value);
+      }
+    });
+    effect(() => {
+      const config: IZsJournalMessageEditConfig = {
+        showMap: this.showMap(),
+        showAllAddresses: this.showAllAddresses(),
+        showLinkedText: this.showLinkedText(),
+      };
+      this._state.setJournalMessageEditConfig(config);
+    });
+    this._state
+      .observeJournalMessageEditConfig()
+      .pipe(takeUntilDestroyed())
+      .subscribe((config: IZsJournalMessageEditConfig) => {
+        if (config) {
+          this.showMap.set(config.showMap);
+          this.showAllAddresses.set(config.showAllAddresses);
+          this.showLinkedText.set(config.showLinkedText);
+        }
+      });
+
+    //handle address search
+    const searchConfig = this._state.getSearchConfig();
+    const { searchResults$, updateSearchTerm, updateSearchConfig } = this._search.createSearchInstance(searchConfig);
+
+    this._state
+      .observeSearchConfig()
+      .pipe(takeUntilDestroyed())
+      .subscribe((config: IZsGlobalSearchConfig) => {
+        if (!config.filterMapSection && !config.filterByDistance && !config.filterByArea && !config.sortedByDistance) {
+          //fallback config: sort by distance if nothing set
+          updateSearchConfig({ ...config, sortedByDistance: true });
+        } else {
+          updateSearchConfig(config);
+        }
+      });
+    effect(() => {
+      updateSearchTerm(this.addressSearchTerm());
+    });
+
+    searchResults$.pipe(takeUntilDestroyed()).subscribe((newResultSets) => {
+      if (newResultSets === null) {
+        //request aborted by new search
+        return;
+      }
+
+      this.foundLocations().forEach((s) => s.results.forEach((x) => x.feature?.unset('ZsMapSearchResult')));
+      newResultSets.forEach((s) => s.results.forEach((x) => x.feature?.set('ZsMapSearchResult', true)));
+      if (newResultSets.length > 3) {
+        newResultSets.forEach((s) => (s.collapsed = true));
+      }
+      this.foundLocations.set(newResultSets);
+      this.autocompleteTrigger().openPanel();
+    });
+  }
+
+  toggleSettings(event?: MouseEvent) {
+    event?.stopPropagation();
+    this.settingsVisible.set(!this.settingsVisible());
+  }
+
+  @HostListener('window:keydown.Escape', ['$event'])
+  abortOnEsc(event: Event) {
+    if (this.addressSelection()) {
+      this.autocompleteTrigger().closePanel();
+      event.preventDefault();
+      event.stopPropagation();
+      setTimeout(() => {
+        if (!this.showLinkedText()) {
+          this.textContentInput().nativeElement.focus();
+        } else {
+          this.linkedTextContent().getFocus();
+        }
+        this.addressSelection.set(false);
+      });
+      this.updateShownFeature();
+      return true;
+    } else if (this._search.handleEsc(event)) {
+      this.updateShownFeature();
+      return true;
+    }
+    return undefined;
+  }
+
+  updateShownFeature = debounceLeading(
+    async () => {
+      if (!this.addressSelection()) {
+        if (this.formVisible() && this.showAllAddresses()) {
+          this._search.showAllFeature(this.messageContentControl().value, true);
+        } else {
+          this._state.updateSearchResultFeatures([]);
+        }
+        return true;
+      }
+      return false;
+    },
+    2000,
+    this,
+  );
+
+  async onKeyDownText(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      //abort address search, not close form
+      this.abortOnEsc(event);
+      return;
+    }
+    //use intelisense keystroke to start address search
+    if (event.ctrlKey && event.key === ' ') {
+      this.handleTextSelection(event, false);
+    }
+  }
+
+  onDoubleClickText(event: MouseEvent) {
+    this.handleTextSelection(event, true);
+  }
+
+  private handleTextSelection(event: Event, onlyAddressBlock: boolean) {
+    const textarea = this.textContentInput().nativeElement;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    let selectedText = text.substring(start, end);
+
+    //check if text cursor is on/inside textToken
+    let foundTextToken = false;
+    if (!ADDRESS_TOKEN_REGEX.test(selectedText)) {
+      let match: RegExpExecArray | null;
+      const regex = getGlobalAddressTokenRegex();
+      while ((match = regex.exec(text)) !== null) {
+        if (match.index <= start && match.index + match[0].length >= start) {
+          foundTextToken = true;
+          selectedText = match[0];
+          textarea.selectionStart = match.index;
+          textarea.selectionEnd = match.index + match[0].length;
+          break;
+        }
+      }
+    }
+
+    if (!foundTextToken && onlyAddressBlock) {
+      return;
+    }
+
+    //if not, select current word
+    if (!foundTextToken && start === end) {
+      const beforeCursor = text.substring(0, start);
+      const afterCursor = text.substring(end);
+
+      const startOfWord = Math.max(beforeCursor.lastIndexOf(' ') + 1, beforeCursor.lastIndexOf('\n') + 1);
+      const afterPos = Math.min(afterCursor.indexOf(' '), afterCursor.indexOf('\n'));
+      const endOfWord = afterPos === -1 ? text.length : end + afterPos;
+
+      selectedText = text.substring(startOfWord, endOfWord);
+      textarea.selectionStart = startOfWord;
+      textarea.selectionEnd = endOfWord;
+    }
+
+    this.textContentSelectedArea = [textarea.selectionStart, textarea.selectionEnd];
+    const { address, locationInfo } = this._search.parseAddressToken(selectedText);
+    this._search.showFeature(locationInfo);
+    this.startEdit(address);
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  onInputText() {
+    const textarea = this.textContentInput().nativeElement;
+    const cursorPosition = textarea.selectionStart || 0;
+    if (isAddressTriggerAt(textarea.value, cursorPosition)) {
+      textarea.selectionStart = cursorPosition - 1;
+      textarea.selectionEnd = cursorPosition;
+      this.textContentSelectedArea = [textarea.selectionStart, textarea.selectionEnd];
+      this.startEdit('');
+    } else {
+      this.updateShownFeature();
+    }
+  }
+
+  previewCoordinate(element: IZsMapSearchResult | null) {
+    if (this.showMap()) {
+      this._search.highlightResult(element, false);
+    }
+  }
+
+  openAddressSearch() {
+    if (this.showLinkedText()) {
+      const result = this.quillBlotService.getAddressEdit(false);
+      if (result) {
+        if (result.blotElem) {
+          this.editAddr(result.blotElem);
+          return;
+        }
+        this.startEdit(result.text);
+        return;
+      }
+      this.startEdit('');
+      return;
+    }
+
+    const textarea = this.textContentInput().nativeElement;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const selectedText = text.substring(start, end);
+    this.textContentSelectedArea = [start, end];
+    this.startEdit(selectedText);
+  }
+
+  useResult(value: IZsMapSearchResult) {
+    const addressToken = value.internal?.addressToken;
+    if (this.showLinkedText()) {
+      if (addressToken) {
+        const match = ADDRESS_TOKEN_REGEX.exec(addressToken);
+        if (match) {
+          if (this.addrEditElem) {
+            this.quillBlotService.updateAddressToken(this.addrEditElem, match[1], match[2] || undefined);
+          } else {
+            this.quillBlotService.insertAddressToken(match[1], match[2] || undefined);
+          }
+        }
+      }
+      setTimeout(() => {
+        this.linkedTextContent().getFocus();
+      });
+    } else {
+      const textarea = this.textContentInput().nativeElement;
+      if (addressToken) {
+        [textarea.selectionStart, textarea.selectionEnd] = this.textContentSelectedArea;
+        textarea.setRangeText(addressToken);
+        textarea.selectionStart = textarea.selectionEnd = textarea.selectionStart + addressToken.length;
+        this.messageContentControl().setValue(textarea.value);
+      }
+      setTimeout(() => {
+        textarea.focus();
+      });
+    }
+    this.addressSelection.set(false);
+    this._state.updatePositionFlag({ isVisible: false, coordinates: [0, 0] });
+
+    this.updateShownFeature();
+  }
+
+  markPotentialAddresses() {
+    this.messageContentControl().setValue(
+      this._search.tokenizeAllPotentialAddresses(this.messageContentControl().value),
+    );
+    this.settingsVisible.set(false);
+  }
+
+  unmarkPotentialAddresses() {
+    this.messageContentControl().setValue(this._search.removeAllPotentialAddresses(this.messageContentControl().value));
+    this.settingsVisible.set(false);
+  }
+
+  onKeydownAddressSearch(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      //prevent form submit
+      event.preventDefault();
+    } else if (event.key === 'Escape') {
+      //abort address search, not close form
+      this.abortOnEsc(event);
+    }
+  }
+
+  private startEdit(address: string) {
+    if (this.showLinkedText()) {
+      this.setInputFieldPositionEditElem();
+    }
+    this.addressSelection.set(true);
+    this._search.addressPreview.set(false);
+    this.addressSearchTerm.set(address);
+    this.autocompleteTrigger().openPanel();
+    setTimeout(() => {
+      this.addresSearchField().nativeElement.focus();
+    });
+  }
+
+  // Quill integration over Service
+  onInputFormatedText(onlyAddrKeyword = true) {
+    const result = this.quillBlotService.getAddressEdit(onlyAddrKeyword);
+    if (result) {
+      if (result.blotElem) {
+        this.editAddr(result.blotElem);
+      } else {
+        this.startEdit(result.text);
+      }
+    }
+  }
+
+  async onKeyDownFormatedText({ event }: { event: KeyboardEvent }) {
+    if (event.key === 'Escape') {
+      //abort address search, not close form
+      this.abortOnEsc(event);
+      return;
+    }
+    //use intelisense keystroke to start address search
+    if (event.ctrlKey && event.key === ' ') {
+      this.onInputFormatedText(false);
+    }
+    this.updateShownFeature();
+  }
+
+  setInputFieldPositionEditElem() {
+    if (this.addrEditElem) {
+      const rect = this.addrEditElem.getBoundingClientRect();
+
+      // calc relative pos
+      const parentRect = this.elementRef.nativeElement.getBoundingClientRect();
+      if (parentRect) {
+        this.addressSelectionPosition.x = rect.left - parentRect.left;
+        this.addressSelectionPosition.y = rect.top - parentRect.top;
+      }
+    } else {
+      this.setInputFieldPositionSelection();
+    }
+  }
+
+  setInputFieldPositionSelection() {
+    const pos = this.quillBlotService.getRelativeSelectionPosition(this.elementRef.nativeElement);
+    if (pos) {
+      this.addressSelectionPosition.x = pos.x;
+      this.addressSelectionPosition.y = pos.y;
+    }
+  }
+
+  async handleTextContentClick({ event }: { event: MouseEvent }) {
+    const target = event.target as HTMLElement;
+    const addrElem = target.closest('.addr-geo') as HTMLElement;
+    if (addrElem) {
+      event.preventDefault();
+      if (target.closest('.addr-edit')) {
+        this.editAddr(addrElem);
+        return;
+      } else if (target.closest('.addr-show')) {
+        if (!this.messageContentControl().disabled) {
+          return;
+        }
+        const geo = addrElem.dataset['geo'];
+        const feature = await this._search.showFeature(geo);
+        if (feature) {
+          this._search.addressPreview.set(true);
+          this.addressSelection.set(false);
+          return;
+        }
+      }
+      if (event.detail === 2) {
+        //double click
+        return;
+      }
+    }
+    if (!target.closest('.addresSearch')) {
+      this._search.addressPreview.set(false);
+      this.addressSelection.set(false);
+      this.updateShownFeature();
+    }
+  }
+
+  async handleTextContentDblClick({ event }: { event: MouseEvent }) {
+    const target = event.target as HTMLElement;
+    const addrElem = target.closest('.addr-geo') as HTMLElement;
+    if (addrElem) {
+      event.preventDefault();
+      this.editAddr(addrElem);
+      return;
+    }
+    this._search.addressPreview.set(false);
+    this.addressSelection.set(false);
+    this.updateShownFeature();
+  }
+
+  private async editAddr(addrElem: HTMLElement) {
+    const geo = addrElem.dataset['geo'];
+    await this._search.showFeature(geo);
+    const textEl = addrElem.querySelector('.text') as HTMLElement;
+    if (textEl) {
+      this.addrEditElem = addrElem;
+      this.addrEditElem.classList.add('edit-active');
+      this.startEdit(textEl.innerText);
+    }
+  }
+}

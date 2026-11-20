@@ -1,0 +1,249 @@
+mat-card.selection {
+  margin-bottom: 0;
+  height: 100%;
+  overflow: auto;
+  border-radius: 0;
+  z-index: 55;
+}
+
+.selection {
+  border-radius: 0 !important;
+}
+
+.titleCard {
+  min-height: 10vh;
+  margin-bottom: 1rem;
+}
+
+.other-layer {
+  color: var(--mat-form-field-error-text-color);
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.embed-external-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+  margin: 0.25rem 0 1rem;
+}
+
+.embed-external-link {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.reportNumber {
+  display: flex;
+  gap: 10px;
+
+  div {
+    align-self: center;
+  }
+}
+
+.colorPicker {
+  display: flex;
+  flex-direction: column;
+  gap: 0rem;
+}
+
+mat-card.featureGroup .mat-expansion-panel-header-title {
+  font-weight: bold;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+mat-form-field {
+  display: block;
+}
+
+mat-slider {
+  width: 95%;
+}
+
+.imgwrapper {
+  text-align: center;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.featureGroup .imgwrapper img {
+  max-height: 5rem;
+  max-width: 5rem;
+}
+
+.imgwrapper img {
+  max-height: 5rem;
+  max-width: 5rem;
+}
+
+.buttonPanel {
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.label {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.label-gray {
+  color: #787878;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.time {
+  margin-top: 1rem;
+  color: #787878;
+}
+
+.title {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.menu-wrapper {
+  text-align: right;
+}
+
+.menu {
+  transform: scale(0.6);
+}
+
+mat-expansion-panel .noPadding {
+  padding: 0;
+}
+
+mat-expansion-panel button,
+.matexpansion-panel-body button {
+  display: block;
+  text-align: left;
+  width: fit-content;
+}
+
+mat-expansion-panel button i {
+  margin-right: 1rem;
+}
+
+.separator {
+  border-bottom: 1px solid;
+}
+
+.primarybutton {
+  width: 100%;
+}
+
+.markdownEditor {
+  position: relative;
+  margin-bottom: 0rem;
+}
+
+.markdownEditor .fab {
+  font-size: 1.5rem;
+  margin-left: 1rem;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.markdownEditor textarea {
+  min-height: 5rem;
+}
+
+.markdownEditor a {
+  font-size: 0.8rem;
+  position: absolute;
+  bottom: -0.6rem;
+  right: 0;
+}
+
+.markdown .preview {
+  border-bottom: 1px dashed;
+  border-left: 1px dashed;
+  border-right: 1px dashed;
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.images {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow-x: auto;
+  padding: 0.5rem;
+}
+
+.images > div {
+  display: inline-block;
+  margin-right: 2rem;
+  margin-top: 1rem;
+  position: relative;
+}
+
+.images .material-icons {
+  cursor: pointer;
+}
+
+.images img {
+  max-height: 2.5rem;
+  max-width: 2.5rem;
+  cursor: pointer;
+}
+
+.images .removeButton {
+  position: absolute;
+  top: -1rem;
+  right: -1rem;
+}
+
+.images i.removeButton {
+  font-size: 1.2rem;
+}
+
+div.flex {
+  display: flex;
+}
+
+.section-divider {
+  margin: 1rem 0;
+}
+
+.categoryDot {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.hidden {
+  display: none;
+}
+
+.createdBy-container {
+  width: 100%;
+}
+
+.createdBy-container-span {
+  display: block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-weight: bold;
+}
+
+.report-number-chip mat-icon {
+  padding-left: 2px;
+  margin-left: 8px;
+}
+
+.report-number-chip mat-icon::after {
+  margin-left: -2px;
+}

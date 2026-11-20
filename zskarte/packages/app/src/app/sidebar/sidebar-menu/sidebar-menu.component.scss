@@ -1,0 +1,25 @@
+.archived {
+  color: red;
+  padding-left: 20px;
+  padding-top: 5px;
+}
+
+app-incident-select {
+  padding: 1rem;
+}
+
+.mat-menu-item-with-info {
+  display: flex;
+}
+
+.mat-menu-item-with-info .mat-mdc-menu-item {
+  max-width: calc(100% - 48px);
+}
+
+.version {
+  display: flex;
+  align-items: center;
+  justify-content: right;
+  gap: 5px;
+  padding: 10px 20px;
+}

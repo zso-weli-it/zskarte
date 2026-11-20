@@ -1,0 +1,126 @@
+mat-panel-title {
+  max-width: 100%;
+}
+
+.journal-header-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 4px;
+}
+
+.entry-date-header {
+  color: #666;
+  font-size: 14px;
+}
+
+.entry-title-header {
+  font-size: 18px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mat-expanded .entry-title-header {
+  white-space: wrap;
+}
+
+:host ::ng-deep {
+  .mat-expansion-panel {
+    overflow: hidden;
+    background: transparent;
+
+    &.mat-expanded {
+      background-color: #F1F1F1;
+    }
+
+    .mat-expansion-panel-header {
+      padding: 12px 16px;
+    }
+
+    .mat-expansion-panel-body {
+      padding: 0 16px 16px 16px;
+      background-color: #F1F1F1;
+    }
+  }
+}
+
+.loading-spinner {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  right: 0;
+  width: 30rem;
+}
+
+
+
+.mark-as-drawn-container {
+  margin-top: -8px;
+  padding-top: 8px;
+}
+
+.mark-as-drawn-button {
+  width: 100%;
+}
+
+
+.tab-group-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+:host ::ng-deep {
+  .tab-group-wrapper {
+    .mat-tab-header,
+    .mat-mdc-tab-header,
+    .mat-tab-header-container {
+      border-bottom: 1px solid #dedede !important;
+      position: absolute;
+      width: 100%;
+      z-index: 2;
+      background-color: white;
+    }
+
+    .mat-tab-group {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      height: 100%;
+    }
+
+    .mat-mdc-tab-body-wrapper {
+      margin-top: 48px;
+    }
+
+    .mat-tab-body-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .mat-tab-body {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .mat-tab-body-content {
+      padding: 0;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      box-sizing: border-box;
+    }
+  }
+}

@@ -1,0 +1,32 @@
+:host {
+  height: 100%;
+  width: 100%;
+}
+
+main {
+  height: 100%;
+  width: 100%;
+}
+
+.main-tabs {
+  border-radius: 2rem;
+  position: fixed;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  z-index: 50;
+  background-color: white;
+}
+
+.journal-address-preview .main-tabs {
+  display: none;
+}
+
+.help-page .main-tabs {
+  display: none !important;
+}
+
+.help-page {
+  ::ng-deep app-floating-ui {
+    display: none !important;
+  }
+}

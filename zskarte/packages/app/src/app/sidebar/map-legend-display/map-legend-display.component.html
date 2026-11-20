@@ -1,0 +1,17 @@
+<app-dialog-header>
+  <h2>{{ data.label }}</h2>
+</app-dialog-header>
+<app-dialog-body>
+  @if (!this.html) {
+    <div class="loading">
+      <mat-progress-spinner color="primary" mode="indeterminate"> </mat-progress-spinner>
+    </div>
+  } @else {
+    <div [innerHTML]="html"></div>
+  }
+</app-dialog-body>
+<app-dialog-footer>
+  <button mat-flat-button color="primary" mat-dialog-close>
+    {{ i18n.get('ok') }}
+  </button>
+</app-dialog-footer>

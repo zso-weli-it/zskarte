@@ -1,0 +1,174 @@
+:host {
+  --ui-spacing: 12px;
+}
+
+.floating-ui-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  background: none;
+  pointer-events: none;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: end; 
+  justify-content: space-between;
+  height: calc(100% - 2.5rem);
+  margin: 1.25rem 1.25rem 1.25rem 0;
+  transition: transform 0.3s ease-in-out;
+
+  &.sidebar-open {
+    transform: translateX(calc(var(--sidebar-width) * -1));
+  }
+}
+
+.vertical-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.search {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  width: 80%;
+  max-width: 400px;
+  align-self: flex-start;
+  will-change: width;
+
+  &.sidebar-open {
+    width: calc(100% - 48px - var(--sidebar-width));
+
+    @media (max-width: 800px) {
+      display: none;
+    }
+  }
+}
+
+.limit {
+  padding: 7px 28px;
+  padding-top: 28px;
+  margin-top: -21px;
+  background-color: var(--mat-badge-background-color);
+  color: white;
+  box-sizing: border-box;
+  border-bottom-right-radius: 28px;
+  border-bottom-left-radius: 28px;
+  margin-left: 2px;
+  width: calc(100% - 4px);
+  appearance: none;
+  border: none;
+
+  &[data-limit-reached='true'] {
+    background-color: var(--mat-form-field-error-text-color);
+  }
+}
+
+.sidebar-button {
+  background-color: white;
+}
+
+button {
+  pointer-events: auto;
+}
+
+.button-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border: none;
+  pointer-events: auto;
+  border-radius: 2em;
+  overflow: hidden;
+}
+
+.toggle-button {
+  border-radius: 0 !important;
+}
+
+.toggle-button ::ng-deep .mat-mdc-button-persistent-ripple {
+  border-radius: 0 !important;
+}
+
+.divider {
+  width: 100%;
+}
+
+app-fab-menu {
+  pointer-events: auto;
+  margin-top: 1.25rem;
+}
+
+app-journal-draw-overlay {
+  position: fixed;
+  bottom: 5rem;
+  left: 1.25rem;
+  width: 400px;
+  z-index: 1;
+}
+
+app-coordinates {
+  position: absolute;
+  bottom: 1.25rem;
+  right: calc(1.25rem + 56px + var(--ui-spacing));
+  width: 287px;
+  z-index: 1;
+  pointer-events: auto;
+
+  @media (max-width: 650px) {
+    right: auto;
+    left: 1.25rem;
+    bottom: calc(1.25rem + 48px + var(--ui-spacing));
+  }
+}
+
+app-geocoder {
+  z-index: 1;
+  width: 100%;
+}
+
+.main {
+  height: calc(100% - 2.5rem);
+  width: 100%;
+  margin: 1.25rem 0 1.25rem 1.25rem;
+  pointer-events: none;
+}
+
+@media (max-width: 650px) {
+  app-journal-draw-overlay {
+    bottom: 8.5rem;
+    width: calc(100vw - 1.25rem - 80px);
+  }
+}
+
+@media (max-width: 800px) {
+  .sidebar-open.search {
+    display: none;
+  }
+}
+
+:host-context(.journal-address-preview) {
+  app-journal-draw-overlay {
+    display: none;
+  }
+  app-coordinates {
+    display: none;
+  }
+  .action-buttons {
+    display: none;
+  }
+}

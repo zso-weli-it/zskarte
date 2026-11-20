@@ -1,0 +1,9 @@
+<app-dialog-header>
+  <h2>{{ i18n.get('guestLimitReached') }}</h2>
+</app-dialog-header>
+<app-dialog-body>
+  <p>{{ i18n.get('guestLimitReached') }}</p>
+</app-dialog-body>
+<app-dialog-footer>
+  <button mat-flat-button color="primary" [mat-dialog-close]="true" cdkFocusInitial>{{ i18n.get('confirm') }}</button>
+</app-dialog-footer>

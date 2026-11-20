@@ -1,0 +1,194 @@
+h2 {
+  padding: 0 1rem;
+  margin-top: 2rem;
+  :first-child {
+    margin-top: 0;
+  }
+}
+
+.newLayerType {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.titleRow {
+  display: flex;
+}
+
+.availableLayers {
+  max-height: 20vh;
+  overflow: auto;
+}
+
+.selectedLayer i {
+  cursor: pointer;
+  margin-left: 0.5em;
+}
+
+.sectionTitle {
+  margin-top: 1.2em;
+  margin-bottom: 1em;
+  font-weight: bold;
+  font-size: 0.8em;
+}
+
+.content {
+  margin-right: 1em;
+  margin-left: 1em;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.layer-slider,
+mat-slider {
+  margin-left: 0;
+  width: 95%;
+}
+
+.map-progress {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.buttons {
+  margin-left: 40px;
+}
+
+.button-download {
+  margin-right: 10px;
+}
+
+.mapfile-input {
+  display: none;
+}
+
+.sourceControl {
+  display: flex;
+}
+.sourceControl mat-form-field {
+  margin-bottom: 5px;
+}
+.sourceControl button {
+  margin-left: 15px;
+}
+
+.material-icons {
+  /*needed as not match for 'visibility_on'*/
+  width: 24px;
+}
+
+.wmsSourceError {
+  color: red;
+}
+
+.buttonContent {
+  padding: 1rem;
+}
+
+.expertButton {
+  margin: 0 0.5rem 0.5rem 0;
+}
+
+.expertInfo {
+  vertical-align: middle;
+}
+
+.mapSourceAvailable i {
+  vertical-align: middle;
+  margin-left: 5px;
+}
+
+.offline-state i {
+  cursor: pointer;
+}
+
+.availableLayers button mat-icon {
+  vertical-align: bottom;
+  margin-right: 5px;
+}
+
+.filterAll {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.filterItem {
+  height: 100%;
+  width: 100%;
+  padding: 8px;
+}
+
+.opaque {
+  opacity: 0.4;
+}
+
+button.filterItem .eyeOverlay {
+  position: absolute;
+  top: calc(50% - 12px);
+  left: calc(50% - 12px);
+}
+
+.category-list-item {
+  margin-left: -16px;
+  margin-right: -16px;
+}
+
+.icon-wrapper {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.category-color {
+  min-height: 32px;
+  min-width: 15px;
+  max-width: 25px;
+  margin: 2px 8px 2px 0px;
+}
+
+.categoryDot {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.mat-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.listItemContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.categoryLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer; /* Show pointer to indicate it's clickable */
+  gap: 8px; /* Space between dot and text */
+}
+
+.selectedLayer .disabled {
+  color: #949494;
+  cursor: default;
+}
+
+mat-checkbox.categoryCheckbox {
+  width: 100%;
+  ::ng-deep .mdc-form-field {
+    width: 100%;
+    label {
+      width: 100%;
+    }
+  }
+}

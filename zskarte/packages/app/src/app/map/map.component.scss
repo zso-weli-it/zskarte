@@ -1,0 +1,51 @@
+.content {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.map {
+  height: 100%;
+}
+
+button,
+input {
+  margin-bottom: 6px;
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  flex-direction: row;
+}
+
+.actions button {
+  margin-right: 6px;
+}
+
+.sidenav {
+  width: 350px;
+  max-width: calc(100vw - 100px);
+}
+
+.fab-button {
+  position: absolute;
+  right: 30px;
+  bottom: 50px;
+  z-index: 50;
+  width: 56px;
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media print {
+  .fab-button {
+    display: none;
+  }
+}

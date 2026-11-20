@@ -1,0 +1,31 @@
+.printingOptions {
+  padding: 0 1rem 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+mat-card {
+  display: flex;
+  gap: 1rem;
+}
+
+.printingOptions > * {
+  flex-grow: 1;
+}
+
+.progress {
+  margin-top: 10px;
+  height: 20px;
+  width: 0;
+  transition: width 250ms;
+  background-color: green;
+  border-radius: 5px;
+}
+.generate-error {
+  color: red;
+}
+
+fieldset.like-mat-form-field-outline {
+  margin-top: -10px;
+}

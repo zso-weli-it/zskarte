@@ -31,7 +31,7 @@ elif [ "$CMD" = "start" ]; then
     BUILD_ARG=""
     
     
-    if [ "$FLAG" = "-b" ]; then
+    if [ "$2" = "-b" ]; then
         BUILD_ARG="--build"
         echo "Starting services and forcing build..."
     else

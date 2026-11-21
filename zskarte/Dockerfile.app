@@ -1,4 +1,4 @@
-FROM node:22.14.0-bookworm AS build-app
+FROM node:22.22.0-bookworm AS build-app
 
 # Create app directory
 WORKDIR /app
@@ -17,7 +17,7 @@ RUN npm run lint:app
 # npm build
 RUN NODE_ENV=production npm run build:app && rm -rf /app/packages/app/src
 
-FROM nginx:1.15.8-alpine
+FROM nginx:1.29.3-alpine
 
 
 # EOF with single quotes to suppress $-expansion

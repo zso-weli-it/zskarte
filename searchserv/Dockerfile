@@ -9,11 +9,11 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
 	pip install -r requirements.txt
 
-FROM python:3.13.14-trixie
+FROM python:3.13.14-slim-trixie
 
 WORKDIR /app
 
-RUN apt install libpq5
+RUN apt-get update && apt-get install -y --no-install-recommends libpq5 && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /venv /venv
 

@@ -38,7 +38,9 @@ elif [ "$CMD" = "start" ]; then
         echo "Starting services..."
     fi
 
+    [ -f zskarte/packages/server/.env ] || cp zskarte/packages/server/.env.example zskarte/packages/server/.env
     docker compose -f zskarte/docker-compose.yml up -d $BUILD_ARG
+    for e in search search-db; do [ -f searchserv/$e.env ] || cp searchserv/$e.env.example searchserv/$e.env; done
     docker compose up -d $BUILD_ARG
 
     echo "Services started."

@@ -1,29 +1,31 @@
 services:
   postgresql-zskarte:
-    image: bitnamilegacy/postgresql:16.3.0
+    image: postgres:18
     container_name: postgresql-zskarte
     volumes:
-      - ./data/postgresql:/bitnami/postgresql
-      - ./packages/server/init:/docker-entrypoint-initdb.d
+      - pgdata-zskarte:/var/lib/postgresql
+      - ./packages/server/init:/docker-entrypoint-initdb.d:ro
     ports:
       - 55432:5432
     environment:
-      - POSTGRESQL_PASSWORD=supersecret123
-      - POSTGRESQL_DATABASE=zskarte
+      - POSTGRES_PASSWORD=supersecret123
+      - POSTGRES_DB=zskarte
     healthcheck:
-      test: ["CMD-SHELL","pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d zskarte"]
       start_period: 120s
+      interval: 10s
       retries: 6
+    restart: unless-stopped
     networks:
       - zskarte
 
   pgadmin-zskarte:
-    image: dpage/pgadmin4:latest
+    image: dpage/pgadmin4:9
     container_name: pgadmin-zskarte
     restart: unless-stopped
     volumes:
-      - ./data/pgadmin:/var/lib/pgadmin
-      - ./packages/server/init/servers.json:/pgadmin4/servers.json
+      - pgadmin-zskarte:/var/lib/pgadmin
+      - ./packages/server/init/servers.json:/pgadmin4/servers.json:ro
     ports:
       - 7050:80
     environment:
@@ -40,13 +42,16 @@ services:
     networks:
       - zskarte
     ports: [ 1337:1337 ]
+    env_file: ./packages/server/.env
     environment:
       - DATABASE_HOST=postgresql-zskarte
       - DATABASE_PORT=5432
+      - DATABASE_PASSWORD=supersecret123
     restart: unless-stopped
     depends_on:
       postgresql-zskarte:
         condition: service_healthy
+
   app-zskarte:
     build:
       context: .
@@ -54,7 +59,10 @@ services:
     container_name: app-zskarte
     ports: [ 4300:80 ]
     restart: unless-stopped
-    
+
+volumes:
+  pgdata-zskarte:
+  pgadmin-zskarte:
 
 networks:
   zskarte:

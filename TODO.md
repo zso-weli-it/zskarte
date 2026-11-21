@@ -1,17 +1,27 @@
 # TODO / offene Punkte
 
-Arbeitsprotokoll für den autonomen Lauf. Probleme, Annahmen und offene Fragen.
+Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 
 ## Erledigt
-- Zeilenenden: Arbeitskopie auf LF normalisiert, `.gitattributes` auf `* text=auto eol=lf` gesetzt (Index war bereits LF).
-- `zskarte.sh start -b`: Flag wird jetzt aus `$2` gelesen (vorher `$FLAG`, nie gesetzt).
+- Zeilenenden: Arbeitskopie auf LF, `.gitattributes` mit `* text=auto eol=lf`, Shell-Skripte `+x`.
+- `zskarte.sh start -b`: Flag wird aus `$2` gelesen.
+- Postgres: offizielles `postgres:18` statt `bitnamilegacy/postgresql:16.3.0`, Named Volume `pgdata-zskarte`. Bind-Mount auf NTFS verursachte `chmod: Operation not permitted`.
+- pgAdmin: `dpage/pgadmin4:9` (statt `latest`), Named Volume `pgadmin-zskarte`.
+- Server bekommt `packages/server/.env` über `env_file`. `zskarte.sh start` kopiert `.env.example`, falls nicht vorhanden (`.dockerignore` schließt `.env` vom Image aus).
+- `zskarte.sh start` kopiert `searchserv/search.env` und `search-db.env` aus den Beispielen, falls nicht vorhanden.
+- End-to-End-Lauf in WSL mit `init` und `start -b` durchgelaufen: App 4300, Strapi 1337 (`/admin` 200), Such-API 8000 (Treffer für Aarau, Bahnhofstrasse), Tileserver 8080 (Tile 200), pgAdmin 7050.
 
-## Annahmen (bitte prüfen)
-- Postgres-Datenverzeichnis `zskarte/data/postgresql` enthält keine echten Daten (nur Reste eines fehlgeschlagenen Laufs). Wird nicht migriert.
-- Bitnami-Image (`bitnamilegacy`) wird durch offizielles `postgres` ersetzt; Named Volumes statt Bind-Mounts, weil NTFS-Mounts unter WSL kein `chmod` erlauben.
+## Annahmen
+- Postgres-Datenverzeichnis `zskarte/data/postgresql` enthielt keine echten Daten (Reste des fehlgeschlagenen Laufs). Nicht migriert.
+- Beispieldaten für Strapi liegen in `zskarte/packages/server/init/init.sql` (pg_dump) und werden beim ersten Start in das leere Volume geladen.
+- Beispiel-Passwörter bleiben, laut Vorgabe. Nutzer ändern sie selbst.
 
-## Offen
-- Deployment-Lauf mit `zskarte.sh init` / `start` in WSL prüfen.
-- Versionsstand aller Abhängigkeiten gegen Registry prüfen (npm outdated, pip index).
+## Offen / bekannt
+- Such-DB braucht nach dem ersten Start rund 40 s bis zur Import-Fertigstellung. Der Such-Service verbindet beim ersten Versuch zu früh (`connection refused`) und muss neu gestartet werden. Lösung im Compose: `depends_on` mit Healthcheck. Ist Schritt 8 (Deployment).
+- `docker compose` Warnungen: Build-Kontext ohne `.git` (`git rev-parse` in der App-Build-Stufe schlägt fehl, harmlos).
 - `zskarte2/` ignorieren (laut Vorgabe).
-- Strapi-Major-Upgrade nur wenn zwingend.
+- Versionsstand aller Abhängigkeiten gegen Registry prüfen (npm outdated, pip index), Upgrades nur wo nötig, bevorzugt LTS.
+- Dockerfile.app nutzt `nginx:1.15.8` (2018), Dockerfile.server `node:22.14.0`, searchserv Python 3.11/3.13 gemischt.
+- searchserv/Dockerfile: `apt install libpq5` ohne `apt-get update`.
+- Hardcodierte Passwörter `supersecret123`, `postgres`, `postgres2`, `zskarte` nur als Beispiel. Bleiben laut Vorgabe.
+- `gen-server-env.sh` existiert, könnte für echte Secrets genutzt werden. Nicht umgesetzt.

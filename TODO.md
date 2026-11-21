@@ -17,7 +17,7 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 - Beispiel-Passwörter bleiben, laut Vorgabe. Nutzer ändern sie selbst.
 
 ## Offen / bekannt
-- Such-DB braucht nach dem ersten Start rund 40 s bis zur Import-Fertigstellung. Der Such-Service verbindet beim ersten Versuch zu früh (`connection refused`) und muss neu gestartet werden. Lösung im Compose: `depends_on` mit Healthcheck. Ist Schritt 8 (Deployment).
+- (erledigt) Such-Service wartet per depends_on auf healthy Such-DB; Pool prüft Verbindungen (check_connection).
 - `docker compose` Warnungen: Build-Kontext ohne `.git` (`git rev-parse` in der App-Build-Stufe schlägt fehl, harmlos).
 - `zskarte2/` ignorieren (laut Vorgabe).
 - Versionsstand aller Abhängigkeiten gegen Registry prüfen (npm outdated, pip index), Upgrades nur wo nötig, bevorzugt LTS.
@@ -25,3 +25,9 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 - searchserv/Dockerfile: `apt install libpq5` ohne `apt-get update`.
 - Hardcodierte Passwörter `supersecret123`, `postgres`, `postgres2`, `zskarte` nur als Beispiel. Bleiben laut Vorgabe.
 - `gen-server-env.sh` existiert, könnte für echte Secrets genutzt werden. Nicht umgesetzt.
+
+## Erledigt (Härten)
+- Images gepinnt: node 22.22.0, nginx 1.29.3, postgres 18.1, python 3.13.14 (searchserv + db-init).
+- searchserv: Healthcheck auf Such-DB, `depends_on: service_healthy`.
+- searchserv/search.py: `check_connection` im Pool, toten `close_them`-Shutdown-Handler entfernt (referenzierte undefinierte `curs`/`conn`).
+- Strapi-Warnung `admin.auth.options.expiresIn` stammt aus Strapi-Defaults, nicht aus unserer Config. Nicht behoben.

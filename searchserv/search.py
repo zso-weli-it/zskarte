@@ -10,7 +10,8 @@ pool = AsyncConnectionPool(
   f"port={os.environ.get('SEARCH_DB_PORT', 5432)} "
   f"user={os.environ.get('SEARCH_DB_USER', 'postgres')} "
   f"password={os.environ.get('SEARCH_DB_PASSWORD', 'postgres')} "
-  , open=False)
+  , open=False
+  , check=AsyncConnectionPool.check_connection)
 
 SORT_ORIGIN_E = os.environ.get('SEARCH_SORT_ORIGIN_E', '8.30882407298')
 SORT_ORIGIN_N = os.environ.get('SEARCH_SORT_ORIGIN_N', '47.3038127715')
@@ -182,8 +183,3 @@ async def func(type: str = "",
                 l += await get_addr(curs, searchText, bbox, sortbbox, limit-len(l))
             return {"results":l}
     
-
-@app.on_event("shutdown")
-def close_them():
-    curs.close()
-    conn.close()

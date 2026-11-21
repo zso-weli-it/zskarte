@@ -3,8 +3,15 @@ services:
     image: postgis/postgis:18-3.6
     container_name: offlinekarte-search-db
     volumes:
-      - ./initdb.d:/docker-entrypoint-initdb.d
+      - ./initdb.d:/docker-entrypoint-initdb.d:ro
     env_file: "search-db.env"
+    healthcheck:
+      # TCP only answers once the import of initdb.d is finished (temp server during init is socket-only)
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
     restart: unless-stopped
   offlinekarte-search:
     build: .
@@ -12,4 +19,7 @@ services:
     ports:
       - "8000:8000"
     env_file: "search.env"
+    depends_on:
+      offlinekarte-search-db:
+        condition: service_healthy
     restart: unless-stopped

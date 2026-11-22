@@ -48,3 +48,32 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 - Strapi-Admin-Build: Ursache für "UnsavedChangesModal is not exported" war ein veralteter `node_modules`-Ordner auf dem Windows-Dateisystem (Strapi 5.33.3 nested). Nach Löschen und Neugenerieren des Lockfiles sauber.
 - `zskarte.bat` dupliziert `zskarte.sh`, fehlt aber das `.env`-Bootstrapping. Entscheidung offen: löschen (du deployst mit .sh) oder synchron halten.
 - Docker: npm-Cache als BuildKit-Cache-Mount in Dockerfile.app/server (`--mount=type=cache,target=/root/.npm`).
+
+## Audit (ponytail-audit)
+
+### Must fix
+- [ ] 1. Token endpoint trusts any JSON value: `packages/server/src/api/access/controllers/access.ts:41, 47`. Reject non-string `accessToken`. (Not run yet, check with one request first.)
+- [ ] 2. Short share codes (6 digits, 15 min) can be guessed, no rate limit on `/accesses/auth/token` (`access.ts:118`). Add rate limit or longer codes.
+- [ ] 3. `access.find` replaces the organisation filter when `operationId` is given (`access.ts:136-140`). Other organisations' share entries are visible. Merge filters instead.
+- [ ] 4. Journal message numbers can repeat under concurrent saves (`journal-entry.ts:78-87`, `messageNumber` not unique). Add per-operation advisory lock in the transaction.
+- [ ] 5. Map state flag cleared after `await` loses the last edits (`state/operation.ts:145-158`). Clear the flag before the save, restore on error.
+- [ ] 6. Possible script injection: `contenteditable/address-token.blot.ts:13, 15` puts `value.address` into `innerHTML`. Use `textContent`. (Not verified in a browser.)
+
+### Should fix
+- [ ] 7. Two timers save the map state (`index.ts:33` every 30 s, cron every 15 s). Remove the `setInterval`.
+- [ ] 8. Server has no tests. Add one small test each for: token type check, list filter keeps organisation, journal number not repeated, map flag after change.
+- [ ] 9. `accessControl.ts:387` `entry.public` crashes on unknown IDs (500 instead of 403). Use `entry?.public`.
+- [ ] 10. Journal update crashes on unknown IDs (`journal-entry.ts:158, 173`). Return 404 when entry is null.
+- [ ] 11. Postgres (55432) and pgAdmin (7050) are published on all interfaces in `zskarte/docker-compose.yml`. Bind to `127.0.0.1`.
+- [ ] 12. Map state is serialised and hashed on every change (`state/operation.ts:109-111`). Compare references from `applyPatches` instead.
+- [ ] 13. `state/maplayer.ts` (1352 lines) mixes five jobs. Split by job, no logic change.
+
+### Nice to have
+- [ ] 14. Remove unused dependency `ngx-indexed-db` (`packages/app/package.json:51`). −1 dependency.
+- [ ] 15. Remove duplicate `wait-on` from `packages/app/package.json:82`. Root copy stays. −1 dependency.
+- [ ] 16. `zskarte.bat` duplicates `zskarte.sh` and misses the `.env` setup. Delete it or make it call the `.sh`. About −45 lines.
+- [ ] 17. Geo index on `ortschaften` uses `double precision`, the search query casts to `real`, so the index is never used. Change the cast in `searchserv/search.py`.
+- [ ] 18. Search `bbox` is not validated. Non-numbers cause a 500. Check all four values are numbers.
+
+Audit left out (smaller): socket server allows origin `*`; raw user agents in logs.
+Audit lean: −60 lines, −2 dependencies possible.

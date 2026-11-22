@@ -44,5 +44,5 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 - TS-Fehler durch neue ol/fuse-Typen: `Fuse<JournalEntry>` explizit typisiert, `mapBrowserEvent`/`getTargetElement` mit Null-Behandlung, `reportNumber` im Template per `$any`. Die `$any`-Stelle ist ein Notbehelf, die Typen von `reportNumber` (number | number[]) sollten bereinigt werden.
 - `immutable`: `redux-immutable` (Peer von strapi-plugin-config-sync) braucht immutable 3.8 an der Wurzel, `sass` braucht 5.x. Lösung: `immutable@^3.8.2` als devDependency in der Wurzel, sass behält seine eigene 5.x-Kopie. Ohne das schlägt der Strapi-Admin-Build (Vite) fehl.
 - `rc-color-picker` (Strapi-Transitive) meldet einen React-16-Peer-Konflikt. Nicht blockierend, bleibt.
-- Bug gefunden: `zskarte.sh start -b` meldet Exit 0, auch wenn ein Image-Build fehlschlägt. Fix: `set -e` greift bei `docker compose up` nicht. Offen für Schritt 7/8.
+- Nicht reproduziert: Im Vordergrund bricht `zskarte.sh start -b` bei fehlgeschlagenem Build korrekt ab. Im Hintergrund-Wrapper wurde Exit 0 angezeigt, Ursache offen.
 - Strapi-Admin-Build: Ursache für "UnsavedChangesModal is not exported" war ein veralteter `node_modules`-Ordner auf dem Windows-Dateisystem (Strapi 5.33.3 nested). Nach Löschen und Neugenerieren des Lockfiles sauber.

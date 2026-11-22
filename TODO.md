@@ -1,177 +1,83 @@
-# TODO / offene Punkte
+# TODO
 
-Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
+Stand: 2026-11-22. Erledigtes ist kurz zusammengefasst, Details stehen in der Git-Historie.
 
-## Erledigt
-- Zeilenenden: Arbeitskopie auf LF, `.gitattributes` mit `* text=auto eol=lf`, Shell-Skripte `+x`.
-- `zskarte.sh start -b`: Flag wird aus `$2` gelesen.
-- Postgres: offizielles `postgres:18` statt `bitnamilegacy/postgresql:16.3.0`, Named Volume `pgdata-zskarte`. Bind-Mount auf NTFS verursachte `chmod: Operation not permitted`.
-- pgAdmin: `dpage/pgadmin4:9` (statt `latest`), Named Volume `pgadmin-zskarte`.
-- Server bekommt `packages/server/.env` über `env_file`. `zskarte.sh start` kopiert `.env.example`, falls nicht vorhanden (`.dockerignore` schließt `.env` vom Image aus).
-- `zskarte.sh start` kopiert `searchserv/search.env` und `search-db.env` aus den Beispielen, falls nicht vorhanden.
-- End-to-End-Lauf in WSL mit `init` und `start -b` durchgelaufen: App 4300, Strapi 1337 (`/admin` 200), Such-API 8000 (Treffer für Aarau, Bahnhofstrasse), Tileserver 8080 (Tile 200), pgAdmin 7050.
+## Offen
 
-## Annahmen
-- Postgres-Datenverzeichnis `zskarte/data/postgresql` enthielt keine echten Daten (Reste des fehlgeschlagenen Laufs). Nicht migriert.
-- Beispieldaten für Strapi liegen in `zskarte/packages/server/init/init.sql` (pg_dump) und werden beim ersten Start in das leere Volume geladen.
-- Beispiel-Passwörter bleiben, laut Vorgabe. Nutzer ändern sie selbst.
-
-## Offen / bekannt
-- (erledigt) Such-Service wartet per depends_on auf healthy Such-DB; Pool prüft Verbindungen (check_connection).
-- `docker compose` Warnungen: Build-Kontext ohne `.git` (`git rev-parse` in der App-Build-Stufe schlägt fehl, harmlos).
-- `zskarte2/` ignorieren (laut Vorgabe).
-- Versionsstand aller Abhängigkeiten gegen Registry prüfen (npm outdated, pip index), Upgrades nur wo nötig, bevorzugt LTS.
-- Dockerfile.app nutzt `nginx:1.15.8` (2018), Dockerfile.server `node:22.14.0`, searchserv Python 3.11/3.13 gemischt.
-- searchserv/Dockerfile: `apt install libpq5` ohne `apt-get update`.
-- Hardcodierte Passwörter `supersecret123`, `postgres`, `postgres2`, `zskarte` nur als Beispiel. Bleiben laut Vorgabe.
-- `gen-server-env.sh` existiert, könnte für echte Secrets genutzt werden. Nicht umgesetzt.
-
-## Erledigt (Härten)
-- Images gepinnt: node 22.22.0, nginx 1.29.3, postgres 18.1, python 3.13.14 (searchserv + db-init).
-- searchserv: Healthcheck auf Such-DB, `depends_on: service_healthy`.
-- searchserv/search.py: `check_connection` im Pool, toten `close_them`-Shutdown-Handler entfernt (referenzierte undefinierte `curs`/`conn`).
-- Strapi-Warnung `admin.auth.options.expiresIn` stammt aus Strapi-Defaults, nicht aus unserer Config. Nicht behoben.
-
-## Dependencies (Stand 2026-11-22, Registry-Check)
-- Strapi 5.33.3 → 5.63.0 (gleiche Major). Versionen in root und server angepasst.
-- Nur Minor/Patch-Updates per `npm update` (Wanted-Versionen). Angular bleibt 21.x (22 wäre Major).
-- `zskarte/.npmrc` mit `legacy-peer-deps=true`. Grund: `styled-components` bringt optionalen Peer `react-native` mit, der mit `@types/react` 19.3 kollidiert (ERESOLVE). Dockerfiles kopieren `.npmrc` vor `npm ci`.
-- Offene Majors (bewusst nicht gemacht, nur bei Bedarf): @angular 22, @pdfme 6, ngx-indexed-db 22, ngx-quill 31, ol-mapbox-style 13, jspdf 4, ts-md5 2, immer 11, uuid 14, react 19 + react-router 7 (server), file-type 22, wait-on 9, udsv 0.7, typescript 7 (common/types), shpjs 4 vs 6 (server ≠ app).
-- Lockfile-Erzeugung nur in Linux-Node-22-Container. npm unter Windows bricht bei `oxide-wasm32-wasi` mit EALLOWREMOTE ab.
-
-## Build-Fixes nach Update
-- `angular.json`: Asset `../../CHANGELOG.md` entfernt (Angular verbietet Assets außerhalb des Workspace). `update-ngsw-config.js` kopiert die Datei nach `src/assets/CHANGELOG.md` (gitignored).
-- TS-Fehler durch neue ol/fuse-Typen: `Fuse<JournalEntry>` explizit typisiert, `mapBrowserEvent`/`getTargetElement` mit Null-Behandlung, `reportNumber` im Template per `$any`. Die `$any`-Stelle ist ein Notbehelf, die Typen von `reportNumber` (number | number[]) sollten bereinigt werden.
-- `immutable`: `redux-immutable` (Peer von strapi-plugin-config-sync) braucht immutable 3.8 an der Wurzel, `sass` braucht 5.x. Lösung: `immutable@^3.8.2` als devDependency in der Wurzel, sass behält seine eigene 5.x-Kopie. Ohne das schlägt der Strapi-Admin-Build (Vite) fehl.
-- `rc-color-picker` (Strapi-Transitive) meldet einen React-16-Peer-Konflikt. Nicht blockierend, bleibt.
-- Nicht reproduziert: Im Vordergrund bricht `zskarte.sh start -b` bei fehlgeschlagenem Build korrekt ab. Im Hintergrund-Wrapper wurde Exit 0 angezeigt, Ursache offen.
-- Strapi-Admin-Build: Ursache für "UnsavedChangesModal is not exported" war ein veralteter `node_modules`-Ordner auf dem Windows-Dateisystem (Strapi 5.33.3 nested). Nach Löschen und Neugenerieren des Lockfiles sauber.
-- `zskarte.bat` dupliziert `zskarte.sh`, fehlt aber das `.env`-Bootstrapping. Entscheidung offen: löschen (du deployst mit .sh) oder synchron halten.
-- Docker: npm-Cache als BuildKit-Cache-Mount in Dockerfile.app/server (`--mount=type=cache,target=/root/.npm`).
-
-## Audit (ponytail-audit)
-
-### Must fix
-- [x] 1. Token endpoint trusts any JSON value: `packages/server/src/api/access/controllers/access.ts:41, 47`. Reject non-string `accessToken`. (Not run yet, check with one request first.)
-- [x] 2. Short share codes (6 digits, 15 min) can be guessed, no rate limit on `/accesses/auth/token` (`access.ts:118`). Add rate limit or longer codes.
-- [x] 3. `access.find` replaces the organisation filter when `operationId` is given (`access.ts:136-140`). Other organisations' share entries are visible. Merge filters instead.
-- [x] 4. Journal message numbers can repeat under concurrent saves (`journal-entry.ts:78-87`, `messageNumber` not unique). Add per-operation advisory lock in the transaction.
-- [x] 5. Map state flag cleared after `await` loses the last edits (`state/operation.ts:145-158`). Clear the flag before the save, restore on error. (Flag vor dem Speichern gelöscht, Test: `map-state.test.ts`)
-- [ ] 6. Possible script injection: `contenteditable/address-token.blot.ts:13, 15` puts `value.address` into `innerHTML`. Use `textContent`. (Not verified in a browser.)
-
-### Should fix
-- [x] 7. Two timers save the map state (`index.ts:33` every 30 s, cron every 15 s). Remove the `setInterval`. (Timer in index.ts entfernt, Cron bleibt)
-- [x] 8. Tests: Access-Filter, Rate-Limit, Journal-Nummern, Map-Flag (`npm run test:unit` in packages/server, 12 Tests).
-- [x] 9. `accessControl.ts:387` `entry.public` crashes on unknown IDs (500 instead of 403). Use `entry?.public`.
-- [x] 10. Journal update crashes on unknown IDs (`journal-entry.ts:158, 173`). Return 404 when entry is null.
-- [x] 11. Postgres (55432) and pgAdmin (7050) are published on all interfaces in `zskarte/docker-compose.yml`. Bind to `127.0.0.1`.
-- [x] 12. Map state is serialised and hashed on every change (`state/operation.ts:109-111`). Compare references from `applyPatches` instead.
-- [x] 13. `state/maplayer.ts` (1352 lines) mixes five jobs. Split by job, no logic change. (aufgeteilt in maplayer-shared, -boundaries, -entrances, -swiss-names, -styles; maplayer.ts re-exportiert)
-
-### Nice to have
-- [x] 14. Remove unused dependency `ngx-indexed-db` (`packages/app/package.json:51`). −1 dependency.
-- [x] 15. Remove duplicate `wait-on` from `packages/app/package.json:82`. Root copy stays. −1 dependency.
-- [x] 16. `zskarte.bat` duplicates `zskarte.sh` and misses the `.env` setup. Delete it or make it call the `.sh`. About −45 lines. → Entscheidung: `zskarte.bat` vorerst behalten (done)
-- [x] 17. Geo index on `ortschaften` uses `double precision`, the search query casts to `real`, so the index is never used. Change the cast in `searchserv/search.py`.
-- [x] 18. Search `bbox` is not validated. Non-numbers cause a 500. Check all four values are numbers.
-
-Audit left out (smaller): socket server allows origin `*`; raw user agents in logs.
-Audit lean: −60 lines, −2 dependencies possible.
-
-## Erledigt (Tileserver-Init)
-- `mapserv-init/fetch-tiles.sh`: Vor dem Download nur HEAD-Header holen (ETag, Last-Modified, Content-Length). Stimmen sie mit `tiles.mbtiles.meta` überein, wird übersprungen. Getestet: erster Lauf lädt, zweiter Lauf überspringt.
-- Download in `tiles.mbtiles.part`, Größe gegen Content-Length geprüft, dann atomar umbenannt. Eine alte gute Datei bleibt bei Abbruch erhalten.
-
-## Erledigt (Audit-Findings 1-4)
-- [x] 1. Token-Endpunkt: nur Strings akzeptiert (`access.ts`).
-- [x] 2. Share-Code-Ratenbegrenzung: max. 10 falsche Codes pro IP und Minute (`access.ts`, in-memory).
-- [x] 3. `access.find`: Operation-Filter wird per `$and` zum Organisations-/Share-Filter addiert statt ihn zu ersetzen.
-- [x] 4. Journal-Nummern: pro Operation eine Transaktions-Sperre (`pg_advisory_xact_lock`) beim Anlegen (`journal-entry.ts`). Update-Pfad noch ohne Sperre.
-
-## Bug: Signaturen nicht setzbar über HTTP-IP (gefunden)
-- [x] `state.service.ts` `refreshMapState`: `crypto.subtle.digest` wirft auf http (kein sicherer Kontext). Das brach das Öffnen der Operation ab, Signaturen erschienen nicht. Fix: direkter String-Vergleich statt Hash.
-- [x] `share-dialog.component.ts:36`: `navigator.clipboard.writeText` funktioniert auf http-IP ebenfalls nicht (nur localhost/https). Offen. → Fallback über verstecktes Textfeld + `execCommand` (Fix: Zwischenablage auf http-IP)
-
-## Finding 6 (XSS) – Test
-- [ ] `zskarte/packages/app/tests/journal-address-xss.spec.ts` reproduziert den Fehler: aktuell FAILS (Payload läuft, `window.__xss === 1`). Nach dem Fix (`textContent` in `address-token.blot.ts`) muss der Test grün werden.
-
-## Python (searchserv)
-- [x] Sprung auf Python 3.14: `searchserv/Dockerfile` (`python:3.14` Build, `python:3.14-slim-trixie` Laufzeit) und `searchserv-db-init/Dockerfile` (`python:3.14-slim-bookworm`). Getestet: Such-API läuft auf 3.14.10, Loader-Image baut.
-- [x] Sprung auf Python 3.15 umgesetzt (Such-Service und Loader). Requirements vollständig gepinnt (43 Pakete). Getestet: Such-API und Loader-Build auf Python 3.15.2.
-  - `python:3.15-slim-trixie` ist verfügbar (3.15.2).
-  - Gepinnte Pakete haben kein Wheel für 3.15: `httptools` 0.9.0, `MarkupSafe` 3.0.4, `orjson` 3.13.0, `PyYAML` 6.0.4, `ujson` 6.1.0, `uvloop` 0.23.0, `pydantic-core` (2.46.4 hängt an `pydantic` 2.13.4, nötig ist 2.50.5 mit `pydantic` 2.14.4), `typing_extensions` 4.16.0, `pydantic-settings` 2.16.3, `typing-inspection`.
-  - Vorschlag für die Pins liegt in `C:\Users\patrick\AppData\Local\Temp\py315-final.txt` (Dry-Run aufgelöst, nicht gebaut).
-  - Fehlt noch: Build der Such-API auf 3.15 und Test der Endpunkte.
-
-## Erkenntnisse Python
-- Python 3.13 ist laut PEP 719 ab Oktober 2026 nur noch im Security-Modus (keine Bugfixes mehr). 3.14 ist die aktuelle Empfehlung.
-- Alle Pins aus `searchserv/requirements.txt` haben Wheels für 3.14.10 (Dry-Run mit `--only-binary`).
-- `searchserv-db-init/requirements.txt` war veraltet (FastAPI 0.115 und weitere Pakete, die der Loader nicht importiert). Auf `psycopg==3.3.4` reduziert, das ist die einzige Abhängigkeit des Loaders.
-
-## npm Deprecation-Warnungen (fresh `npm ci`, 14 Pakete)
-Quelle: `npm ci` im Node-22-Container. Spalte "Wer bringt es mit" zeigt den Pfad, Vorschlag zum Beheben.
-
-- [x] `@angular/animations@21.2.26`: entfernt. Unser Code nutzt keine Angular-Animationen, Material braucht das Paket nicht (nur optionaler Peer von platform-browser). Geprüft: E2E-Suite unverändert, Dialoge und Menü ohne Konsolenfehler.
-- [ ] `@angular/platform-browser-dynamic@21.2.26`: deprecated. Direkt (`packages/app`). Vorschlag: Import entfernen, `@angular/platform-browser` reicht (vorher prüfen, ob `platformBrowserDynamic` im Code vorkommt). → Erledigt: `src/test.ts` war tot (kein Test-Target, keine tsconfig-Referenz), Datei und Abhängigkeit entfernt.
-- [ ] `@babel/plugin-proposal-export-namespace-from@7.18.9`: über `fix-esm@1.0.1` (root). Vorschlag: `fix-esm` prüfen, ob es noch gebraucht wird (`grep -rn fix-esm`). Sonst entfernen. → Offen. Kommt über `fix-esm`. `fix-esm` wird für `superjson` gebraucht, weil `superjson` reines ESM ist (`"type": "module"`) und der Server als CJS läuft. Lösung nur über anderes Serialisierungspaket oder ESM-Umbau des Servers, beides aufwendig.
-- [x] `@koa/router@12.0.2`: über `@strapi/core` und `@strapi/types`. Upstream-Abhängigkeit von Strapi. Vorschlag: auf Strapi-Update warten; alternativ per `overrides` auf 15.x testen (Risiko, Strapi-Tests nötig). → erledigt über Strapi-Updates (Abhängigkeit von Strapi, nicht selbst änderbar)
-- [ ] `core-js@2.6.12`: Analyse abgeschlossen, keine saubere Lösung ohne großen Umbau. Kette: `@pdfme/ui` 5.x / `@pdfme/common` → `form-render` → `rc-color-picker` 1.2.6 (neueste Version) → `rc-trigger` 1.x → `babel-runtime` 6.x → `core-js` ^2. Option A: `overrides` auf `core-js@3`: funktioniert nicht, `babel-runtime` 6 braucht `core-js/library`, das es in Version 3 nicht mehr gibt. Option B: `@pdfme` 6.x: UI basiert auf React (antd), mit der Angular-App nicht nutzbar. Empfehlung: Warnung bewusst stehen lassen, bis der PDF-Designer ersetzt oder die Kette von pdfme aufgelöst wird.
-- [ ] `fstream@1.0.12`: über `exceljs@4.4.0` → `unzipper`. Vorschlag: `exceljs` ist die letzte Version, Alternative prüfen (z. B. `xlsx` oder Ersatz für den Export). Nur für den Excel-Export relevant. → Offen. Über `exceljs@4.4.0` (bereits neueste Version) → `unzipper`. Lösung nur über Austausch der Excel-Bibliothek (genutzt in `journal.service.ts`, `listViewEntry.ts`), eigenes Projekt, Ausgabeformate müssen mit echten Dateien geprüft werden.
-- [x] `glob@11.1.0` (Root) auf glob 14.0.6 angehoben, Ausgabe von `cleanup.ts` geprüft (identische Pfade). `glob@7.2.3` über Strapi, erledigt: glob 11 wird nur in `scripts/cleanup.ts` genutzt. Aktuelle Version ist 14.0.6. Vor dem Upgrade `cleanup.ts` gegen einen Testordner prüfen.
-- [x] `inflight@1.0.6`: über `glob@7`. Speicherleck laut Warnung. Vorschlag: mit `glob`-Update verschwinden. → erledigt über Strapi-Updates (Abhängigkeit von Strapi, nicht selbst änderbar)
-- [x] `rimraf@2.7.1` und `rimraf@3.0.2`: über Strapi-Admin (`broadcast-channel`) und Build-Tools. Vorschlag: Strapi-Update. → erledigt über Strapi-Updates (Abhängigkeit von Strapi, nicht selbst änderbar)
-- [ ] `lodash.isequal@4.5.0`: über `exceljs` → `fast-csv` → `@fast-csv/format`. Vorschlag: mit `exceljs`-Entscheidung klären. → Offen. Über `exceljs` → `fast-csv` → `@fast-csv/format`. Entfällt mit dem Excel-Austausch.
-- [x] `node-abort-controller@3.1.1`: über `@strapi/strapi` → `fork-ts-checker-webpack-plugin`. Upstream. Vorschlag: Strapi-Update. → erledigt über Strapi-Updates (Abhängigkeit von Strapi, nicht selbst änderbar)
-- [x] `uuid@8.3.2`: über `sockjs` (webpack-dev-server, nur Strapi-Admin-Entwicklung). Vorschlag: nicht im Produktionsbild, Strapi-Update abwarten. → erledigt über Strapi-Updates (Abhängigkeit von Strapi, nicht selbst änderbar)
-
-Für Strapi-Warnungen gilt: nur mit einem Strapi-Versionssprung oder gezielten `overrides` lösbar. Die Entscheidung liegt beim Upgrade-Plan, nicht bei einzelnen Paketen.
-
-## Node.js-Version
-Geprüft mit frischem `npm ci --ignore-scripts` im jeweiligen Node-Container:
-- Node 22.22 (npm 10.9): Exit 0, 14 verschiedene deprecated Pakete.
-- Node 24.15 (npm 11.12): Exit 0, keine Engine-Fehler, 19 deprecated-Zeilen.
-- Node 26.13 (npm 11.20): Exit 0, keine Engine-Fehler, 19 deprecated-Zeilen.
-
-Engine-Ranges: Strapi 5.63 erlaubt `>=22.0.0 <=26.x`, Angular 21 verlangt `^20.19 || ^22.12 || >=24`. Node 24 und 26 liegen damit in beiden Ranges.
-
-- [x] Umgesetzt: Node 26.13.1 (LTS seit 26.13.0, EOL April 2029) in Dockerfile.app, Dockerfile.server, .nvmrc und engines. Build, Lint und Stack-Start grün; E2E 9/10, der rote Test ist XSS (A4), offen.
-- [X] Node 26 als späterer Schritt, sobald Strapi und Angular es in der Praxis mit Build und Tests bestätigt haben. Die LTS-Einstufung von Node 26 vorher prüfen.
-- [ ] Vor dem Sprung: `npm run lint` und `npm run build` für App und Server im neuen Image, plus E2E-Tests.
-
-## Konfiguration über deploy.env (erledigt)
-- [x] `deploy.env` (nicht im Git) mit `deploy.env.example` als Vorlage. `zskarte.sh` liest sie für alle Befehle.
-- [x] `ZSK_TRAEFIK=true` ergänzt Traefik-Labels aus `zskarte/docker-compose.traefik.yml` und `docker-compose.traefik.yml` und entfernt die direkten Host-Ports von App, Server, Suche und Tiles.
-- [x] Frontend-URLs als Build-Args, `zskarte/packages/app/scripts/write-environment.js` schreibt `environment.prod.ts` beim Image-Build. Keine manuelle Anpassung mehr nötig.
-- [x] README-Abschnitt "Configuration (deploy.env)".
-- [x] Auf dem Produktivserver getestet: `deploy.env` mit `ZSK_TRAEFIK=true`, `./zskarte.sh start -b`, Routen funktionieren.
-- [ ] Das separate Deployment-Script des Servers (schreibt `environment.prod.ts`) ablösen, sobald der Test grün ist.
-
-## Audit 2 (ponytail-audit, nach Produktiv-Deployment)
-### Must fix
-- [ ] A1. Share-Login-Ratenbegrenzung sperrt alle Nutzer hinter Traefik (`access.ts:51, 69`). Fix: `proxy: true` in `packages/server/config/server.ts`, danach 11-Versuche-Test erneut.
-- [ ] A2. Beispiel-Secrets aus `.env.example` werden auf dem Server kopiert (`zskarte.sh`). Fix: `zskarte.sh` erzeugt Zufallswerte (z. B. `zskarte/gen-server-env.sh`), dann prüfen, dass die Server-`.env` keine Beispielwerte mehr enthält.
-- [ ] A3. Offener Proxy `GET /api/proxy?url=` (`api/proxy/`). Fix: Route, Controller und `axios` entfernen (nur dort genutzt). Frontend nutzt ihn nicht.
-- [ ] A4. XSS über Adress-Token im Editor (`contenteditable/address-token.blot.ts:13, 15`). Fix: `textContent` statt `innerHTML`. Test `journal-address-xss.spec.ts` muss danach grün sein.
-
-### Should fix
-- [ ] A5. Journal-Nummer beim Ändern (`journal-entry.ts`, `update`) ohne Sperre. Fix: gleiche `pg_advisory_xact_lock` wie beim Anlegen.
-- [ ] A6. DB-Passwort-Fallback `supersecret123` in `packages/server/config/database.ts:11`. Fix: Default entfernen, Start schlägt ohne Variable fehl.
-- [ ] A7. Deploy-Konfiguration ohne Prüfung (`zskarte.sh`, Traefik-Overrides). Leere Variable gibt `Host(``)`. Fix: `zskarte.sh` bricht ab, wenn `ZSK_TRAEFIK=true` und eine Pflichtvariable leer ist.
-
-### Nice to have
+### Sicherheit (Audit 2)
+- [ ] A1. Share-Login-Ratenbegrenzung wirkt hinter Traefik für alle Nutzer gemeinsam. Fix: `proxy: true` in `packages/server/config/server.ts`, danach den 11-Versuche-Test wiederholen.
+- [ ] A2. Beispiel-Secrets aus `.env.example` werden bei `zskarte.sh start` übernommen. Fix: Zufallswerte erzeugen (`zskarte/gen-server-env.sh` nutzen), prüfen, dass die Server-`.env` keine Beispielwerte mehr enthält.
+- [ ] A3. Offener Proxy `GET /api/proxy?url=` (`packages/server/src/api/proxy/`). Frontend nutzt ihn nicht. Fix: Route, Controller und `axios` entfernen.
+- [ ] A4. XSS über Adress-Token im Editor (`contenteditable/address-token.blot.ts:13, 15`). Fix: `textContent` statt `innerHTML`. Der Test `tests/journal-address-xss.spec.ts` schlägt bis dahin fehl.
+- [ ] A7. `zskarte.sh` bricht nicht ab, wenn bei `ZSK_TRAEFIK=true` eine Pflicht-Variable leer ist.
 - [ ] A8. Socket.io erlaubt alle Origins (`state/socketio.ts`, `origin: '*'`). Auf App-Host einschränken.
-- [ ] A9. Rohe User-Eingaben in Logs (`accessControl.ts`, `logAccessViolation`). Escapen.
-- [ ] A10. Rate-Limit-Map wächst mit vielen IPs (`access/lib/failed-try-limiter.ts`). Alte Einträge bei jedem Aufruf entfernen.
+- [ ] A9. Rohe User-Eingaben in den Logs (`accessControl.ts`, `logAccessViolation`). Escapen.
+- [ ] A10. Rate-Limit-Map wächst mit vielen IPs. Alte Einträge bei jedem Aufruf entfernen.
+
+### Daten
+- [ ] A5. Journal-Nummer beim Ändern (`journal-entry.ts`, `update`) ist ohne Sperre. Fix: gleiche `pg_advisory_xact_lock` wie beim Anlegen.
+- [ ] A6. DB-Passwort-Fallback `supersecret123` in `packages/server/config/database.ts:11`. Default entfernen.
 - [ ] A11. `write-environment.js` schreibt Werte ohne Escaping. `JSON.stringify` verwenden.
 
-Lean: −70 Zeilen, −1 Dependency (`axios` nach Entfernen von `/proxy`). `zskarte.bat` (−45 Zeilen) bleibt Entscheidung.
+### Betrieb
+- [ ] Das separate Deployment-Skript (schreibt `environment.prod.ts`) ablösen. Die Datei entsteht jetzt beim Image-Build aus `deploy.env`.
 
-Nicht geprüft: Produktiv-Server (Secrets, Labels anderer Apps, Strapi-Rollen für `/proxy`), die meisten Angular-Komponenten, Migrationen, `mapserv`.
+### PDF-Druck (pdfme)
+- [ ] Entscheidung: pdfme entfernen und die Standardvorlage (82 Elemente) im Code rendern (jsPDF, qrcode). Aufwand laut Einschätzung kleiner als gedacht. Referenz-PDF liegt unter `C:\Users\patrick\AppData\Local\Temp\baseline-pdfme-current-with-appurl.pdf`. Das entfernt auch die `core-js`- und `fix-esm`-Kette.
 
-## Browser-Konsole
-- [x] Canvas2D-Hinweis: Ursache OpenLayers `hitdetect.js` (Hit-Canvas ohne `willReadFrequently`). Fix als patch-package-Patch `zskarte/patches/ol+10.11.0.patch`, im App-Image vor `npm ci` kopiert. Geprüft: Konsole beim Mausbewegen über die Karte ohne Warnung (Test lokal, nicht im Repo).
+### npm-Deprecations ohne Strapi-Bezug
+- [ ] `fix-esm` / `@babel/plugin-proposal-export-namespace-from`: `fix-esm` wird für `superjson` gebraucht, das reines ESM ist. Lösung nur über anderes Serialisierungspaket oder ESM-Umbau des Servers.
+- [ ] `core-js@2.6.12` über `@pdfme` → `form-render` → `rc-color-picker` → `rc-trigger` 1.x → `babel-runtime` 6. Override auf core-js 3 scheitert (`core-js/library` fehlt in v3). Lösung nur über den PDF-Umbau.
+- [ ] `fstream@1.0.12`, `lodash.isequal@4.5.0`: über `exceljs` (neueste Version). Lösung nur über Austausch der Excel-Bibliothek (`journal.service.ts`, `listViewEntry.ts`).
 
-- Stand geprüft: `@strapi/strapi` `latest` ist 5.63.0 (npm dist-tag). Ein Strapi-Upgrade löst die Warnungen also nicht. Verbleibend nur `overrides` oder Warten auf Strapi-Updates der Abhängigkeiten (`glob@7`, `@koa/router@12`, `node-abort-controller`, `rimraf`, `inflight`).
+### OpenLayers-Patch
+- [ ] Bei jedem Upgrade von `ol` (aktuell 10.11.0): `zskarte/patches/ol+10.11.0.patch` prüfen und neu erzeugen. Bricht der Build bei `patch-package` ab, passt der Patch nicht mehr.
 
-## OpenLayers-Patch (Pflege)
-- [ ] Bei jedem Upgrade von `ol` (aktuell 10.11.0): `zskarte/patches/ol+10.11.0.patch` prüfen und neu erzeugen. Bricht der Build bei `patch-package` ab, ist der Patch nicht mehr passend.
+## Bewusst offen
+- Strapi-Warnungen (`glob@7`, `@koa/router@12`, `node-abort-controller`, `rimraf`, `inflight`, `uuid@8`): Lösung über Strapi-Updates. Strapi 5.63.0 ist das aktuelle latest.
+- Offene Major-Updates (`@pdfme` 6, `react` 19, `typescript` 7, `uuid` 14 u. a.): nur bei Bedarf.
+- `zskarte.bat`: bleibt vorerst. Entscheidung, ob löschen oder synchron halten.
+- `zskarte2/` wird ignoriert.
+- Strapi-Warnung `admin.auth.options.expiresIn` stammt aus Strapi-Defaults.
+- `rc-color-picker` React-16-Peer-Konflikt: nicht blockierend.
+- Beispiel-Passwörter (`supersecret123`, `zskarte`, `postgres2`) bleiben laut Vorgabe, Nutzer ändern sie selbst.
+- Dev-Umgebung `environment.dev.ts` zeigt auf den Upstream-Testserver `api-test.zskarte.ch`.
+- Browser-Konsole: `getImageData`-Warnung behoben, keine offenen Punkte.
+
+## Erledigt (Kurzfassung)
+
+### Betrieb und Deployment
+- Named Volumes für Postgres und pgAdmin, Postgres 18.1, pgAdmin 9, Node 26.13.1, nginx 1.29.3.
+- Konfiguration über `deploy.env` (Domains, Traefik, Frontend-URLs, Suchlabel, App-URL für QR-Code).
+- Traefik-Betrieb über Compose-Overrides, produktiv getestet.
+- Tileserver-Init lädt die 1-GB-Karte nur bei geänderter Remote-Datei.
+- DB-Migration über Dump und Restore, Doku in der README.
+- nginx: `server_tokens off`, `nosniff`, `Referrer-Policy`.
+- Such-Service: Healthcheck, Pool-Check, Python 3.15, bbox-Prüfung, Geo-Index genutzt.
+
+### Anwendung
+- Versionsangabe `<version>-<commit>` (Version 7.0.0) auf der Login-Seite und im Service Worker.
+- Signaturen und Freigabelink auch über http-Adressen.
+- Suchlabel über `ZSK_ORG_NAME`.
+- QR-Code des Journals zeigt auf die konfigurierte App-Adresse.
+- OpenLayers-Patch: keine Canvas-Konsolenwarnung.
+- Entfernt: `@angular/animations`, `@angular/platform-browser-dynamic`, `src/test.ts`, `ngx-indexed-db`, doppeltes `wait-on`.
+
+### Server und Daten
+- Share-Codes: Token nur als Text, Ratenbegrenzung (10 pro Minute und IP), Access-Filter behoben.
+- Journal: Nummern-Sperre beim Anlegen, 404 statt 500, Unit-Tests.
+- Karten-Status: keine verlorenen Änderungen, Persist-Timer zusammengeführt, `maplayer.ts` aufgeteilt.
+- 500er bei unbekannten IDs behoben.
+
+### Abhängigkeiten und Tooling
+- Strapi 5.63.0, Node 26, Python 3.15, glob 14.0.6.
+- Deprecations, die über Strapi-Updates laufen, sind als erledigt markiert.
+- Changelog `zskarte/CHANGELOG.md` mit Eintrag 7.0.0 (ohne Backticks).
+
+### Audit 1 (abgeschlossen)
+- Zeilenenden, Named Volumes, Health-Checks, `.env`-Bootstrap, Node/Python-Upgrades.
+- Befunde 1 bis 18 des ersten Audits: 1 bis 5, 7 bis 18 umgesetzt, 6 (XSS) offen, siehe oben.
+
+### Tests
+- Unit-Tests (`npm run test:unit` in `packages/server`): Ratenbegrenzung, Access-Filter, Journal-Nummern, Karten-Status.
+- E2E: Drawing und Journal, grün bis auf den XSS-Test und den instabilen Layer-Test „add and delete layer“.

@@ -9,6 +9,7 @@ export const environment = {
   searchUrl: 'http://localhost:8000/search/',
   searchLabel: 'Lokale Suche',
   showNavLink: true,
+  buildVersion: 'dev',
 };
 
 /*

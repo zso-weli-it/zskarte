@@ -6,6 +6,7 @@ import { SessionService } from '../session.service';
 import { ALLOW_OFFLINE_ACCESS_KEY, GUEST_USER_IDENTIFIER, GUEST_USER_PASSWORD } from '../userLogic';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
+import { environment } from '../../../environments/environment';
 import { I18NService } from '../../state/i18n.service';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
@@ -39,6 +40,7 @@ import { IZso, IZsMapOrganization } from '@zskarte/types';
   ],
 })
 export class LoginComponent implements OnDestroy {
+  readonly buildVersion = environment.buildVersion;
   session = inject(SessionService);
   i18n = inject(I18NService);
   private _api = inject(ApiService);

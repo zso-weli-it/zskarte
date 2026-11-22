@@ -107,3 +107,12 @@ mat-card:first-child {
   height: 48px;
   font-size: 48px;
 }
+
+.build-version {
+  position: fixed;
+  right: 8px;
+  bottom: 6px;
+  font-size: 11px;
+  opacity: 0.6;
+  pointer-events: none;
+}

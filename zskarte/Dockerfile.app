@@ -37,6 +37,7 @@ FROM nginx:1.29.3-alpine
 COPY <<'EOF' /etc/nginx/conf.d/default.conf
 server {
     listen       80;
+    server_tokens off;
 
     root   /usr/share/nginx/html;
     index index.html;

@@ -38,6 +38,8 @@ COPY <<'EOF' /etc/nginx/conf.d/default.conf
 server {
     listen       80;
     server_tokens off;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
     root   /usr/share/nginx/html;
     index index.html;

@@ -4,7 +4,7 @@ const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 // changelog entries are looked up by the package version
 const plainVersion = packageJson.version;
 // shown as the app version (service worker, login page): ZSKarte_<commit of the app folder>, set by zskarte.sh
-const version = `${process.env.ZSK_VERSION_PREFIX || 'ZSKarte'}_${process.env.COMMIT_SHA || 'unknown'}`;
+const version = `${process.env.ZSK_VERSION_PREFIX || 'ZSKarte'} v${plainVersion}-${process.env.COMMIT_SHA || 'unknown'}`;
 
 const date = new Date().toISOString().split('T')[0];
 

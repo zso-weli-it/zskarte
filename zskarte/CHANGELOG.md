@@ -1,12 +1,12 @@
 # Changelog
 
-## Unreleased (fork)
+## 7.0.0
 
 ### Breaking
 - Node.js 26, PostgreSQL 18 (Datenbank per Dump und Restore übernehmen), Strapi 5.63.
 
 ### Neu
-- Versionsangabe `ZSKarte_<commit>` auf der Login-Seite.
+- Versionsangabe `ZSKarte v<version>-<commit>` auf der Login-Seite.
 - Suchfeld-Label konfigurierbar.
 
 ### Fehlerbehebungen

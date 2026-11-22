@@ -40,6 +40,8 @@ export default factories.createCoreController('api::access.access', ({ strapi })
   async token(ctx) {
     const { accessToken } = ctx.request.body;
     if (!accessToken) return ctx.badRequest('No access token provided');
+    // only plain strings: an object like {"$ne": ""} would match any row in the filter below
+    if (typeof accessToken !== 'string') return ctx.badRequest('Invalid access token');
 
     const { jwt } = strapi.plugins['users-permissions'].services;
 

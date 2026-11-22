@@ -52,7 +52,7 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 ## Audit (ponytail-audit)
 
 ### Must fix
-- [ ] 1. Token endpoint trusts any JSON value: `packages/server/src/api/access/controllers/access.ts:41, 47`. Reject non-string `accessToken`. (Not run yet, check with one request first.)
+- [x] 1. Token endpoint trusts any JSON value: `packages/server/src/api/access/controllers/access.ts:41, 47`. Reject non-string `accessToken`. (Not run yet, check with one request first.)
 - [ ] 2. Short share codes (6 digits, 15 min) can be guessed, no rate limit on `/accesses/auth/token` (`access.ts:118`). Add rate limit or longer codes.
 - [ ] 3. `access.find` replaces the organisation filter when `operationId` is given (`access.ts:136-140`). Other organisations' share entries are visible. Merge filters instead.
 - [ ] 4. Journal message numbers can repeat under concurrent saves (`journal-entry.ts:78-87`, `messageNumber` not unique). Add per-operation advisory lock in the transaction.
@@ -81,3 +81,6 @@ Audit lean: −60 lines, −2 dependencies possible.
 ## Erledigt (Tileserver-Init)
 - `mapserv-init/fetch-tiles.sh`: Vor dem Download nur HEAD-Header holen (ETag, Last-Modified, Content-Length). Stimmen sie mit `tiles.mbtiles.meta` überein, wird übersprungen. Getestet: erster Lauf lädt, zweiter Lauf überspringt.
 - Download in `tiles.mbtiles.part`, Größe gegen Content-Length geprüft, dann atomar umbenannt. Eine alte gute Datei bleibt bei Abbruch erhalten.
+
+## Erledigt (Audit-Findings 1-4)
+- [x] 1. Token-Endpunkt: nur Strings akzeptiert (`access.ts`).

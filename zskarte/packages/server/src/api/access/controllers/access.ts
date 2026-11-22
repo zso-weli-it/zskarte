@@ -158,10 +158,9 @@ export default factories.createCoreController('api::access.access', ({ strapi })
   },
   async find(ctx) {
     if (ctx.query.operationId) {
+      // AND with the filter from accessControl (organisation or share-token operation), never replace it
       ctx.query.filters = {
-        operation: {
-          documentId: ctx.query.operationId,
-        },
+        $and: [ctx.query.filters ?? {}, { operation: { documentId: { $eq: ctx.query.operationId } } }],
       };
     }
     return await super.find(ctx);

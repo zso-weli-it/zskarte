@@ -3,35 +3,16 @@
 ## Unreleased (fork)
 
 ### Breaking
-- Node.js 26.13.1 (LTS) für App- und Server-Image.
-- PostgreSQL 18.1 statt 16.3: Bestehende Datenbanken per Dump und Restore übernehmen (README, „DB Migration“).
-- Strapi 5.63.0 (vorher 5.33.x), Schema-Migrationen beim ersten Start.
+- Node.js 26, PostgreSQL 18 (Datenbank per Dump und Restore übernehmen), Strapi 5.63.
 
-### Deployment
-- Traefik-Betrieb über Compose-Override (`docker-compose.traefik.yml`), Host-Ports entfallen.
-- Postgres und pgAdmin nur auf `127.0.0.1`, mit Named Volumes.
-- Frontend-URLs, Suchlabel und Versionsangabe als Build-Args.
-- Versionsangabe `ZSKarte_<commit>` für Login-Seite und Service Worker.
-
-### Sicherheit
-- Share-Code-Token: nur Text-Werte akzeptiert.
-- Share-Code-Ratenbegrenzung (10 falsche Codes pro Minute). Bekannt: hinter Traefik gilt sie für alle Nutzer gemeinsam.
-- Access-Liste: Operation-Filter ersetzt den Organisations-Filter nicht mehr.
+### Neu
+- Versionsangabe `ZSKarte_<commit>` auf der Login-Seite.
+- Suchfeld-Label konfigurierbar.
 
 ### Fehlerbehebungen
-- Journal: keine doppelten Nummern beim Anlegen, 404 statt 500 beim Ändern.
-- Karten-Status: Änderungen während des Speicherns gehen nicht mehr verloren.
-- Signaturen und Freigabelink auf http-Adressen.
-- Zugriffskontrolle: 403 statt 500 bei unbekannten IDs.
-
-### Frontend
-- Suchfeld-Label über `ZSK_ORG_NAME`.
-- OpenLayers-Patch: keine Canvas-Warnung in der Konsole.
-- Nicht genutzte Abhängigkeiten und tote `test.ts` entfernt.
-
-### Server
-- Kartenebenen-Code in Module nach Aufgaben aufgeteilt, Verhalten unverändert.
-- Unit-Tests für Ratenbegrenzung, Access-Filter, Journal-Nummern und Karten-Status.
+- Signaturen und Freigabelink auch über http-Adressen.
+- Journal: keine doppelten Nummern, keine Abstürze bei unbekannten IDs.
+- Karte: keine verlorenen Änderungen beim Speichern.
 
 ## 6.0.2
 - Add Geodienste layers

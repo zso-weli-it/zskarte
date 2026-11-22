@@ -766,7 +766,7 @@ export class JournalService {
     let fileName = `${operation.name}_message${entry.messageNumber}_${new Date().toISOString().slice(0, 16)}.pdf`;
     let entryUrl: string | undefined;
     if (entry.messageNumber && entry.createdAt) {
-      entryUrl = `${window.location.origin}/main/journal?operationId=${operation.documentId}&messageNumber=${entry.messageNumber}`;
+      entryUrl = `${environment.appUrl}/main/journal?operationId=${operation.documentId}&messageNumber=${entry.messageNumber}`;
     } else {
       this.deactivateQRCode(template);
       if (Object.keys(entry).length === 0) {

@@ -19,6 +19,7 @@ ADD --exclude=./packages/server . /app
 ARG ZSK_API_URL
 ARG ZSK_SEARCH_URL
 ARG ZSK_TILE_URL
+ARG ZSK_APP_URL
 ARG ZSK_ORG_NAME
 # read by scripts/update-ngsw-config.js (appData version for the service worker)
 ARG COMMIT_SHA

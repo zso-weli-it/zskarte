@@ -22,6 +22,7 @@ export const environment = {
   searchLabel: '${searchLabel}',
   showNavLink: true,
   buildVersion: '${buildVersion}',
+  appUrl: '${value('ZSK_APP_URL', 'http://localhost:4300')}',
 };
 `;
 

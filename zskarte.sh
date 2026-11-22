@@ -17,12 +17,14 @@ if [ "${ZSK_TRAEFIK:-false}" = "true" ]; then
     export ZSK_API_URL="https://${ZSK_API_HOST}"
     export ZSK_SEARCH_URL="https://${ZSK_SEARCH_HOST}/search/"
     export ZSK_TILE_URL="https://${ZSK_TILES_HOST}/styles/osm-bright"
+    export ZSK_APP_URL="https://${ZSK_APP_HOST}"
     TRAEFIK_ZSK="-f zskarte/docker-compose.traefik.yml"
     TRAEFIK_ROOT="-f docker-compose.traefik.yml"
 else
     export ZSK_API_URL="http://localhost:1337"
     export ZSK_SEARCH_URL="http://localhost:8000/search/"
     export ZSK_TILE_URL="http://localhost:8080/styles/osm-bright"
+    export ZSK_APP_URL="http://localhost:4300"
     TRAEFIK_ZSK=""
     TRAEFIK_ROOT=""
 fi

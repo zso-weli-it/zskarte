@@ -10,6 +10,7 @@ export const environment = {
   searchLabel: 'Lokale Suche',
   showNavLink: true,
   buildVersion: 'dev',
+  appUrl: 'http://localhost:4300',
 };
 
 /*

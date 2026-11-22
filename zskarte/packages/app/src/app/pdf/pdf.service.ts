@@ -4,6 +4,7 @@ import { text, image, dateTime, line, checkbox, barcodes, rectangle } from '@pdf
 import { I18NService } from '../state/i18n.service';
 import { IPdfService } from './pdf-service.factory';
 import saveAs from 'file-saver';
+import { environment } from '../../environments/environment';
 
 const fontConfigs = {
   fonts: {
@@ -213,6 +214,8 @@ export class PdfService implements IPdfService {
   }
 
   public async downloadPdf(template: any, inputs: any, fileName: string) {
+    // placeholder {APP_URL} in the template (e.g. QR code target) becomes the public app address
+    template = JSON.parse(JSON.stringify(template).replaceAll('{APP_URL}', environment.appUrl));
     inputs = inputs.map((input: any) => this.flattenObject(input));
     inputs = await this.processInputsWithSchema(inputs, template);
 

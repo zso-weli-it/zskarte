@@ -60,6 +60,7 @@ services:
         ZSK_API_URL: ${ZSK_API_URL:-http://localhost:1337}
         ZSK_SEARCH_URL: ${ZSK_SEARCH_URL:-http://localhost:8000/search/}
         ZSK_TILE_URL: ${ZSK_TILE_URL:-http://localhost:8080/styles/osm-bright}
+        ZSK_APP_URL: ${ZSK_APP_URL:-http://localhost:4300}
         ZSK_ORG_NAME: ${ZSK_ORG_NAME:-}
         COMMIT_SHA: ${COMMIT_SHA:-}
     container_name: app-zskarte

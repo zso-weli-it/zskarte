@@ -60,6 +60,7 @@ services:
         ZSK_API_URL: ${ZSK_API_URL:-http://localhost:1337}
         ZSK_SEARCH_URL: ${ZSK_SEARCH_URL:-http://localhost:8000/search/}
         ZSK_TILE_URL: ${ZSK_TILE_URL:-http://localhost:8080/styles/osm-bright}
+        ZSK_SEARCH_LABEL: ${ZSK_SEARCH_LABEL:-Lokale Suche}
     container_name: app-zskarte
     ports: [ 4300:80 ]
     restart: unless-stopped

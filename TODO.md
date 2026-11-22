@@ -143,5 +143,5 @@ Engine-Ranges: Strapi 5.63 erlaubt `>=22.0.0 <=26.x`, Angular 21 verlangt `^20.1
 - [x] `ZSK_TRAEFIK=true` ergänzt Traefik-Labels aus `zskarte/docker-compose.traefik.yml` und `docker-compose.traefik.yml` und entfernt die direkten Host-Ports von App, Server, Suche und Tiles.
 - [x] Frontend-URLs als Build-Args, `zskarte/packages/app/scripts/write-environment.js` schreibt `environment.prod.ts` beim Image-Build. Keine manuelle Anpassung mehr nötig.
 - [x] README-Abschnitt "Configuration (deploy.env)".
-- [ ] Auf dem Produktivserver testen: `deploy.env` anlegen, `ZSK_TRAEFIK=true`, `./zskarte.sh start -b`, Routen prüfen.
+- [x] Auf dem Produktivserver getestet: `deploy.env` mit `ZSK_TRAEFIK=true`, `./zskarte.sh start -b`, Routen funktionieren.
 - [ ] Das separate Deployment-Script des Servers (schreibt `environment.prod.ts`) ablösen, sobald der Test grün ist.

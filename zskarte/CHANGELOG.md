@@ -2,7 +2,7 @@
 
 ## 7.0.0
 - Node.js 26, PostgreSQL 18 (Datenbank per Dump und Restore übernehmen), Strapi 5.63.
-- Versionsangabe `<version>-<commit>` auf der Login-Seite.
+- Versionsangabe <version>-<commit> auf der Login-Seite.
 - Suchfeld-Label konfigurierbar.
 - Signaturen und Freigabelink auch über http-Adressen.
 - Journal: keine doppelten Nummern, keine Abstürze bei unbekannten IDs.

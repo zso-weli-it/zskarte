@@ -167,3 +167,6 @@ Engine-Ranges: Strapi 5.63 erlaubt `>=22.0.0 <=26.x`, Angular 21 verlangt `^20.1
 Lean: −70 Zeilen, −1 Dependency (`axios` nach Entfernen von `/proxy`). `zskarte.bat` (−45 Zeilen) bleibt Entscheidung.
 
 Nicht geprüft: Produktiv-Server (Secrets, Labels anderer Apps, Strapi-Rollen für `/proxy`), die meisten Angular-Komponenten, Migrationen, `mapserv`.
+
+## Browser-Konsole
+- [ ] Canvas2D-Hinweis: "Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true". Stammt aus Canvas-Aufrufen mit `getImageData`, die häufig laufen. Fix: beim Erzeugen dieser Canvas-Elemente `getContext('2d', { willReadFrequently: true })` setzen. Vorher suchen, wo `getImageData` aufgerufen wird (`grep -rn getImageData packages/app/src`), und prüfen, ob es sich um Kacheln oder Einzelaufrufe handelt.

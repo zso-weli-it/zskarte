@@ -20,9 +20,6 @@ services:
   offlinekarte-tileserver:
     networks: [default, proxy]
     ports: !reset []
-    # overrides env_file: browsers request the public host, so it must be in the allowed list
-    environment:
-      - TILESERVER_GL_ALLOWED_HOSTS=${ZSK_TILES_HOST}
     labels:
       - traefik.enable=true
       - traefik.docker.network=${ZSK_TRAEFIK_NETWORK}

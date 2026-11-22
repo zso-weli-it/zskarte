@@ -64,6 +64,7 @@ services:
         GIT_URL: ${GIT_URL:-}
         ZSK_ORG_NAME: ${ZSK_ORG_NAME:-}
         ZSK_CODE_LOGIN: ${ZSK_CODE_LOGIN:-true}
+        ZSK_WORK_LOCAL: ${ZSK_WORK_LOCAL:-true}
         COMMIT_SHA: ${COMMIT_SHA:-}
     container_name: app-zskarte
     ports: [ 4300:80 ]

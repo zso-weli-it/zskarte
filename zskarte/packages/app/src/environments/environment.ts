@@ -13,6 +13,7 @@ export const environment = {
   appUrl: 'http://localhost:4300',
   gitUrl: 'https://github.com/itzsoweli/offlinekarte',
   codeLoginEnabled: true,
+  workLocalEnabled: true,
 };
 
 /*

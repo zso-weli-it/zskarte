@@ -43,6 +43,7 @@ export class LoginComponent implements OnDestroy {
   readonly buildVersion = environment.buildVersion;
   readonly gitUrl = environment.gitUrl;
   readonly codeLoginEnabled = environment.codeLoginEnabled;
+  readonly workLocalEnabled = environment.workLocalEnabled;
   session = inject(SessionService);
   i18n = inject(I18NService);
   private _api = inject(ApiService);

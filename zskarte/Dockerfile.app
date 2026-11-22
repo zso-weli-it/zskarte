@@ -23,6 +23,7 @@ ARG ZSK_APP_URL
 ARG GIT_URL
 ARG ZSK_ORG_NAME
 ARG ZSK_CODE_LOGIN
+ARG ZSK_WORK_LOCAL
 # read by scripts/update-ngsw-config.js (appData version for the service worker)
 ARG COMMIT_SHA
 RUN node packages/app/scripts/write-environment.js

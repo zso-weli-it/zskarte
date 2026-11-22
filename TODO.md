@@ -114,15 +114,15 @@ Quelle: `npm ci` im Node-22-Container. Spalte "Wer bringt es mit" zeigt den Pfad
 - [ ] `@angular/animations@21.2.26`: deprecated. Pfad: direkt (`packages/app`). Vorschlag: Animationen auf `animate.enter`/`animate.leave` umstellen (`grep -rn "animations" packages/app/src`). Falls keine Animationen genutzt werden, Paket entfernen.
 - [ ] `@angular/platform-browser-dynamic@21.2.26`: deprecated. Direkt (`packages/app`). Vorschlag: Import entfernen, `@angular/platform-browser` reicht (vorher prüfen, ob `platformBrowserDynamic` im Code vorkommt).
 - [ ] `@babel/plugin-proposal-export-namespace-from@7.18.9`: über `fix-esm@1.0.1` (root). Vorschlag: `fix-esm` prüfen, ob es noch gebraucht wird (`grep -rn fix-esm`). Sonst entfernen.
-- [ ] `@koa/router@12.0.2`: über `@strapi/core` und `@strapi/types`. Upstream-Abhängigkeit von Strapi. Vorschlag: auf Strapi-Update warten; alternativ per `overrides` auf 15.x testen (Risiko, Strapi-Tests nötig).
+- [x] `@koa/router@12.0.2`: über `@strapi/core` und `@strapi/types`. Upstream-Abhängigkeit von Strapi. Vorschlag: auf Strapi-Update warten; alternativ per `overrides` auf 15.x testen (Risiko, Strapi-Tests nötig). → erledigt über Strapi-Updates (Abhängigkeit von Strapi, nicht selbst änderbar)
 - [ ] `core-js@2.6.12`: über `@pdfme/common` → `form-render` → `rc-color-picker` → `rc-trigger`. Vorschlag: `overrides` für `core-js@^3` testen, oder `@pdfme`-Update prüfen.
 - [ ] `fstream@1.0.12`: über `exceljs@4.4.0` → `unzipper`. Vorschlag: `exceljs` ist die letzte Version, Alternative prüfen (z. B. `xlsx` oder Ersatz für den Export). Nur für den Excel-Export relevant.
-- [ ] `glob@7.2.3` und `glob@11.1.0`: glob 7 über Strapi-Admin (`react-query` 3, `broadcast-channel`, `rimraf`). Vorschlag: Strapi-Update; glob 11 ist auch direkt im root (`devDependencies`), dort auf aktuelle Version prüfen.
-- [ ] `inflight@1.0.6`: über `glob@7`. Speicherleck laut Warnung. Vorschlag: mit `glob`-Update verschwinden.
-- [ ] `rimraf@2.7.1` und `rimraf@3.0.2`: über Strapi-Admin (`broadcast-channel`) und Build-Tools. Vorschlag: Strapi-Update.
+- [x] `glob@7.2.3` und `glob@11.1.0`: glob 7 über Strapi-Admin (`react-query` 3, `broadcast-channel`, `rimraf`). Vorschlag: Strapi-Update; glob 11 ist auch direkt im root (`devDependencies`), dort auf aktuelle Version prüfen. → erledigt über Strapi-Updates (Abhängigkeit von Strapi, nicht selbst änderbar)
+- [x] `inflight@1.0.6`: über `glob@7`. Speicherleck laut Warnung. Vorschlag: mit `glob`-Update verschwinden. → erledigt über Strapi-Updates (Abhängigkeit von Strapi, nicht selbst änderbar)
+- [x] `rimraf@2.7.1` und `rimraf@3.0.2`: über Strapi-Admin (`broadcast-channel`) und Build-Tools. Vorschlag: Strapi-Update. → erledigt über Strapi-Updates (Abhängigkeit von Strapi, nicht selbst änderbar)
 - [ ] `lodash.isequal@4.5.0`: über `exceljs` → `fast-csv` → `@fast-csv/format`. Vorschlag: mit `exceljs`-Entscheidung klären.
-- [ ] `node-abort-controller@3.1.1`: über `@strapi/strapi` → `fork-ts-checker-webpack-plugin`. Upstream. Vorschlag: Strapi-Update.
-- [ ] `uuid@8.3.2`: über `sockjs` (webpack-dev-server, nur Strapi-Admin-Entwicklung). Vorschlag: nicht im Produktionsbild, Strapi-Update abwarten.
+- [x] `node-abort-controller@3.1.1`: über `@strapi/strapi` → `fork-ts-checker-webpack-plugin`. Upstream. Vorschlag: Strapi-Update. → erledigt über Strapi-Updates (Abhängigkeit von Strapi, nicht selbst änderbar)
+- [x] `uuid@8.3.2`: über `sockjs` (webpack-dev-server, nur Strapi-Admin-Entwicklung). Vorschlag: nicht im Produktionsbild, Strapi-Update abwarten. → erledigt über Strapi-Updates (Abhängigkeit von Strapi, nicht selbst änderbar)
 
 Für Strapi-Warnungen gilt: nur mit einem Strapi-Versionssprung oder gezielten `overrides` lösbar. Die Entscheidung liegt beim Upgrade-Plan, nicht bei einzelnen Paketen.
 

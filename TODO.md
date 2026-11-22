@@ -107,3 +107,33 @@ Audit lean: −60 lines, −2 dependencies possible.
 - Python 3.13 ist laut PEP 719 ab Oktober 2026 nur noch im Security-Modus (keine Bugfixes mehr). 3.14 ist die aktuelle Empfehlung.
 - Alle Pins aus `searchserv/requirements.txt` haben Wheels für 3.14.10 (Dry-Run mit `--only-binary`).
 - `searchserv-db-init/requirements.txt` war veraltet (FastAPI 0.115 und weitere Pakete, die der Loader nicht importiert). Auf `psycopg==3.3.4` reduziert, das ist die einzige Abhängigkeit des Loaders.
+
+## npm Deprecation-Warnungen (fresh `npm ci`, 14 Pakete)
+Quelle: `npm ci` im Node-22-Container. Spalte "Wer bringt es mit" zeigt den Pfad, Vorschlag zum Beheben.
+
+- [ ] `@angular/animations@21.2.26`: deprecated. Pfad: direkt (`packages/app`). Vorschlag: Animationen auf `animate.enter`/`animate.leave` umstellen (`grep -rn "animations" packages/app/src`). Falls keine Animationen genutzt werden, Paket entfernen.
+- [ ] `@angular/platform-browser-dynamic@21.2.26`: deprecated. Direkt (`packages/app`). Vorschlag: Import entfernen, `@angular/platform-browser` reicht (vorher prüfen, ob `platformBrowserDynamic` im Code vorkommt).
+- [ ] `@babel/plugin-proposal-export-namespace-from@7.18.9`: über `fix-esm@1.0.1` (root). Vorschlag: `fix-esm` prüfen, ob es noch gebraucht wird (`grep -rn fix-esm`). Sonst entfernen.
+- [ ] `@koa/router@12.0.2`: über `@strapi/core` und `@strapi/types`. Upstream-Abhängigkeit von Strapi. Vorschlag: auf Strapi-Update warten; alternativ per `overrides` auf 15.x testen (Risiko, Strapi-Tests nötig).
+- [ ] `core-js@2.6.12`: über `@pdfme/common` → `form-render` → `rc-color-picker` → `rc-trigger`. Vorschlag: `overrides` für `core-js@^3` testen, oder `@pdfme`-Update prüfen.
+- [ ] `fstream@1.0.12`: über `exceljs@4.4.0` → `unzipper`. Vorschlag: `exceljs` ist die letzte Version, Alternative prüfen (z. B. `xlsx` oder Ersatz für den Export). Nur für den Excel-Export relevant.
+- [ ] `glob@7.2.3` und `glob@11.1.0`: glob 7 über Strapi-Admin (`react-query` 3, `broadcast-channel`, `rimraf`). Vorschlag: Strapi-Update; glob 11 ist auch direkt im root (`devDependencies`), dort auf aktuelle Version prüfen.
+- [ ] `inflight@1.0.6`: über `glob@7`. Speicherleck laut Warnung. Vorschlag: mit `glob`-Update verschwinden.
+- [ ] `rimraf@2.7.1` und `rimraf@3.0.2`: über Strapi-Admin (`broadcast-channel`) und Build-Tools. Vorschlag: Strapi-Update.
+- [ ] `lodash.isequal@4.5.0`: über `exceljs` → `fast-csv` → `@fast-csv/format`. Vorschlag: mit `exceljs`-Entscheidung klären.
+- [ ] `node-abort-controller@3.1.1`: über `@strapi/strapi` → `fork-ts-checker-webpack-plugin`. Upstream. Vorschlag: Strapi-Update.
+- [ ] `uuid@8.3.2`: über `sockjs` (webpack-dev-server, nur Strapi-Admin-Entwicklung). Vorschlag: nicht im Produktionsbild, Strapi-Update abwarten.
+
+Für Strapi-Warnungen gilt: nur mit einem Strapi-Versionssprung oder gezielten `overrides` lösbar. Die Entscheidung liegt beim Upgrade-Plan, nicht bei einzelnen Paketen.
+
+## Node.js-Version
+Geprüft mit frischem `npm ci --ignore-scripts` im jeweiligen Node-Container:
+- Node 22.22 (npm 10.9): Exit 0, 14 verschiedene deprecated Pakete.
+- Node 24.15 (npm 11.12): Exit 0, keine Engine-Fehler, 19 deprecated-Zeilen.
+- Node 26.13 (npm 11.20): Exit 0, keine Engine-Fehler, 19 deprecated-Zeilen.
+
+Engine-Ranges: Strapi 5.63 erlaubt `>=22.0.0 <=26.x`, Angular 21 verlangt `^20.19 || ^22.12 || >=24`. Node 24 und 26 liegen damit in beiden Ranges.
+
+- [ ] Empfehlung: Sprung auf Node 24 LTS (`node:24-bookworm-slim` bzw. `node:24-bookworm` für den App-Build). Node 22 bleibt Maintenance, das Ende ist 2027.
+- [ ] Node 26 als späterer Schritt, sobald Strapi und Angular es in der Praxis mit Build und Tests bestätigt haben. Die LTS-Einstufung von Node 26 vorher prüfen.
+- [ ] Vor dem Sprung: `npm run lint` und `npm run build` für App und Server im neuen Image, plus E2E-Tests.

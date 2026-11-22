@@ -1,23 +1,10 @@
-const { execSync } = require('child_process');
 const fs = require('fs');
 
 const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+// changelog entries are looked up by the package version
 const plainVersion = packageJson.version;
-let version = plainVersion;
-
-if (process.env.COMMIT_SHA) {
-  version = `${version}-${process.env.COMMIT_SHA}`;
-} else {
-  try {
-    const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
-    if (branch !== 'main') {
-      const commitId = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
-      version = `${version}-${commitId}`;
-    }
-  } catch (error) {
-    console.warn('Git command failed, use default version;', error);
-  }
-}
+// shown as the app version (service worker, login page): ZSKarte_<commit of the app folder>, set by zskarte.sh
+const version = `ZSKarte_${process.env.COMMIT_SHA || 'unknown'}`;
 
 const date = new Date().toISOString().split('T')[0];
 

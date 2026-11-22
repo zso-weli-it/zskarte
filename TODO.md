@@ -42,7 +42,6 @@ Stand: 2026-11-22. Erledigtes ist kurz zusammengefasst, Details stehen in der Gi
 - `rc-color-picker` React-16-Peer-Konflikt: nicht blockierend.
 - Beispiel-Passwörter (`supersecret123`, `zskarte`, `postgres2`) bleiben laut Vorgabe, Nutzer ändern sie selbst.
 - Dev-Umgebung `environment.dev.ts` zeigt auf den Upstream-Testserver `api-test.zskarte.ch`.
-- Browser-Konsole: `getImageData`-Warnung behoben, keine offenen Punkte.
 
 ## Erledigt (Kurzfassung)
 
@@ -76,7 +75,7 @@ Stand: 2026-11-22. Erledigtes ist kurz zusammengefasst, Details stehen in der Gi
 
 ### Audit 1 (abgeschlossen)
 - Zeilenenden, Named Volumes, Health-Checks, `.env`-Bootstrap, Node/Python-Upgrades.
-- Befunde 1 bis 18 des ersten Audits: 1 bis 5, 7 bis 18 umgesetzt, 6 (XSS) offen, siehe oben.
+- Befunde 1 bis 18 des ersten Audits: umgesetzt außer 6 (XSS, offen) und 8 (Tests nur teilweise, offen: Journal-Nummern und Karten-Status sind getestet, Token-Typ-Check ebenfalls über Unit-Tests abgedeckt).
 
 ### Tests
 - Unit-Tests (`npm run test:unit` in `packages/server`): Ratenbegrenzung, Access-Filter, Journal-Nummern, Karten-Status.

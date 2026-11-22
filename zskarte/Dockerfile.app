@@ -1,4 +1,4 @@
-FROM node:26.13.1-bookworm AS build-app
+FROM node:26.13.1-bookworm-slim AS build-app
 
 # Create app directory
 WORKDIR /app

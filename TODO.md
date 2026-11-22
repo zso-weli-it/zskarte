@@ -169,6 +169,6 @@ Lean: −70 Zeilen, −1 Dependency (`axios` nach Entfernen von `/proxy`). `zska
 Nicht geprüft: Produktiv-Server (Secrets, Labels anderer Apps, Strapi-Rollen für `/proxy`), die meisten Angular-Komponenten, Migrationen, `mapserv`.
 
 ## Browser-Konsole
-- [ ] Canvas2D-Hinweis: "Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true". Stammt aus Canvas-Aufrufen mit `getImageData`, die häufig laufen. Fix: beim Erzeugen dieser Canvas-Elemente `getContext('2d', { willReadFrequently: true })` setzen. Vorher suchen, wo `getImageData` aufgerufen wird (`grep -rn getImageData packages/app/src`), und prüfen, ob es sich um Kacheln oder Einzelaufrufe handelt.
+- [x] Canvas2D-Hinweis: Ursache OpenLayers `hitdetect.js` (Hit-Canvas ohne `willReadFrequently`). Fix als patch-package-Patch `zskarte/patches/ol+10.11.0.patch`, im App-Image vor `npm ci` kopiert. Prüfung: Konsole nach Rebuild (offen, siehe Test).
 
 - Stand geprüft: `@strapi/strapi` `latest` ist 5.63.0 (npm dist-tag). Ein Strapi-Upgrade löst die Warnungen also nicht. Verbleibend nur `overrides` oder Warten auf Strapi-Updates der Abhängigkeiten (`glob@7`, `@koa/router@12`, `node-abort-controller`, `rimraf`, `inflight`).

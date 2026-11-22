@@ -8,6 +8,8 @@ ADD ./.npmrc /app/.npmrc
 ADD ./package.json /app/package.json
 ADD ./package-lock.json /app/package-lock.json
 ADD ./packages/app/package.json /app/packages/app/package.json
+# patch-package (postinstall) needs the patches before npm ci
+ADD ./patches /app/patches
 RUN --mount=type=cache,target=/root/.npm npm ci
 
 # Copy all files

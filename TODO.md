@@ -66,7 +66,7 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 - [x] 10. Journal update crashes on unknown IDs (`journal-entry.ts:158, 173`). Return 404 when entry is null.
 - [x] 11. Postgres (55432) and pgAdmin (7050) are published on all interfaces in `zskarte/docker-compose.yml`. Bind to `127.0.0.1`.
 - [x] 12. Map state is serialised and hashed on every change (`state/operation.ts:109-111`). Compare references from `applyPatches` instead.
-- [ ] 13. `state/maplayer.ts` (1352 lines) mixes five jobs. Split by job, no logic change.
+- [x] 13. `state/maplayer.ts` (1352 lines) mixes five jobs. Split by job, no logic change. (aufgeteilt in maplayer-shared, -boundaries, -entrances, -swiss-names, -styles; maplayer.ts re-exportiert)
 
 ### Nice to have
 - [ ] 14. Remove unused dependency `ngx-indexed-db` (`packages/app/package.json:51`). −1 dependency.

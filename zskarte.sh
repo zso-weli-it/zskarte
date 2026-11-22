@@ -71,7 +71,15 @@ elif [ "$CMD" = "start" ]; then
 
     echo "Services started."
 
+elif [ "$CMD" = "stop" ]; then
+    echo "Stopping services..."
+
+    docker compose $ZSK_FILES down
+    docker compose $ROOT_FILES down
+
+    echo "Services stopped."
+
 else
-    echo "Usage: $0 {init|update|start [-b]}"
+    echo "Usage: $0 {init|update|start [-b]|stop}"
     exit 1
 fi

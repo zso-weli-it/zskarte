@@ -3,10 +3,13 @@ import { login } from './util';
 
 // Regression test: text inside an address token must be shown as plain text in the journal editor.
 // Before the fix, address-token.blot.ts put the raw address into innerHTML and the onerror handler ran.
+//
+// The editor for stored text is only shown for entries with status "awaiting_message" (they open in the
+// create dialog), so the test creates such an entry: the POST body is changed to carry the payload.
 const PAYLOAD = 'addr:(<img src=x onerror="window.__xss=1"><span class="xss-marker">MARKER</span>)';
 const SUBJECT = 'XSS-Test';
 
-async function addEntry(page: Page, content: string) {
+async function addEntry(page: Page) {
   const rowCount = await page.locator('tbody').getByRole('row').count();
   await page.getByRole('button', { name: 'Add' }).click();
   const modal = page.locator('app-journal-entry-create-modal');
@@ -19,7 +22,7 @@ async function addEntry(page: Page, content: string) {
   await modal.getByLabel('Nummer / Kanal').fill('testtest');
   await modal.getByLabel('Betreff').fill(SUBJECT);
   await modal.locator('app-text-area-with-address-search .ql-container').click();
-  await modal.locator('app-text-area-with-address-search .ql-editor').fill(content);
+  await modal.locator('app-text-area-with-address-search .ql-editor').fill('Inhalt');
   await modal.getByLabel('Visum').fill('test');
   await page.waitForTimeout(500);
   await modal.getByRole('button', { name: 'Erfassen' }).click();
@@ -43,11 +46,19 @@ test.describe('Journal address token XSS', () => {
   });
 
   test('payload in an address token is not executed when the entry is opened in the editor', async ({ page }) => {
-    await addEntry(page, PAYLOAD);
+    // store the entry as "awaiting_message" with the payload as its text
+    await page.route(/\/api\/journal-entries(\?|$)/, async (route) => {
+      if (route.request().method() !== 'POST') return route.continue();
+      const body = route.request().postDataJSON();
+      body.data.messageContent = PAYLOAD;
+      body.data.entryStatus = 'awaiting_message';
+      await route.continue({ postData: JSON.stringify(body) });
+    });
+    await addEntry(page);
 
     await page.locator('tbody tr').filter({ hasText: SUBJECT }).first().click();
 
-    // proves that the editor with the stored text is open (the marker is plain text in both cases)
+    // the editor with the stored text is open; the marker is visible as text in both the safe and the unsafe case
     await expect(page.locator('app-text-area-with-address-search .ql-editor').first()).toContainText('MARKER');
 
     const executed = await page.evaluate(() => (window as any).__xss === 1);

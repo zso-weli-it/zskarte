@@ -91,3 +91,6 @@ Audit lean: −60 lines, −2 dependencies possible.
 ## Bug: Signaturen nicht setzbar über HTTP-IP (gefunden)
 - [x] `state.service.ts` `refreshMapState`: `crypto.subtle.digest` wirft auf http (kein sicherer Kontext). Das brach das Öffnen der Operation ab, Signaturen erschienen nicht. Fix: direkter String-Vergleich statt Hash.
 - [x] `share-dialog.component.ts:36`: `navigator.clipboard.writeText` funktioniert auf http-IP ebenfalls nicht (nur localhost/https). Offen. → Fallback über verstecktes Textfeld + `execCommand` (Fix: Zwischenablage auf http-IP)
+
+## Finding 6 (XSS) – Test
+- [ ] `zskarte/packages/app/tests/journal-address-xss.spec.ts` reproduziert den Fehler: aktuell FAILS (Payload läuft, `window.__xss === 1`). Nach dem Fix (`textContent` in `address-token.blot.ts`) muss der Test grün werden.

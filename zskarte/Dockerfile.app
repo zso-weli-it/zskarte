@@ -4,6 +4,7 @@ FROM node:22.22.0-bookworm AS build-app
 WORKDIR /app
 
 # npm install
+ADD ./.npmrc /app/.npmrc
 ADD ./package.json /app/package.json
 ADD ./package-lock.json /app/package-lock.json
 ADD ./packages/app/package.json /app/packages/app/package.json

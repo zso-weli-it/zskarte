@@ -136,7 +136,9 @@ The old setup (commit `6947bc4`) ran PostgreSQL 16.3 with a bind mount in `zskar
 1. **Backup** (old installation still running):
 
    ```bash
-   docker exec postgresql-zskarte pg_dump -U postgres -Fc zskarte > zskarte-pg16.dump
+   # dump inside the container (binary output is corrupted by shell redirection, e.g. in PowerShell)
+   docker exec -e PGPASSWORD=supersecret123 postgresql-zskarte pg_dump -U postgres -w -Fc -f /tmp/zskarte-pg16.dump zskarte
+   docker cp postgresql-zskarte:/tmp/zskarte-pg16.dump ./zskarte-pg16.dump
    ```
 
    Also copy `zskarte/packages/server/public/uploads` if it exists (not in Git).
@@ -154,7 +156,8 @@ The old setup (commit `6947bc4`) ran PostgreSQL 16.3 with a bind mount in `zskar
 
    ```bash
    docker stop server-zskarte
-   docker exec -i postgresql-zskarte pg_restore -U postgres -d zskarte --clean --if-exists < zskarte-pg16.dump
+   docker cp ./zskarte-pg16.dump postgresql-zskarte:/tmp/zskarte-pg16.dump
+   docker exec -e PGPASSWORD=supersecret123 postgresql-zskarte pg_restore -U postgres -w -d zskarte --clean --if-exists /tmp/zskarte-pg16.dump
    docker start server-zskarte
    ```
 

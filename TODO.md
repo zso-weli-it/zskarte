@@ -70,7 +70,7 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 
 ### Nice to have
 - [ ] 14. Remove unused dependency `ngx-indexed-db` (`packages/app/package.json:51`). −1 dependency.
-- [ ] 15. Remove duplicate `wait-on` from `packages/app/package.json:82`. Root copy stays. −1 dependency.
+- [x] 15. Remove duplicate `wait-on` from `packages/app/package.json:82`. Root copy stays. −1 dependency.
 - [ ] 16. `zskarte.bat` duplicates `zskarte.sh` and misses the `.env` setup. Delete it or make it call the `.sh`. About −45 lines.
 - [ ] 17. Geo index on `ortschaften` uses `double precision`, the search query casts to `real`, so the index is never used. Change the cast in `searchserv/search.py`.
 - [ ] 18. Search `bbox` is not validated. Non-numbers cause a 500. Check all four values are numbers.

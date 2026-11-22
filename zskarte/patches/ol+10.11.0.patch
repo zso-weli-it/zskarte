@@ -1,3 +1,19 @@
+diff --git a/node_modules/ol/render/canvas/ExecutorGroup.js b/node_modules/ol/render/canvas/ExecutorGroup.js
+index d6e0658..a44218c
+--- a/node_modules/ol/render/canvas/ExecutorGroup.js
++++ b/node_modules/ol/render/canvas/ExecutorGroup.js
+@@ -241,7 +241,10 @@ class ExecutorGroup {
+     declutteredFeatures,
+   ) {
+     if (canvasReadsBenchmarked === false) {
+-      benchmarkCanvasReads();
++      // patched: the benchmark itself triggers Chromium's willReadFrequently warning; the map reads often, so use true
++      willReadFrequently = true;
++      canvasReadsBenchmarked = true;
++      // benchmarkCanvasReads();
+     }
+ 
+     hitTolerance = Math.round(hitTolerance);
 diff --git a/node_modules/ol/render/canvas/hitdetect.js b/node_modules/ol/render/canvas/hitdetect.js
 index abaa5f4..44e3309
 --- a/node_modules/ol/render/canvas/hitdetect.js

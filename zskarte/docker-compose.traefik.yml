@@ -1,0 +1,29 @@
+# Used by zskarte.sh only when ZSK_TRAEFIK=true in deploy.env.
+# Adds the services to the Traefik network and routes the public hostnames to them.
+networks:
+  proxy:
+    external: true
+    name: ${ZSK_TRAEFIK_NETWORK}
+
+services:
+  app-zskarte:
+    networks: [default, proxy]
+    ports: !reset []
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${ZSK_TRAEFIK_NETWORK}
+      - traefik.http.routers.zsk-app.rule=Host(`${ZSK_APP_HOST}`)
+      - traefik.http.routers.zsk-app.entrypoints=${ZSK_TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.zsk-app.tls.certresolver=${ZSK_TRAEFIK_CERTRESOLVER}
+      - traefik.http.services.zsk-app.loadbalancer.server.port=80
+
+  server-zskarte:
+    networks: [zskarte, proxy]
+    ports: !reset []
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${ZSK_TRAEFIK_NETWORK}
+      - traefik.http.routers.zsk-api.rule=Host(`${ZSK_API_HOST}`)
+      - traefik.http.routers.zsk-api.entrypoints=${ZSK_TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.zsk-api.tls.certresolver=${ZSK_TRAEFIK_CERTRESOLVER}
+      - traefik.http.services.zsk-api.loadbalancer.server.port=1337

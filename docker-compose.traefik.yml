@@ -1,0 +1,29 @@
+# Used by zskarte.sh only when ZSK_TRAEFIK=true in deploy.env.
+# Search API and tile server behind Traefik (the search service comes from searchserv/docker-compose.yml).
+networks:
+  proxy:
+    external: true
+    name: ${ZSK_TRAEFIK_NETWORK}
+
+services:
+  offlinekarte-search:
+    networks: [default, proxy]
+    ports: !reset []
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${ZSK_TRAEFIK_NETWORK}
+      - traefik.http.routers.zsk-search.rule=Host(`${ZSK_SEARCH_HOST}`)
+      - traefik.http.routers.zsk-search.entrypoints=${ZSK_TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.zsk-search.tls.certresolver=${ZSK_TRAEFIK_CERTRESOLVER}
+      - traefik.http.services.zsk-search.loadbalancer.server.port=8000
+
+  offlinekarte-tileserver:
+    networks: [default, proxy]
+    ports: !reset []
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${ZSK_TRAEFIK_NETWORK}
+      - traefik.http.routers.zsk-tiles.rule=Host(`${ZSK_TILES_HOST}`)
+      - traefik.http.routers.zsk-tiles.entrypoints=${ZSK_TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.zsk-tiles.tls.certresolver=${ZSK_TRAEFIK_CERTRESOLVER}
+      - traefik.http.services.zsk-tiles.loadbalancer.server.port=8080

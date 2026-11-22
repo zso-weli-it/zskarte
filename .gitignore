@@ -1,2 +1,5 @@
 *.swp
 shell.nix
+
+# deployment config with real hostnames (see deploy.env.example)
+deploy.env

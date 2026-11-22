@@ -3,6 +3,29 @@ set -e
 
 CMD=$1
 
+# deploy.env: one place for hostnames and Traefik settings (see deploy.env.example)
+[ -f deploy.env ] || cp deploy.env.example deploy.env
+set -a
+. ./deploy.env
+set +a
+
+# public URLs of the frontend, baked into the app image at build time
+if [ "${ZSK_TRAEFIK:-false}" = "true" ]; then
+    export ZSK_API_URL="https://${ZSK_API_HOST}"
+    export ZSK_SEARCH_URL="https://${ZSK_SEARCH_HOST}/search/"
+    export ZSK_TILE_URL="https://${ZSK_TILES_HOST}/styles/osm-bright"
+    TRAEFIK_ZSK="-f zskarte/docker-compose.traefik.yml"
+    TRAEFIK_ROOT="-f docker-compose.traefik.yml"
+else
+    export ZSK_API_URL="http://localhost:1337"
+    export ZSK_SEARCH_URL="http://localhost:8000/search/"
+    export ZSK_TILE_URL="http://localhost:8080/styles/osm-bright"
+    TRAEFIK_ZSK=""
+    TRAEFIK_ROOT=""
+fi
+ZSK_FILES="-f zskarte/docker-compose.yml $TRAEFIK_ZSK"
+ROOT_FILES="-f docker-compose.yml $TRAEFIK_ROOT"
+
 if [ "$CMD" = "init" ]; then
     echo "Running INIT workflow..."
 
@@ -15,10 +38,8 @@ if [ "$CMD" = "init" ]; then
 elif [ "$CMD" = "update" ]; then
     echo "Running UPDATE workflow for zskarte..."
 
-    cd zskarte
-    docker compose down
-    cd ..
-    docker compose down
+    docker compose $ZSK_FILES down
+    docker compose $ROOT_FILES down
 
     echo "Containers stopped."
     ./zskarte.sh init
@@ -29,19 +50,19 @@ elif [ "$CMD" = "update" ]; then
 
 elif [ "$CMD" = "start" ]; then
     BUILD_ARG=""
-    
-    
+
     if [ "$2" = "-b" ]; then
         BUILD_ARG="--build"
         echo "Starting services and forcing build..."
     else
         echo "Starting services..."
     fi
+    echo "Mode: ZSK_TRAEFIK=${ZSK_TRAEFIK:-false}, frontend API URL: $ZSK_API_URL"
 
     [ -f zskarte/packages/server/.env ] || cp zskarte/packages/server/.env.example zskarte/packages/server/.env
-    docker compose -f zskarte/docker-compose.yml up -d $BUILD_ARG
+    docker compose $ZSK_FILES up -d $BUILD_ARG
     for e in search search-db; do [ -f searchserv/$e.env ] || cp searchserv/$e.env.example searchserv/$e.env; done
-    docker compose up -d $BUILD_ARG
+    docker compose $ROOT_FILES up -d $BUILD_ARG
 
     echo "Services started."
 

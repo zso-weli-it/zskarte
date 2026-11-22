@@ -13,6 +13,12 @@ RUN --mount=type=cache,target=/root/.npm npm ci
 # Copy all files
 ADD --exclude=./packages/server . /app
 
+# public URLs of the frontend (set by zskarte.sh from deploy.env), written into environment.prod.ts
+ARG ZSK_API_URL
+ARG ZSK_SEARCH_URL
+ARG ZSK_TILE_URL
+RUN node packages/app/scripts/write-environment.js
+
 # npm lint
 RUN npm run lint:app
 # npm build

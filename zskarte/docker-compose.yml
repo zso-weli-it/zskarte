@@ -56,6 +56,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.app
+      args:
+        ZSK_API_URL: ${ZSK_API_URL:-http://localhost:1337}
+        ZSK_SEARCH_URL: ${ZSK_SEARCH_URL:-http://localhost:8000/search/}
+        ZSK_TILE_URL: ${ZSK_TILE_URL:-http://localhost:8080/styles/osm-bright}
     container_name: app-zskarte
     ports: [ 4300:80 ]
     restart: unless-stopped

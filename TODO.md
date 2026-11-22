@@ -137,3 +137,11 @@ Engine-Ranges: Strapi 5.63 erlaubt `>=22.0.0 <=26.x`, Angular 21 verlangt `^20.1
 - [ ] Empfehlung: Sprung auf Node 24 LTS (`node:24-bookworm-slim` bzw. `node:24-bookworm` für den App-Build). Node 22 bleibt Maintenance, das Ende ist 2027.
 - [ ] Node 26 als späterer Schritt, sobald Strapi und Angular es in der Praxis mit Build und Tests bestätigt haben. Die LTS-Einstufung von Node 26 vorher prüfen.
 - [ ] Vor dem Sprung: `npm run lint` und `npm run build` für App und Server im neuen Image, plus E2E-Tests.
+
+## Konfiguration über deploy.env (erledigt)
+- [x] `deploy.env` (nicht im Git) mit `deploy.env.example` als Vorlage. `zskarte.sh` liest sie für alle Befehle.
+- [x] `ZSK_TRAEFIK=true` ergänzt Traefik-Labels aus `zskarte/docker-compose.traefik.yml` und `docker-compose.traefik.yml` und entfernt die direkten Host-Ports von App, Server, Suche und Tiles.
+- [x] Frontend-URLs als Build-Args, `zskarte/packages/app/scripts/write-environment.js` schreibt `environment.prod.ts` beim Image-Build. Keine manuelle Anpassung mehr nötig.
+- [x] README-Abschnitt "Configuration (deploy.env)".
+- [ ] Auf dem Produktivserver testen: `deploy.env` anlegen, `ZSK_TRAEFIK=true`, `./zskarte.sh start -b`, Routen prüfen.
+- [ ] Das separate Deployment-Script des Servers (schreibt `environment.prod.ts`) ablösen, sobald der Test grün ist.

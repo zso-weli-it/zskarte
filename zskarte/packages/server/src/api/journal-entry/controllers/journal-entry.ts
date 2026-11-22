@@ -153,6 +153,7 @@ export default factories.createCoreController('api::journal-entry.journal-entry'
           organization: { fields: ['documentId' as any] },
         },
       });
+      if (!entry) return ctx.notFound('Journal entry not found');
       documentId = entry.documentId;
       ctx.params.id = documentId;
     } else {
@@ -166,6 +167,7 @@ export default factories.createCoreController('api::journal-entry.journal-entry'
           organization: { fields: ['documentId' as any] },
         },
       });
+      if (!entry) return ctx.notFound('Journal entry not found');
       uuid = entry.uuid;
     }
     const operationId = entry.operation.documentId;

@@ -92,8 +92,8 @@ async def get_ort_by_PLZ(curs, text, bbox, sortbbox, limit):
     await (
       QueryBuilder("ortschaftsname, PLZ, E, N", "import.ortschaften")
         .nameCheck("PLZ", text)
-        .bbox("ST_Point(E :: real, N :: real, 4326)", bbox)
-        .orderBy("ST_Point(E :: real, N :: real, 4326)", bbox, sortbbox)
+        .bbox("ST_Point(E :: double precision, N :: double precision, 4326)", bbox)
+        .orderBy("ST_Point(E :: double precision, N :: double precision, 4326)", bbox, sortbbox)
         .limitBy(limit)
         .execOn(curs)
     )
@@ -104,8 +104,8 @@ async def get_ort(curs, text, bbox, sortbbox, limit):
     await (
       QueryBuilder("ortschaftsname, PLZ, E, N", "import.ortschaften")
         .nameCheck("lower(ortschaftsname)", text)
-        .bbox("ST_Point(E :: real, N :: real, 4326)", bbox)
-        .orderBy("ST_Point(E :: real, N :: real, 4326)", bbox, sortbbox)
+        .bbox("ST_Point(E :: double precision, N :: double precision, 4326)", bbox)
+        .orderBy("ST_Point(E :: double precision, N :: double precision, 4326)", bbox, sortbbox)
         .limitBy(limit)
         .execOn(curs)
     )

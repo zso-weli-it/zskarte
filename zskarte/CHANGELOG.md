@@ -2,14 +2,11 @@
 
 ## 7.0.0
 
-### Breaking
 - Node.js 26, PostgreSQL 18 (Datenbank per Dump und Restore übernehmen), Strapi 5.63.
 
-### Neu
-- Versionsangabe `ZSKarte v<version>-<commit>` auf der Login-Seite.
+- Versionsangabe `<version>-<commit>` auf der Login-Seite.
 - Suchfeld-Label konfigurierbar.
 
-### Fehlerbehebungen
 - Signaturen und Freigabelink auch über http-Adressen.
 - Journal: keine doppelten Nummern, keine Abstürze bei unbekannten IDs.
 - Karte: keine verlorenen Änderungen beim Speichern.

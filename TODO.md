@@ -77,3 +77,7 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 
 Audit left out (smaller): socket server allows origin `*`; raw user agents in logs.
 Audit lean: −60 lines, −2 dependencies possible.
+
+## Erledigt (Tileserver-Init)
+- `mapserv-init/fetch-tiles.sh`: Vor dem Download nur HEAD-Header holen (ETag, Last-Modified, Content-Length). Stimmen sie mit `tiles.mbtiles.meta` überein, wird übersprungen. Getestet: erster Lauf lädt, zweiter Lauf überspringt.
+- Download in `tiles.mbtiles.part`, Größe gegen Content-Length geprüft, dann atomar umbenannt. Eine alte gute Datei bleibt bei Abbruch erhalten.

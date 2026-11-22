@@ -56,12 +56,12 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 - [x] 2. Short share codes (6 digits, 15 min) can be guessed, no rate limit on `/accesses/auth/token` (`access.ts:118`). Add rate limit or longer codes.
 - [x] 3. `access.find` replaces the organisation filter when `operationId` is given (`access.ts:136-140`). Other organisations' share entries are visible. Merge filters instead.
 - [x] 4. Journal message numbers can repeat under concurrent saves (`journal-entry.ts:78-87`, `messageNumber` not unique). Add per-operation advisory lock in the transaction.
-- [ ] 5. Map state flag cleared after `await` loses the last edits (`state/operation.ts:145-158`). Clear the flag before the save, restore on error.
+- [x] 5. Map state flag cleared after `await` loses the last edits (`state/operation.ts:145-158`). Clear the flag before the save, restore on error. (Flag vor dem Speichern gelöscht, Test: `map-state.test.ts`)
 - [ ] 6. Possible script injection: `contenteditable/address-token.blot.ts:13, 15` puts `value.address` into `innerHTML`. Use `textContent`. (Not verified in a browser.)
 
 ### Should fix
 - [ ] 7. Two timers save the map state (`index.ts:33` every 30 s, cron every 15 s). Remove the `setInterval`.
-- [~] 8. (teilweise: Rate-Limit und Access-Filter getestet, 4 Unit-Tests via `npm run test:unit` in packages/server; offen: Journal-Nummern und Map-Flag) Server has no tests. Add one small test each for: token type check, list filter keeps organisation, journal number not repeated, map flag after change.
+- [x] 8. Tests: Access-Filter, Rate-Limit, Journal-Nummern, Map-Flag (`npm run test:unit` in packages/server, 12 Tests).
 - [ ] 9. `accessControl.ts:387` `entry.public` crashes on unknown IDs (500 instead of 403). Use `entry?.public`.
 - [ ] 10. Journal update crashes on unknown IDs (`journal-entry.ts:158, 173`). Return 404 when entry is null.
 - [x] 11. Postgres (55432) and pgAdmin (7050) are published on all interfaces in `zskarte/docker-compose.yml`. Bind to `127.0.0.1`.

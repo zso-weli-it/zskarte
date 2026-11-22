@@ -172,3 +172,6 @@ Nicht geprüft: Produktiv-Server (Secrets, Labels anderer Apps, Strapi-Rollen f�
 - [x] Canvas2D-Hinweis: Ursache OpenLayers `hitdetect.js` (Hit-Canvas ohne `willReadFrequently`). Fix als patch-package-Patch `zskarte/patches/ol+10.11.0.patch`, im App-Image vor `npm ci` kopiert. Geprüft: Konsole beim Mausbewegen über die Karte ohne Warnung (Test lokal, nicht im Repo).
 
 - Stand geprüft: `@strapi/strapi` `latest` ist 5.63.0 (npm dist-tag). Ein Strapi-Upgrade löst die Warnungen also nicht. Verbleibend nur `overrides` oder Warten auf Strapi-Updates der Abhängigkeiten (`glob@7`, `@koa/router@12`, `node-abort-controller`, `rimraf`, `inflight`).
+
+## OpenLayers-Patch (Pflege)
+- [ ] Bei jedem Upgrade von `ol` (aktuell 10.11.0): `zskarte/patches/ol+10.11.0.patch` prüfen und neu erzeugen. Bricht der Build bei `patch-package` ab, ist der Patch nicht mehr passend.

@@ -37,7 +37,6 @@ Stand: 2026-11-22. Erledigtes ist kurz zusammengefasst, Details stehen in der Gi
 - Strapi-Warnungen (`glob@7`, `@koa/router@12`, `node-abort-controller`, `rimraf`, `inflight`, `uuid@8`): Lösung über Strapi-Updates. Strapi 5.63.0 ist das aktuelle latest.
 - Offene Major-Updates (`@pdfme` 6, `react` 19, `typescript` 7, `uuid` 14 u. a.): nur bei Bedarf.
 - `zskarte.bat`: bleibt vorerst. Entscheidung, ob löschen oder synchron halten.
-- `zskarte2/` wird ignoriert.
 - Strapi-Warnung `admin.auth.options.expiresIn` stammt aus Strapi-Defaults.
 - `rc-color-picker` React-16-Peer-Konflikt: nicht blockierend.
 - Beispiel-Passwörter (`supersecret123`, `zskarte`, `postgres2`) bleiben laut Vorgabe, Nutzer ändern sie selbst.

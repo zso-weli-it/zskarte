@@ -3,6 +3,3 @@ shell.nix
 
 # deployment config with real hostnames (see deploy.env.example)
 deploy.env
-
-# local tileserver settings (see tileserver.env.example)
-tileserver.env

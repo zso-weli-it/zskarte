@@ -46,3 +46,5 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 - `rc-color-picker` (Strapi-Transitive) meldet einen React-16-Peer-Konflikt. Nicht blockierend, bleibt.
 - Nicht reproduziert: Im Vordergrund bricht `zskarte.sh start -b` bei fehlgeschlagenem Build korrekt ab. Im Hintergrund-Wrapper wurde Exit 0 angezeigt, Ursache offen.
 - Strapi-Admin-Build: Ursache für "UnsavedChangesModal is not exported" war ein veralteter `node_modules`-Ordner auf dem Windows-Dateisystem (Strapi 5.33.3 nested). Nach Löschen und Neugenerieren des Lockfiles sauber.
+- `zskarte.bat` dupliziert `zskarte.sh`, fehlt aber das `.env`-Bootstrapping. Entscheidung offen: löschen (du deployst mit .sh) oder synchron halten.
+- Docker: npm-Cache als BuildKit-Cache-Mount in Dockerfile.app/server (`--mount=type=cache,target=/root/.npm`).

@@ -8,7 +8,7 @@ ADD ./.npmrc /app/.npmrc
 ADD ./package.json /app/package.json
 ADD ./package-lock.json /app/package-lock.json
 ADD ./packages/app/package.json /app/packages/app/package.json
-RUN npm ci 
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 # Copy all files
 ADD --exclude=./packages/server . /app

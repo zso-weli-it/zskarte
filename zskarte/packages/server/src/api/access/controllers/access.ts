@@ -12,6 +12,20 @@ const { sanitize } = utils;
 
 const MINUTES_15 = 1000 * 60 * 15;
 
+// Short codes are only 6 digits, so guessing must be slow: max 10 wrong codes per IP per minute.
+// shortcut: in-memory per process, one server process assumed; use a shared store if scaled out.
+const MAX_FAILED_TOKEN_TRIES = 10;
+const FAILED_TOKEN_WINDOW_MS = 60 * 1000;
+const failedTokenTries = new Map<string, number[]>();
+
+const recentFailedTries = (ip: string) => {
+  const now = Date.now();
+  const recent = (failedTokenTries.get(ip) ?? []).filter((t) => now - t < FAILED_TOKEN_WINDOW_MS);
+  if (recent.length) failedTokenTries.set(ip, recent);
+  else failedTokenTries.delete(ip);
+  return recent;
+};
+
 const sanitizeUser = (user, ctx) => {
   //return sanitize.contentAPI.output(user, strapi.getModel('plugin::users-permissions.user'), { auth }) as Promise<User>;
   // there is no ctx.state.auth available in this context (in strapi.requestContext.get();)
@@ -42,6 +56,10 @@ export default factories.createCoreController('api::access.access', ({ strapi })
     if (!accessToken) return ctx.badRequest('No access token provided');
     // only plain strings: an object like {"$ne": ""} would match any row in the filter below
     if (typeof accessToken !== 'string') return ctx.badRequest('Invalid access token');
+    if (recentFailedTries(ctx.ip).length >= MAX_FAILED_TOKEN_TRIES) {
+      ctx.status = 429;
+      return { error: { status: 429, message: 'Too many wrong codes, try again in a minute' } };
+    }
 
     const { jwt } = strapi.plugins['users-permissions'].services;
 
@@ -55,7 +73,10 @@ export default factories.createCoreController('api::access.access', ({ strapi })
     })) as Access[];
     const access = _.first(accesses);
 
-    if (!access) return ctx.unauthorized('Invalid access token');
+    if (!access) {
+      failedTokenTries.set(ctx.ip, [...recentFailedTries(ctx.ip), Date.now()]);
+      return ctx.unauthorized('Invalid access token');
+    }
     if (!access.active) return ctx.unauthorized('Access is not active anymore');
     if (access.expiresOn && new Date(access.expiresOn).getTime() < Date.now())
       return ctx.unauthorized('Access is not active anymore');

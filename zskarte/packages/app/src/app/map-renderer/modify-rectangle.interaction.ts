@@ -80,7 +80,7 @@ export class ModifyRectangle extends Modify {
       if (geometry instanceof Polygon) {
         this.modifyFeature = features[0] as Feature<Polygon>;
         this.modifyGeometry = geometry;
-        this.findModifiedPoint(event.mapBrowserEvent);
+        this.findModifiedPoint(event.mapBrowserEvent!);
         if (this.movePointConf === null) {
           this.getMap()!.once('pointermove', this.findModifiedPoint.bind(this));
         }
@@ -92,7 +92,7 @@ export class ModifyRectangle extends Modify {
   private endChange(event: ModifyEvent) {
     this.getMap()!.un('pointermove', this.updatePointsBinding);
     if (this.modifyGeometry && this.movePointConf) {
-      this.adjustPoints(event.mapBrowserEvent.coordinate, this.modifyGeometry, true, this.movePointConf);
+      this.adjustPoints(event.mapBrowserEvent!.coordinate, this.modifyGeometry, true, this.movePointConf);
     }
     this.dispatchEvent({
       type: 'modifyrectangleend',

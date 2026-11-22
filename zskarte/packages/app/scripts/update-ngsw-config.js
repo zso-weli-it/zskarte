@@ -48,6 +48,8 @@ function extractChangelogForVersion(changelogPath, version) {
 }
 
 const changelogContent = extractChangelogForVersion('../../CHANGELOG.md', plainVersion);
+// served as /assets/CHANGELOG.md (Angular forbids assets outside the workspace root)
+fs.copyFileSync('../../CHANGELOG.md', 'src/assets/CHANGELOG.md');
 
 ngswConfig.appData = {
   version,

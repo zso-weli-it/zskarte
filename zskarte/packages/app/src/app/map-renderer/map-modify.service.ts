@@ -87,7 +87,7 @@ export class MapModifyService {
         this._select.updateVertexPoint(this._modify['vertexFeature_'].getGeometry().getCoordinates());
         const type = element?.element?.elementState?.type;
         const symbolCoordinates = DrawStyle.getIconCoordinates(feature, _renderer.getView().getResolution() ?? 1)[0];
-        const modifyCoordinates = e.mapBrowserEvent.coordinate;
+        const modifyCoordinates = e.mapBrowserEvent?.coordinate;
         const toggleRotate =
           type === ZsMapDrawElementStateType.SYMBOL && areCoordinatesEqual(symbolCoordinates, modifyCoordinates);
         this._overlay.toggleEditButtons(true, toggleRotate);

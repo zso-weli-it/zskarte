@@ -285,8 +285,8 @@ export class MapPrintService {
     const scaleResolution =
       scale / getPointResolution(this._renderer.getView().getProjection(), printState.dpi / MM_PER_INCHES, printCenter);
     this._renderer.getScaleLine().setDpi(printState.dpi);
-    this._renderer.getMap().getTargetElement().style.width = `${width}px`;
-    this._renderer.getMap().getTargetElement().style.height = `${height}px`;
+    this._renderer.getMap().getTargetElement()!.style.width = `${width}px`;
+    this._renderer.getMap().getTargetElement()!.style.height = `${height}px`;
     this._renderer.getMap().updateSize();
     this._renderer
       .getMap()
@@ -327,8 +327,8 @@ export class MapPrintService {
   private _resetPrintViewSize(printState) {
     //reset normal map size / settings
     this._renderer.getScaleLine().setDpi(printState.backupDpi);
-    this._renderer.getMap().getTargetElement().style.width = '';
-    this._renderer.getMap().getTargetElement().style.height = '';
+    this._renderer.getMap().getTargetElement()!.style.width = '';
+    this._renderer.getMap().getTargetElement()!.style.height = '';
     this._renderer.getMap().updateSize();
     this._renderer.getView().setResolution(printState.backupResolution);
     document.body.style.cursor = 'auto';

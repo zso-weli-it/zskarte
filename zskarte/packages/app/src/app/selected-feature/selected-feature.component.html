@@ -62,7 +62,7 @@
                 <div class="reportNumber">
                   <div>{{ i18n.get('reportNumber') }}</div>
                   <mat-chip-grid #reportNumberChips [ngModel]="drawElement['reportNumber']">
-                    @for (reportNumber of drawElement.reportNumber ?? []; track reportNumber) {
+                    @for (reportNumber of $any(drawElement.reportNumber ?? []); track reportNumber) {
                       <mat-chip-row (click)="openMessage(reportNumber)" class="report-number-chip">
                         {{ reportNumber }}
                       </mat-chip-row>
@@ -92,7 +92,7 @@
                 <mat-form-field appearance="outline">
                   <mat-label>{{ i18n.get('reportNumber') }}</mat-label>
                   <mat-chip-grid #reportNumberChips [ngModel]="drawElement['reportNumber']">
-                    @for (reportNumber of drawElement.reportNumber ?? []; track reportNumber) {
+                    @for (reportNumber of $any(drawElement.reportNumber ?? []); track reportNumber) {
                       <mat-chip-row
                         (removed)="removeReportNumber(reportNumber, drawElement)"
                         (click)="openMessage(reportNumber)"

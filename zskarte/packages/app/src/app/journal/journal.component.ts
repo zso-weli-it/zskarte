@@ -120,7 +120,7 @@ export class JournalComponent implements AfterViewInit {
   outgoingFilter = false;
   decisionFilter = false;
   eingangFilter = false;
-  private fuse: Fuse<JournalEntry> = new Fuse([], {
+  private fuse: Fuse<JournalEntry> = new Fuse<JournalEntry>([], {
     includeScore: true,
     keys: ['messageSubject', 'messageContent', 'decision'],
     ignoreLocation: true,

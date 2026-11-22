@@ -94,3 +94,16 @@ Audit lean: −60 lines, −2 dependencies possible.
 
 ## Finding 6 (XSS) – Test
 - [ ] `zskarte/packages/app/tests/journal-address-xss.spec.ts` reproduziert den Fehler: aktuell FAILS (Payload läuft, `window.__xss === 1`). Nach dem Fix (`textContent` in `address-token.blot.ts`) muss der Test grün werden.
+
+## Python (searchserv)
+- [x] Sprung auf Python 3.14: `searchserv/Dockerfile` (`python:3.14` Build, `python:3.14-slim-trixie` Laufzeit) und `searchserv-db-init/Dockerfile` (`python:3.14-slim-bookworm`). Getestet: Such-API läuft auf 3.14.10, Loader-Image baut.
+- [ ] Sprung auf Python 3.15 (nicht gemacht, eigener Schritt):
+  - `python:3.15-slim-trixie` ist verfügbar (3.15.2).
+  - Gepinnte Pakete haben kein Wheel für 3.15: `httptools` 0.9.0, `MarkupSafe` 3.0.4, `orjson` 3.13.0, `PyYAML` 6.0.4, `ujson` 6.1.0, `uvloop` 0.23.0, `pydantic-core` (2.46.4 hängt an `pydantic` 2.13.4, nötig ist 2.50.5 mit `pydantic` 2.14.4), `typing_extensions` 4.16.0, `pydantic-settings` 2.16.3, `typing-inspection`.
+  - Vorschlag für die Pins liegt in `C:\Users\patrick\AppData\Local\Temp\py315-final.txt` (Dry-Run aufgelöst, nicht gebaut).
+  - Fehlt noch: Build der Such-API auf 3.15 und Test der Endpunkte.
+
+## Erkenntnisse Python
+- Python 3.13 ist laut PEP 719 ab Oktober 2026 nur noch im Security-Modus (keine Bugfixes mehr). 3.14 ist die aktuelle Empfehlung.
+- Alle Pins aus `searchserv/requirements.txt` haben Wheels für 3.14.10 (Dry-Run mit `--only-binary`).
+- `searchserv-db-init/requirements.txt` war veraltet (FastAPI 0.115 und weitere Pakete, die der Loader nicht importiert). Auf `psycopg==3.3.4` reduziert, das ist die einzige Abhängigkeit des Loaders.

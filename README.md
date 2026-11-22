@@ -129,6 +129,41 @@ docker exec offlinekarte-search-db psql -U postgres -tAc "select version();"
 docker exec offlinekarte-search-db psql -U postgres -tAc "select postgis_full_version();"
 ```
 
+### DB Migration (from the old installation with PostgreSQL 16)
+
+The old setup (commit `6947bc4`) ran PostgreSQL 16.3 with a bind mount in `zskarte/data/postgresql`. PostgreSQL 18 cannot read that data directory, so the data is moved with a dump and restore. Make the backup first and keep it until the new installation is verified.
+
+1. **Backup** (old installation still running):
+
+   ```bash
+   docker exec postgresql-zskarte pg_dump -U postgres -Fc zskarte > zskarte-pg16.dump
+   ```
+
+   Also copy `zskarte/packages/server/public/uploads` if it exists (not in Git).
+
+2. **Stop the old installation**, keep its `data/` folder as fallback.
+
+3. **Start the new version** (empty database, example data from `init.sql`):
+
+   ```bash
+   ./zskarte.sh init
+   ./zskarte.sh start -b
+   ```
+
+4. **Replace the database content with the backup.** Stop the backend first so nothing reads the tables:
+
+   ```bash
+   docker stop server-zskarte
+   docker exec -i postgresql-zskarte pg_restore -U postgres -d zskarte --clean --if-exists < zskarte-pg16.dump
+   docker start server-zskarte
+   ```
+
+   Strapi applies its schema migrations (5.33 to 5.63) on this start. They cannot be reverted easily, so the dump from step 1 is the only fallback.
+
+5. **Check:** log in to the Strapi admin, count the journal entries, open a map with signs.
+
+> ⚠️ `pg_restore --clean` replaces the objects in database `zskarte`. Do not store anything else there.
+
 ### Informations for developer
 
 More informations for developers for internal logic / tasks can be found in [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md).

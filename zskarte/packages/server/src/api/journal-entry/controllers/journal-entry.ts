@@ -33,7 +33,10 @@ export default factories.createCoreController('api::journal-entry.journal-entry'
     const sanitizedInputData = (await this.sanitizeInput(body.data, ctx)) as any;
 
     const { db } = strapi;
-    return await db.transaction(async () => {
+    return await db.transaction(async ({ trx }) => {
+      // serialise number assignment per operation: concurrent saves would otherwise read the same max number
+      // (messageNumber has no unique index). The lock is released automatically at commit/rollback.
+      await trx.raw('select pg_advisory_xact_lock(hashtext(?))', [`journal:${sanitizedInputData.operation}`]);
       async function countOcurrence(messageNumber: number) {
         return await strapi.documents('api::journal-entry.journal-entry').count({
           filters: {

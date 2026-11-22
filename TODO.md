@@ -55,7 +55,7 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 - [x] 1. Token endpoint trusts any JSON value: `packages/server/src/api/access/controllers/access.ts:41, 47`. Reject non-string `accessToken`. (Not run yet, check with one request first.)
 - [x] 2. Short share codes (6 digits, 15 min) can be guessed, no rate limit on `/accesses/auth/token` (`access.ts:118`). Add rate limit or longer codes.
 - [x] 3. `access.find` replaces the organisation filter when `operationId` is given (`access.ts:136-140`). Other organisations' share entries are visible. Merge filters instead.
-- [ ] 4. Journal message numbers can repeat under concurrent saves (`journal-entry.ts:78-87`, `messageNumber` not unique). Add per-operation advisory lock in the transaction.
+- [x] 4. Journal message numbers can repeat under concurrent saves (`journal-entry.ts:78-87`, `messageNumber` not unique). Add per-operation advisory lock in the transaction.
 - [ ] 5. Map state flag cleared after `await` loses the last edits (`state/operation.ts:145-158`). Clear the flag before the save, restore on error.
 - [ ] 6. Possible script injection: `contenteditable/address-token.blot.ts:13, 15` puts `value.address` into `innerHTML`. Use `textContent`. (Not verified in a browser.)
 
@@ -86,3 +86,4 @@ Audit lean: −60 lines, −2 dependencies possible.
 - [x] 1. Token-Endpunkt: nur Strings akzeptiert (`access.ts`).
 - [x] 2. Share-Code-Ratenbegrenzung: max. 10 falsche Codes pro IP und Minute (`access.ts`, in-memory).
 - [x] 3. `access.find`: Operation-Filter wird per `$and` zum Organisations-/Share-Filter addiert statt ihn zu ersetzen.
+- [x] 4. Journal-Nummern: pro Operation eine Transaktions-Sperre (`pg_advisory_xact_lock`) beim Anlegen (`journal-entry.ts`). Update-Pfad noch ohne Sperre.

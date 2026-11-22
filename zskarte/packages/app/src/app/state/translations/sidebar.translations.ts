@@ -316,9 +316,9 @@ export const SIDEBAR_TRANSLATIONS = {
     fr: 'Vous êtes hors ligne',
   },
   loginUnavailable: {
-    de: 'Login ist aktuell nicht verfügbar. Bitte versuche es in einigen Minuten nochmals oder kontaktiere den Administrator.',
-    en: 'Login is currently unavailable. Please try again in a few minutes or contact the administrator.',
-    fr: "La connexion est actuellement indisponible. Veuillez réessayer dans quelques minutes ou contacter l'administrateur.",
+    de: 'Login ist aktuell nicht verfügbar. Bitte versuche es in einigen Minuten nochmals oder kontaktiere den Administrator. Lade die Seite danach mit CTRL + F5 neu.',
+    en: 'Login is currently unavailable. Please try again in a few minutes or contact the administrator. Then reload the page with CTRL + F5.',
+    fr: "La connexion est actuellement indisponible. Veuillez réessayer dans quelques minutes ou contacter l'administrateur. Rechargez ensuite la page avec CTRL + F5.",
   },
   currentLocation: {
     de: 'Aktuelle position',

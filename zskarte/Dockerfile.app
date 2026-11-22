@@ -22,7 +22,6 @@ ARG ZSK_TILE_URL
 ARG ZSK_ORG_NAME
 # read by scripts/update-ngsw-config.js (appData version for the service worker)
 ARG COMMIT_SHA
-ARG ZSK_VERSION_PREFIX
 RUN node packages/app/scripts/write-environment.js
 
 # npm lint

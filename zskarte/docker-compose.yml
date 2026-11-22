@@ -62,7 +62,6 @@ services:
         ZSK_TILE_URL: ${ZSK_TILE_URL:-http://localhost:8080/styles/osm-bright}
         ZSK_ORG_NAME: ${ZSK_ORG_NAME:-}
         COMMIT_SHA: ${COMMIT_SHA:-}
-        ZSK_VERSION_PREFIX: ${ZSK_VERSION_PREFIX:-ZSKarte}
     container_name: app-zskarte
     ports: [ 4300:80 ]
     restart: unless-stopped

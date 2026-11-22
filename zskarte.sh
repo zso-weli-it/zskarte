@@ -11,7 +11,6 @@ set +a
 
 # public URLs and name of the frontend, baked into the app image at build time
 export ZSK_ORG_NAME="${ZSK_ORG_NAME:-}"
-export ZSK_VERSION_PREFIX="${ZSK_VERSION_PREFIX:-ZSKarte}"
 # app version for the service worker: hash of the app folder, so a new version shows only when the app changes
 export COMMIT_SHA="$(git rev-parse --short=7 HEAD:zskarte/packages/app 2>/dev/null || echo unknown)"
 if [ "${ZSK_TRAEFIK:-false}" = "true" ]; then

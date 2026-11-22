@@ -181,20 +181,29 @@ The old setup (commit `6947bc4`) ran PostgreSQL 16.3 with a bind mount in `zskar
    ./zskarte.sh start -b
    ```
 
-4. **Replace the database content with the backup.** Stop the backend first so nothing reads the tables:
+4. **Restore the backup into an empty database.** A restore with `--clean` into the database that already holds the example schema fails on foreign keys (`cannot drop constraint ... because other objects depend on it`). Recreate the database first, then restore:
 
    ```bash
+   # stop the backend so nothing reads the tables
    docker stop server-zskarte
+
+   # empty database (FORCE closes open connections, e.g. from pgAdmin)
+   docker exec -e PGPASSWORD=supersecret123 postgresql-zskarte psql -U postgres -w      -c "DROP DATABASE IF EXISTS zskarte WITH (FORCE);"      -c "CREATE DATABASE zskarte;"
+
+   # restore into the empty database (no --clean needed)
    docker cp ./zskarte-pg16.dump postgresql-zskarte:/tmp/zskarte-pg16.dump
-   docker exec -e PGPASSWORD=supersecret123 postgresql-zskarte pg_restore -U postgres -w -d zskarte --clean --if-exists /tmp/zskarte-pg16.dump
+   docker exec -e PGPASSWORD=supersecret123 postgresql-zskarte pg_restore -U postgres -w -d zskarte /tmp/zskarte-pg16.dump
+
+   # start the backend again; Strapi applies its schema migrations (5.33 to 5.63) on this start
    docker start server-zskarte
+   docker logs -f --tail 30 server-zskarte
    ```
 
-   Strapi applies its schema migrations (5.33 to 5.63) on this start. They cannot be reverted easily, so the dump from step 1 is the only fallback.
+   Wait for `Strapi started successfully`. The dump from step 1 remains the only fallback, the migrations cannot be reverted easily.
 
 5. **Check:** log in to the Strapi admin, count the journal entries, open a map with signs.
 
-> ⚠️ `pg_restore --clean` replaces the objects in database `zskarte`. Do not store anything else there.
+> ⚠️ The step above drops and recreates database `zskarte`. Everything in it is replaced by the backup, so do not store anything else there.
 
 ### Informations for developer
 

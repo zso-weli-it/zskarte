@@ -145,3 +145,25 @@ Engine-Ranges: Strapi 5.63 erlaubt `>=22.0.0 <=26.x`, Angular 21 verlangt `^20.1
 - [x] README-Abschnitt "Configuration (deploy.env)".
 - [x] Auf dem Produktivserver getestet: `deploy.env` mit `ZSK_TRAEFIK=true`, `./zskarte.sh start -b`, Routen funktionieren.
 - [ ] Das separate Deployment-Script des Servers (schreibt `environment.prod.ts`) ablösen, sobald der Test grün ist.
+
+## Audit 2 (ponytail-audit, nach Produktiv-Deployment)
+### Must fix
+- [ ] A1. Share-Login-Ratenbegrenzung sperrt alle Nutzer hinter Traefik (`access.ts:51, 69`). Fix: `proxy: true` in `packages/server/config/server.ts`, danach 11-Versuche-Test erneut.
+- [ ] A2. Beispiel-Secrets aus `.env.example` werden auf dem Server kopiert (`zskarte.sh`). Fix: `zskarte.sh` erzeugt Zufallswerte (z. B. `zskarte/gen-server-env.sh`), dann prüfen, dass die Server-`.env` keine Beispielwerte mehr enthält.
+- [ ] A3. Offener Proxy `GET /api/proxy?url=` (`api/proxy/`). Fix: Route, Controller und `axios` entfernen (nur dort genutzt). Frontend nutzt ihn nicht.
+- [ ] A4. XSS über Adress-Token im Editor (`contenteditable/address-token.blot.ts:13, 15`). Fix: `textContent` statt `innerHTML`. Test `journal-address-xss.spec.ts` muss danach grün sein.
+
+### Should fix
+- [ ] A5. Journal-Nummer beim Ändern (`journal-entry.ts`, `update`) ohne Sperre. Fix: gleiche `pg_advisory_xact_lock` wie beim Anlegen.
+- [ ] A6. DB-Passwort-Fallback `supersecret123` in `packages/server/config/database.ts:11`. Fix: Default entfernen, Start schlägt ohne Variable fehl.
+- [ ] A7. Deploy-Konfiguration ohne Prüfung (`zskarte.sh`, Traefik-Overrides). Leere Variable gibt `Host(``)`. Fix: `zskarte.sh` bricht ab, wenn `ZSK_TRAEFIK=true` und eine Pflichtvariable leer ist.
+
+### Nice to have
+- [ ] A8. Socket.io erlaubt alle Origins (`state/socketio.ts`, `origin: '*'`). Auf App-Host einschränken.
+- [ ] A9. Rohe User-Eingaben in Logs (`accessControl.ts`, `logAccessViolation`). Escapen.
+- [ ] A10. Rate-Limit-Map wächst mit vielen IPs (`access/lib/failed-try-limiter.ts`). Alte Einträge bei jedem Aufruf entfernen.
+- [ ] A11. `write-environment.js` schreibt Werte ohne Escaping. `JSON.stringify` verwenden.
+
+Lean: −70 Zeilen, −1 Dependency (`axios` nach Entfernen von `/proxy`). `zskarte.bat` (−45 Zeilen) bleibt Entscheidung.
+
+Nicht geprüft: Produktiv-Server (Secrets, Labels anderer Apps, Strapi-Rollen für `/proxy`), die meisten Angular-Komponenten, Migrationen, `mapserv`.

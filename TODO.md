@@ -61,7 +61,7 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 
 ### Should fix
 - [ ] 7. Two timers save the map state (`index.ts:33` every 30 s, cron every 15 s). Remove the `setInterval`.
-- [ ] 8. Server has no tests. Add one small test each for: token type check, list filter keeps organisation, journal number not repeated, map flag after change.
+- [~] 8. (teilweise: Rate-Limit und Access-Filter getestet, 4 Unit-Tests via `npm run test:unit` in packages/server; offen: Journal-Nummern und Map-Flag) Server has no tests. Add one small test each for: token type check, list filter keeps organisation, journal number not repeated, map flag after change.
 - [ ] 9. `accessControl.ts:387` `entry.public` crashes on unknown IDs (500 instead of 403). Use `entry?.public`.
 - [ ] 10. Journal update crashes on unknown IDs (`journal-entry.ts:158, 173`). Return 404 when entry is null.
 - [x] 11. Postgres (55432) and pgAdmin (7050) are published on all interfaces in `zskarte/docker-compose.yml`. Bind to `127.0.0.1`.

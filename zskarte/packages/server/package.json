@@ -14,7 +14,8 @@
     "regenerate": "strapi ts:generate-types",
     "export": "config-sync export --yes --type user-role",
     "import": "config-sync import --yes --type user-role",
-    "strapi": "strapi"
+    "strapi": "strapi",
+    "test:unit": "tsx --test test/unit/*.test.ts"
   },
   "dependencies": {
     "@fast-csv/format": "^5.0.5",

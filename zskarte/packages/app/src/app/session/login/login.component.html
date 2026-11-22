@@ -108,5 +108,9 @@
       }
     }
   </mat-card>
-  <div class="build-version">{{ buildVersion }}</div>
+  @if (gitUrl) {
+    <a class="build-version" [href]="gitUrl" target="_blank" rel="noopener">{{ buildVersion }}</a>
+  } @else {
+    <div class="build-version">{{ buildVersion }}</div>
+  }
 </form>

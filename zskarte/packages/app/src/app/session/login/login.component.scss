@@ -108,11 +108,14 @@ mat-card:first-child {
   font-size: 48px;
 }
 
+a.build-version {
+  color: inherit;
+}
+
 .build-version {
   position: fixed;
   right: 8px;
   bottom: 6px;
   font-size: 11px;
   opacity: 0.6;
-  pointer-events: none;
 }

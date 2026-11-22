@@ -23,6 +23,7 @@ export const environment = {
   showNavLink: true,
   buildVersion: '${buildVersion}',
   appUrl: '${value('ZSK_APP_URL', 'http://localhost:4300')}',
+  gitUrl: '${value('GIT_URL', '')}',
 };
 `;
 

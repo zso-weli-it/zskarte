@@ -41,6 +41,7 @@ import { IZso, IZsMapOrganization } from '@zskarte/types';
 })
 export class LoginComponent implements OnDestroy {
   readonly buildVersion = environment.buildVersion;
+  readonly gitUrl = environment.gitUrl;
   session = inject(SessionService);
   i18n = inject(I18NService);
   private _api = inject(ApiService);

@@ -97,7 +97,7 @@ Audit lean: −60 lines, −2 dependencies possible.
 
 ## Python (searchserv)
 - [x] Sprung auf Python 3.14: `searchserv/Dockerfile` (`python:3.14` Build, `python:3.14-slim-trixie` Laufzeit) und `searchserv-db-init/Dockerfile` (`python:3.14-slim-bookworm`). Getestet: Such-API läuft auf 3.14.10, Loader-Image baut.
-- [ ] Sprung auf Python 3.15 (nicht gemacht, eigener Schritt):
+- [x] Sprung auf Python 3.15 umgesetzt (Such-Service und Loader). Requirements vollständig gepinnt (43 Pakete). Getestet: Such-API und Loader-Build auf Python 3.15.2.
   - `python:3.15-slim-trixie` ist verfügbar (3.15.2).
   - Gepinnte Pakete haben kein Wheel für 3.15: `httptools` 0.9.0, `MarkupSafe` 3.0.4, `orjson` 3.13.0, `PyYAML` 6.0.4, `ujson` 6.1.0, `uvloop` 0.23.0, `pydantic-core` (2.46.4 hängt an `pydantic` 2.13.4, nötig ist 2.50.5 mit `pydantic` 2.14.4), `typing_extensions` 4.16.0, `pydantic-settings` 2.16.3, `typing-inspection`.
   - Vorschlag für die Pins liegt in `C:\Users\patrick\AppData\Local\Temp\py315-final.txt` (Dry-Run aufgelöst, nicht gebaut).

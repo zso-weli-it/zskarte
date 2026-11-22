@@ -1,4 +1,4 @@
-FROM python:3.14 AS build
+FROM python:3.15 AS build
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
 	pip install -r requirements.txt
 
-FROM python:3.14-slim-trixie
+FROM python:3.15-slim-trixie
 
 WORKDIR /app
 

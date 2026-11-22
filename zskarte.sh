@@ -9,8 +9,8 @@ set -a
 . ./deploy.env
 set +a
 
-# public URLs and labels of the frontend, baked into the app image at build time
-export ZSK_SEARCH_LABEL="${ZSK_SEARCH_LABEL:-Lokale Suche}"
+# public URLs and name of the frontend, baked into the app image at build time
+export ZSK_ORG_NAME="${ZSK_ORG_NAME:-}"
 if [ "${ZSK_TRAEFIK:-false}" = "true" ]; then
     export ZSK_API_URL="https://${ZSK_API_HOST}"
     export ZSK_SEARCH_URL="https://${ZSK_SEARCH_HOST}/search/"

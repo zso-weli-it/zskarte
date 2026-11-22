@@ -19,7 +19,7 @@ ADD --exclude=./packages/server . /app
 ARG ZSK_API_URL
 ARG ZSK_SEARCH_URL
 ARG ZSK_TILE_URL
-ARG ZSK_SEARCH_LABEL
+ARG ZSK_ORG_NAME
 RUN node packages/app/scripts/write-environment.js
 
 # npm lint

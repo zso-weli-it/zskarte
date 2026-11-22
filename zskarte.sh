@@ -11,6 +11,8 @@ set +a
 
 # public URLs and name of the frontend, baked into the app image at build time
 export ZSK_ORG_NAME="${ZSK_ORG_NAME:-}"
+# app version for the service worker: hash of the app folder, so a new version shows only when the app changes
+export COMMIT_SHA="$(git rev-parse --short=7 HEAD:zskarte/packages/app 2>/dev/null || echo unknown)"
 if [ "${ZSK_TRAEFIK:-false}" = "true" ]; then
     export ZSK_API_URL="https://${ZSK_API_HOST}"
     export ZSK_SEARCH_URL="https://${ZSK_SEARCH_HOST}/search/"

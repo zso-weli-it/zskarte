@@ -6,7 +6,7 @@ services:
       - pgdata-zskarte:/var/lib/postgresql
       - ./packages/server/init:/docker-entrypoint-initdb.d:ro
     ports:
-      - 55432:5432
+      - 127.0.0.1:55432:5432
     environment:
       - POSTGRES_PASSWORD=supersecret123
       - POSTGRES_DB=zskarte
@@ -27,7 +27,7 @@ services:
       - pgadmin-zskarte:/var/lib/pgadmin
       - ./packages/server/init/servers.json:/pgadmin4/servers.json:ro
     ports:
-      - 7050:80
+      - 127.0.0.1:7050:80
     environment:
       - PGADMIN_DEFAULT_EMAIL=info@zskarte.ch
       - PGADMIN_DEFAULT_PASSWORD=zskarte

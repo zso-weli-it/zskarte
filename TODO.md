@@ -65,7 +65,7 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 - [x] 9. `accessControl.ts:387` `entry.public` crashes on unknown IDs (500 instead of 403). Use `entry?.public`.
 - [x] 10. Journal update crashes on unknown IDs (`journal-entry.ts:158, 173`). Return 404 when entry is null.
 - [x] 11. Postgres (55432) and pgAdmin (7050) are published on all interfaces in `zskarte/docker-compose.yml`. Bind to `127.0.0.1`.
-- [ ] 12. Map state is serialised and hashed on every change (`state/operation.ts:109-111`). Compare references from `applyPatches` instead.
+- [x] 12. Map state is serialised and hashed on every change (`state/operation.ts:109-111`). Compare references from `applyPatches` instead.
 - [ ] 13. `state/maplayer.ts` (1352 lines) mixes five jobs. Split by job, no logic change.
 
 ### Nice to have

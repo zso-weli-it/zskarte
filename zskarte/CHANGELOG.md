@@ -1,60 +1,37 @@
 # Changelog
 
-## Unreleased (fork: offlinekarte)
+## Unreleased (fork)
 
-Fork-Änderungen seit dem Init-Stand (`6947bc4`). Die Versionsnummer wird noch festgelegt.
-
-### Breaking changes
-- Konfiguration über `deploy.env` (Domains, Traefik, Frontend-URLs, Suchlabel, Versionspräfix). Das separate Deployment-Skript, das `environment.prod.ts` schreibt, wird nicht mehr gebraucht.
+### Breaking
 - Node.js 26.13.1 (LTS) für App- und Server-Image.
-- PostgreSQL 18.1 statt Bitnami-PostgreSQL 16. Bestehende Datenbanken müssen per Dump und Restore übernommen werden (siehe README, Abschnitt „DB Migration“).
-- Strapi 5.63.0 (vorher 5.33.x, gleiche Major-Version, Schema-Migrationen beim ersten Start).
+- PostgreSQL 18.1 statt 16.3: Bestehende Datenbanken per Dump und Restore übernehmen (README, „DB Migration“).
+- Strapi 5.63.0 (vorher 5.33.x), Schema-Migrationen beim ersten Start.
 
-### Deployment und Betrieb
-- Traefik-Betrieb über `ZSK_TRAEFIK=true`: Labels und Netzwerk werden aus den Compose-Overrides gesetzt, direkte Host-Ports entfallen.
-- Postgres und pgAdmin nur noch auf `127.0.0.1`.
-- Postgres und pgAdmin mit Named Volumes statt Bind-Mounts (funktioniert unter WSL und Windows).
-- `zskarte.sh start` legt fehlende `.env`-Dateien aus den Beispielen an.
-- Tileserver-Init lädt die 1-GB-Karte nur bei geänderter Remote-Datei (ETag, Last-Modified, Größe) und ersetzt sie atomar.
-- Such-Service wartet per Healthcheck auf die Datenbank.
-- Python 3.15 für Such-Service und Loader (Requirements vollständig gepinnt).
-- Shell-Skripte auf LF normalisiert, `start -b` übernimmt das Flag jetzt.
+### Deployment
+- Traefik-Betrieb über Compose-Override (`docker-compose.traefik.yml`), Host-Ports entfallen.
+- Postgres und pgAdmin nur auf `127.0.0.1`, mit Named Volumes.
+- Frontend-URLs, Suchlabel und Versionsangabe als Build-Args.
+- Versionsangabe `ZSKarte_<commit>` für Login-Seite und Service Worker.
 
 ### Sicherheit
-- Share-Code-Login: Token-Endpunkt akzeptiert nur Text-Werte (kein JSON-Objekt als Filter).
-- Share-Code-Login: Ratenbegrenzung für falsche Codes (10 pro Minute). Bekannt: Hinter Traefik wirkt sie derzeit für alle Nutzer gemeinsam, siehe TODO (A1).
-- Access-Liste: Der Operation-Filter ersetzt den Organisations-Filter nicht mehr.
-- Zugriffskontrolle: kein 500 mehr bei unbekannten IDs auf öffentlichen Typen.
-- Such-API: `bbox` wird geprüft, ungültige Werte werden ignoriert.
+- Share-Code-Token: nur Text-Werte akzeptiert.
+- Share-Code-Ratenbegrenzung (10 falsche Codes pro Minute). Bekannt: hinter Traefik gilt sie für alle Nutzer gemeinsam.
+- Access-Liste: Operation-Filter ersetzt den Organisations-Filter nicht mehr.
 
-### Daten und Synchronisation
-- Journal: Nummernvergabe pro Operation mit Transaktions-Sperre (keine doppelten Nummern beim Anlegen).
-- Journal-Update: 404 statt 500 bei unbekannter ID.
-- Karten-Status: Änderungs-Flag wird vor dem Speichern gelöscht, Änderungen während des Speicherns gehen nicht mehr verloren.
-- Karten-Status: Änderungserkennung per Referenzvergleich statt Hash über den ganzen Zustand.
-- Doppelter Persist-Timer entfernt, der Cron-Job speichert alle 15 Sekunden.
-- Suche: Geo-Index auf Ortschaften wird jetzt benutzt.
+### Fehlerbehebungen
+- Journal: keine doppelten Nummern beim Anlegen, 404 statt 500 beim Ändern.
+- Karten-Status: Änderungen während des Speicherns gehen nicht mehr verloren.
+- Signaturen und Freigabelink auf http-Adressen.
+- Zugriffskontrolle: 403 statt 500 bei unbekannten IDs.
 
 ### Frontend
-- Signaturen und Freigabelink funktionieren auf http-Adressen (ohne `localhost`): kein `crypto.subtle` und kein `navigator.clipboard` mehr als Voraussetzung.
-- Suchfeld-Label konfigurierbar (`ZSK_ORG_NAME`, Anzeige „<Name> (lokale Suche)“).
-- Versionsangabe `ZSKarte_<commit>` auf der Login-Seite und im Service Worker (Hash des App-Ordners).
-- OpenLayers-Patch: Hit-Detection mit `willReadFrequently`, behebt die Canvas-Konsolenwarnung.
-- Nicht benötigte Abhängigkeiten entfernt (`ngx-indexed-db`, `@angular/platform-browser-dynamic`, doppeltes `wait-on`) und tote `test.ts` gelöscht.
+- Suchfeld-Label über `ZSK_ORG_NAME`.
+- OpenLayers-Patch: keine Canvas-Warnung in der Konsole.
+- Nicht genutzte Abhängigkeiten und tote `test.ts` entfernt.
 
-### Server-Code
-- `maplayer.ts` in Module nach Aufgaben aufgeteilt (Grenzen, Eingänge, Namen, Styles, Shared). Verhalten unverändert.
-- Unit-Tests für Ratenbegrenzung, Access-Filter, Journal-Nummern und Karten-Status (`npm run test:unit`).
-
-### Tests und Dokumentation
-- E2E-Test für den XSS-Fall im Adress-Token-Editor (bekannt: schlägt fehl, bis der Fix umgesetzt ist).
-- README: Azure-Abschnitt entfernt, Voraussetzungen und Installation auf `zskarte.sh` angepasst, Konfiguration über `deploy.env`, DB-Versionen, DB-Migration.
-
-### Bekannte offene Punkte
-- Adress-Token im Editor: Text wird als HTML interpretiert (Fix in Arbeit).
-- Offener Proxy-Endpunkt `/api/proxy` (wird entfernt).
-- Beispiel-Secrets in `.env.example` (Zufallswerte bei der Installation erzeugen).
-
+### Server
+- Kartenebenen-Code in Module nach Aufgaben aufgeteilt, Verhalten unverändert.
+- Unit-Tests für Ratenbegrenzung, Access-Filter, Journal-Nummern und Karten-Status.
 
 ## 6.0.2
 - Add Geodienste layers

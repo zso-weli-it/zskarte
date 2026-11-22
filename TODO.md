@@ -73,7 +73,7 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 - [x] 15. Remove duplicate `wait-on` from `packages/app/package.json:82`. Root copy stays. −1 dependency.
 - [x] 16. `zskarte.bat` duplicates `zskarte.sh` and misses the `.env` setup. Delete it or make it call the `.sh`. About −45 lines. → Entscheidung: `zskarte.bat` vorerst behalten (done)
 - [x] 17. Geo index on `ortschaften` uses `double precision`, the search query casts to `real`, so the index is never used. Change the cast in `searchserv/search.py`.
-- [ ] 18. Search `bbox` is not validated. Non-numbers cause a 500. Check all four values are numbers.
+- [x] 18. Search `bbox` is not validated. Non-numbers cause a 500. Check all four values are numbers.
 
 Audit left out (smaller): socket server allows origin `*`; raw user agents in logs.
 Audit lean: −60 lines, −2 dependencies possible.

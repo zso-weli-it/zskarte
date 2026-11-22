@@ -1,3 +1,4 @@
+import math
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from psycopg_pool import AsyncConnectionPool
@@ -159,9 +160,13 @@ async def func(type: str = "",
       sortbbox: bool = False,
       limit: int = 50):
     if bbox is not None:
-        bbox = bbox.split(',')
-        if len(bbox) != 4:
-            print("unexpected bbox size")
+        # only four finite numbers are allowed; anything else is ignored instead of failing in SQL
+        try:
+            bbox = [float(v) for v in bbox.split(',')]
+            if len(bbox) != 4 or not all(math.isfinite(v) for v in bbox):
+                raise ValueError("bbox needs four finite numbers")
+        except ValueError:
+            print("invalid bbox, ignored")
             bbox = None
             sortbbox = False
     limit = max(1, min(limit, 100))

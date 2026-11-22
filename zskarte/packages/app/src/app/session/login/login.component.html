@@ -80,13 +80,15 @@
               {{ i18n.get('back') }}
             </button>
           } @else {
-            <button
-              class="alternative-login-button"
-              mat-stroked-button
-              (click)="isLoginWithCodeEnabled = !isLoginWithCodeEnabled"
-            >
-              <span>{{ i18n.get('codeLogin') }}</span>
-            </button>
+            @if (codeLoginEnabled) {
+              <button
+                class="alternative-login-button"
+                mat-stroked-button
+                (click)="isLoginWithCodeEnabled = !isLoginWithCodeEnabled"
+              >
+                <span>{{ i18n.get('codeLogin') }}</span>
+              </button>
+            }
             @if (hasGuestUser) {
               <text-divider>{{ i18n.get('or') }}</text-divider>
               <button class="alternative-login-button" mat-stroked-button (click)="guestLogin()">

@@ -33,8 +33,30 @@ export class ShareDialogComponent {
   }
 
   async copyJoinLink() {
-    await navigator.clipboard.writeText(this.joinLink);
-    this._snackBar.open(this.i18n.get('copiedToClipboard'), this.i18n.get('ok'), { duration: 2000 });
+    if (await this.copyToClipboard(this.joinLink)) {
+      this._snackBar.open(this.i18n.get('copiedToClipboard'), this.i18n.get('ok'), { duration: 2000 });
+    }
+  }
+
+  // navigator.clipboard only exists on https and localhost; on http (e.g. an IP address) fall back to a hidden textarea
+  private async copyToClipboard(text: string): Promise<boolean> {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        // not allowed in this context, use the fallback below
+      }
+    }
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.select();
+    const copied = document.execCommand('copy');
+    area.remove();
+    return copied;
   }
 
   private generateQrCodeDataUrl(): Promise<string> {

@@ -315,6 +315,11 @@ export const SIDEBAR_TRANSLATIONS = {
     en: 'You are offline',
     fr: 'Vous êtes hors ligne',
   },
+  loginUnavailable: {
+    de: 'Login ist aktuell nicht verfügbar. Bitte versuche es in einigen Minuten nochmals oder kontaktiere den Administrator.',
+    en: 'Login is currently unavailable. Please try again in a few minutes or contact the administrator.',
+    fr: "La connexion est actuellement indisponible. Veuillez réessayer dans quelques minutes ou contacter l'administrateur.",
+  },
   currentLocation: {
     de: 'Aktuelle position',
     en: 'Current location',

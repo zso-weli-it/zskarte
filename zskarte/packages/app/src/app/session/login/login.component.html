@@ -1,4 +1,10 @@
 <form class="login-form">
+  @if (isOnline && organizationsUnavailable) {
+    <div class="login-warning" role="alert">
+      <mat-icon>warning</mat-icon>
+      <span>{{ i18n.get('loginUnavailable') }}</span>
+    </div>
+  }
   <mat-card>
     <button type="button" class="help-button" mat-icon-button (click)="openHelp()" [attr.aria-label]="i18n.get('help')" [title]="i18n.get('help')">
       <mat-icon>help</mat-icon>

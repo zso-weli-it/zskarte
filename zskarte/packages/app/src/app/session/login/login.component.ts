@@ -55,6 +55,7 @@ export class LoginComponent implements OnDestroy {
   public isLoginWithCodeEnabled = false;
   public joinCode = '';
   public isOnline = true;
+  public organizationsUnavailable = false;
   public hasGuestUser = false;
   public allowOfflineAccess = localStorage.getItem(ALLOW_OFFLINE_ACCESS_KEY);
   private _ngUnsubscribe = new Subject<void>();
@@ -70,7 +71,10 @@ export class LoginComponent implements OnDestroy {
 
   async ngOnInit() {
     const { error, result } = await this._api.get<IZsMapOrganization[]>('/api/organizations/forlogin');
-    if (error || !result) return;
+    if (error || !result) {
+      this.organizationsUnavailable = true;
+      return;
+    }
     const orgs: IZso[] = [];
     for (const org of result) {
       if (org.users?.length > 0 && org.users[0]?.username) {

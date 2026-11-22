@@ -134,7 +134,7 @@ Geprüft mit frischem `npm ci --ignore-scripts` im jeweiligen Node-Container:
 
 Engine-Ranges: Strapi 5.63 erlaubt `>=22.0.0 <=26.x`, Angular 21 verlangt `^20.19 || ^22.12 || >=24`. Node 24 und 26 liegen damit in beiden Ranges.
 
-- [ ] Empfehlung: Sprung auf Node 24 LTS (`node:24-bookworm-slim` bzw. `node:24-bookworm` für den App-Build). Node 22 bleibt Maintenance, das Ende ist 2027.
+- [x] Umgesetzt: Node 26.13.1 (LTS seit 26.13.0, EOL April 2029) in Dockerfile.app, Dockerfile.server, .nvmrc und engines. Build, Lint und Stack-Start grün; E2E 9/10, der rote Test ist XSS (A4), offen.
 - [ ] Node 26 als späterer Schritt, sobald Strapi und Angular es in der Praxis mit Build und Tests bestätigt haben. Die LTS-Einstufung von Node 26 vorher prüfen.
 - [ ] Vor dem Sprung: `npm run lint` und `npm run build` für App und Server im neuen Image, plus E2E-Tests.
 

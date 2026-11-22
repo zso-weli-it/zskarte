@@ -1436,23 +1436,14 @@ export class ZsMapStateService {
       if (!this.isHistoryMode()) {
         await this._sync.sendCachedMapStatePatches();
       }
-      const sha256 = async (str: string): Promise<string> => {
-        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-        return Array.prototype.map
-          .call(new Uint8Array(buf), (x) => `00${(x as number).toString(16)}`.slice(-2))
-          .join('');
-      };
       let operation = await this._operationService.getOperation(operationId);
       if (!operation?.mapState) {
         //on load error / offline, get back saved mapState to prevent "work" on history snapshot
         operation = this._session.getOperation();
       }
       if (operation?.mapState) {
-        const [oldDigest, newDigest] = await Promise.all([
-          sha256(JSON.stringify(this._map.value)),
-          sha256(JSON.stringify(operation.mapState)),
-        ]);
-        if (oldDigest !== newDigest) {
+        // plain string compare: crypto.subtle is not available on http (non-localhost) origins
+        if (JSON.stringify(this._map.value) !== JSON.stringify(operation.mapState)) {
           this.setMapState(operation.mapState, null);
         } else {
           this._mapHistoryDate.next(null);

@@ -87,3 +87,7 @@ Audit lean: −60 lines, −2 dependencies possible.
 - [x] 2. Share-Code-Ratenbegrenzung: max. 10 falsche Codes pro IP und Minute (`access.ts`, in-memory).
 - [x] 3. `access.find`: Operation-Filter wird per `$and` zum Organisations-/Share-Filter addiert statt ihn zu ersetzen.
 - [x] 4. Journal-Nummern: pro Operation eine Transaktions-Sperre (`pg_advisory_xact_lock`) beim Anlegen (`journal-entry.ts`). Update-Pfad noch ohne Sperre.
+
+## Bug: Signaturen nicht setzbar über HTTP-IP (gefunden)
+- [x] `state.service.ts` `refreshMapState`: `crypto.subtle.digest` wirft auf http (kein sicherer Kontext). Das brach das Öffnen der Operation ab, Signaturen erschienen nicht. Fix: direkter String-Vergleich statt Hash.
+- [ ] `share-dialog.component.ts:36`: `navigator.clipboard.writeText` funktioniert auf http-IP ebenfalls nicht (nur localhost/https). Offen.

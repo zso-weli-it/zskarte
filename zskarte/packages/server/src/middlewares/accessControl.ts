@@ -384,7 +384,7 @@ export default <T extends UID.ContentType>(config: AccessControlConfig<T>, { str
       //share link login accessing valid organization
     } else if (userOrganisationId && organization && userOrganisationId === organization.documentId) {
       //loggedin user is in corresponding organization
-    } else if (config.check === AccessControlTypes.BY_ID && hasPublic(config.type) && entry.public === true) {
+    } else if (config.check === AccessControlTypes.BY_ID && hasPublic(config.type) && entry?.public === true) {
       //it's a public object, read is allowed
     } else if (!operation && !organization) {
       //entry not found

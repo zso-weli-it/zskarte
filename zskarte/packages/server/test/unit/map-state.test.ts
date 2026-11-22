@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { operationCaches, persistMapStates } from '../../src/state/operation';
+import { operationCaches, persistMapStates, updateMapState } from '../../src/state/operation';
 
 const silentLog = { info() {}, error() {}, warn() {}, debug() {} };
 
@@ -42,4 +42,13 @@ test('an unchanged map state is not written', async () => {
   await persistMapStates(strapi);
   assert.equal(writes, 0);
   delete operationCaches['op-clean'];
+});
+
+test('a patch that changes nothing does not mark the map as changed', async () => {
+  operationCaches['op-noop'] = { operation: {} as any, connections: [], users: [], mapState: { a: 1 }, mapStateChanged: false };
+  await updateMapState('op-noop', 'client-1', [{ op: 'replace', path: ['a'], value: 1, timestamp: 1 } as any]);
+  assert.equal(operationCaches['op-noop'].mapStateChanged, false);
+  await updateMapState('op-noop', 'client-1', [{ op: 'replace', path: ['a'], value: 2, timestamp: 2 } as any]);
+  assert.equal(operationCaches['op-noop'].mapStateChanged, true);
+  delete operationCaches['op-noop'];
 });

@@ -1,7 +1,6 @@
 import { applyPatches, enablePatches, Patch } from 'immer';
 import { Core } from '@strapi/types';
 import _ from 'lodash';
-import crypto from 'crypto';
 
 import {
   Operation,
@@ -106,11 +105,8 @@ const updateMapState = async (operationId: string, identifier: string, patches: 
       strapi.log.error(error);
     }
   }
-  const jsonOldMapState = JSON.stringify(oldMapState);
-  const jsonNewMapState = JSON.stringify(operationCache.mapState);
-  const hashOldMapState = crypto.createHash('sha256').update(jsonOldMapState).digest('hex');
-  const hashNewMapState = crypto.createHash('sha256').update(jsonNewMapState).digest('hex');
-  const stateChanged = hashOldMapState !== hashNewMapState;
+  // immer returns the same object when a patch changes nothing, so a reference check is enough
+  const stateChanged = operationCache.mapState !== oldMapState;
 
   if (!stateChanged) return;
 

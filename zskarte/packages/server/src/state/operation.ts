@@ -143,14 +143,20 @@ const persistMapStates = async (strapi: Core.Strapi) => {
   try {
     for (const [operationId, operationCache] of Object.entries(operationCaches)) {
       if (!operationCache.mapStateChanged) continue;
-      await strapi.documents('api::operation.operation').update({
-        documentId: operationId,
-        data: {
-          mapState: operationCache.mapState as any,
-        },
-      });
+      // clear the flag before the write: a change arriving during the save sets it again and is saved next time
       operationCache.mapStateChanged = false;
-      strapi.log.info(`MapState of operation ${operationId} Persisted`);
+      try {
+        await strapi.documents('api::operation.operation').update({
+          documentId: operationId,
+          data: {
+            mapState: operationCache.mapState as any,
+          },
+        });
+        strapi.log.info(`MapState of operation ${operationId} Persisted`);
+      } catch (error) {
+        operationCache.mapStateChanged = true;
+        strapi.log.error(error);
+      }
     }
   } catch (error) {
     strapi.log.error(error);

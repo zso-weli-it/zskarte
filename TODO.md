@@ -60,7 +60,7 @@ Arbeitsprotokoll für den autonomen Lauf (Stand 2026-11-22).
 - [ ] 6. Possible script injection: `contenteditable/address-token.blot.ts:13, 15` puts `value.address` into `innerHTML`. Use `textContent`. (Not verified in a browser.)
 
 ### Should fix
-- [ ] 7. Two timers save the map state (`index.ts:33` every 30 s, cron every 15 s). Remove the `setInterval`.
+- [x] 7. Two timers save the map state (`index.ts:33` every 30 s, cron every 15 s). Remove the `setInterval`. (Timer in index.ts entfernt, Cron bleibt)
 - [x] 8. Tests: Access-Filter, Rate-Limit, Journal-Nummern, Map-Flag (`npm run test:unit` in packages/server, 12 Tests).
 - [ ] 9. `accessControl.ts:387` `entry.public` crashes on unknown IDs (500 instead of 403). Use `entry?.public`.
 - [ ] 10. Journal update crashes on unknown IDs (`journal-entry.ts:158, 173`). Return 404 when entry is null.

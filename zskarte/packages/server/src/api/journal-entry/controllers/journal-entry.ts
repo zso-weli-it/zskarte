@@ -4,6 +4,7 @@
 
 import { factories } from '@strapi/strapi';
 import { updateJournal } from '../../../state/journal';
+import { chooseMessageNumber } from '../lib/message-number';
 import { errors } from '@strapi/utils';
 import fp from 'lodash/fp';
 
@@ -61,23 +62,11 @@ export default factories.createCoreController('api::journal-entry.journal-entry'
       }
 
       const messageNumber = sanitizedInputData.messageNumber;
-      let nextMessageNumber = null;
-      if (messageNumber && messageNumber > 0) {
-        //if messageNumber is submitted and already exist return error
-        if ((await countOcurrence(messageNumber)) > 0) {
-          ctx.status = 409;
-          return { message: `messageNumber ${messageNumber} already exist` };
-        }
-      } else {
-        if (messageNumber && messageNumber < 0) {
-          //if negative messageNumber is submitted (from local patches) try if the positve equivalent is still avaliable.
-          if ((await countOcurrence(-messageNumber)) === 0) {
-            nextMessageNumber = -messageNumber;
-            sanitizedInputData.messageNumber = nextMessageNumber;
-          }
-        }
-        if (!nextMessageNumber) {
-          //if not submitted find highest number and add 1
+      const choice = await chooseMessageNumber(
+        messageNumber,
+        async (n) => (await countOcurrence(n)) > 0,
+        async () => {
+          //if not submitted find highest number
           const entry = await strapi.documents('api::journal-entry.journal-entry').findFirst({
             filters: {
               operation: { documentId: { $eq: sanitizedInputData.operation } },
@@ -86,11 +75,17 @@ export default factories.createCoreController('api::journal-entry.journal-entry'
             sort: { messageNumber: 'desc' },
             fields: ['messageNumber'],
           });
-
-          nextMessageNumber = (entry?.messageNumber || 0) + 1;
-        }
-        sanitizedInputData.messageNumber = nextMessageNumber;
+          return entry?.messageNumber || 0;
+        },
+      );
+      //if messageNumber is submitted and already exist return error
+      if (choice.conflict) {
+        ctx.status = 409;
+        return { message: `messageNumber ${messageNumber} already exist` };
       }
+      sanitizedInputData.messageNumber = choice.messageNumber;
+      //null = the client's own number: a race can only be reported, not renumbered
+      const nextMessageNumber = choice.automatic ? choice.messageNumber : null;
 
       //insert journal entry
       const entity = await strapi.documents('api::journal-entry.journal-entry').create({

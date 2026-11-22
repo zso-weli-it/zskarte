@@ -17,7 +17,6 @@ import { ApiService } from './app/api/api.service';
 import { DatePipe } from '@angular/common';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { OverlayModule } from '@angular/cdk/overlay';
@@ -124,7 +123,6 @@ bootstrapApplication(AppComponent, {
 
     DatePipe,
     provideHttpClient(withInterceptorsFromDi()),
-    provideAnimations(),
     provideRouter(appRoutes),
     provideZoneChangeDetection(),
   ],

@@ -135,7 +135,7 @@ Geprüft mit frischem `npm ci --ignore-scripts` im jeweiligen Node-Container:
 Engine-Ranges: Strapi 5.63 erlaubt `>=22.0.0 <=26.x`, Angular 21 verlangt `^20.19 || ^22.12 || >=24`. Node 24 und 26 liegen damit in beiden Ranges.
 
 - [x] Umgesetzt: Node 26.13.1 (LTS seit 26.13.0, EOL April 2029) in Dockerfile.app, Dockerfile.server, .nvmrc und engines. Build, Lint und Stack-Start grün; E2E 9/10, der rote Test ist XSS (A4), offen.
-- [ ] Node 26 als späterer Schritt, sobald Strapi und Angular es in der Praxis mit Build und Tests bestätigt haben. Die LTS-Einstufung von Node 26 vorher prüfen.
+- [X] Node 26 als späterer Schritt, sobald Strapi und Angular es in der Praxis mit Build und Tests bestätigt haben. Die LTS-Einstufung von Node 26 vorher prüfen.
 - [ ] Vor dem Sprung: `npm run lint` und `npm run build` für App und Server im neuen Image, plus E2E-Tests.
 
 ## Konfiguration über deploy.env (erledigt)
@@ -170,3 +170,5 @@ Nicht geprüft: Produktiv-Server (Secrets, Labels anderer Apps, Strapi-Rollen f�
 
 ## Browser-Konsole
 - [ ] Canvas2D-Hinweis: "Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true". Stammt aus Canvas-Aufrufen mit `getImageData`, die häufig laufen. Fix: beim Erzeugen dieser Canvas-Elemente `getContext('2d', { willReadFrequently: true })` setzen. Vorher suchen, wo `getImageData` aufgerufen wird (`grep -rn getImageData packages/app/src`), und prüfen, ob es sich um Kacheln oder Einzelaufrufe handelt.
+
+- Stand geprüft: `@strapi/strapi` `latest` ist 5.63.0 (npm dist-tag). Ein Strapi-Upgrade löst die Warnungen also nicht. Verbleibend nur `overrides` oder Warten auf Strapi-Updates der Abhängigkeiten (`glob@7`, `@koa/router@12`, `node-abort-controller`, `rimraf`, `inflight`).

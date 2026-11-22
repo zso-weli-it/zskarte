@@ -5,6 +5,7 @@ CMD=$1
 
 # deploy.env: one place for hostnames and Traefik settings (see deploy.env.example)
 [ -f deploy.env ] || cp deploy.env.example deploy.env
+[ -f tileserver.env ] || cp tileserver.env.example tileserver.env
 set -a
 . ./deploy.env
 set +a

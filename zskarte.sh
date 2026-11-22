@@ -79,7 +79,11 @@ elif [ "$CMD" = "stop" ]; then
 
     echo "Services stopped."
 
+elif [ "$CMD" = "restart" ]; then
+    ./zskarte.sh stop
+    ./zskarte.sh start "$2"
+
 else
-    echo "Usage: $0 {init|update|start [-b]|stop}"
+    echo "Usage: $0 {init|update|start [-b]|stop|restart [-b]}"
     exit 1
 fi

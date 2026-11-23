@@ -8,16 +8,19 @@ import _ from 'lodash';
 import { Access, AccessTypes, Operation, User } from '../../../definitions';
 import crypto from 'crypto';
 import { AccessTokenTypes } from '../../../definitions/constants/AccessTokenType';
-import { createFailedTryLimiter } from '../lib/failed-try-limiter';
+import { createCodeGuessGuard } from '../lib/code-guess-guard';
 import { withOperationFilter } from '../lib/list-filter';
 import { claimShortCode } from '../lib/short-code';
 const { sanitize } = utils;
 
 const MINUTES_15 = 1000 * 60 * 15;
 
-// Short codes are only 6 digits, so guessing must be slow: max 10 wrong codes per IP per minute.
-// Short codes are only 6 digits, so guessing must be slow: max 10 wrong codes per IP per minute.
-const failedTokenLimiter = createFailedTryLimiter(10, 60 * 1000);
+// Short codes are only 6 digits, so guessing must be slow: max 10 wrong codes per IP per minute,
+// and max 100 wrong codes in total per 15 minutes.
+const failedTokenLimiter = createCodeGuessGuard(
+  { maxTries: 10, windowMs: 60 * 1000 },
+  { maxTries: 100, windowMs: MINUTES_15 },
+);
 
 const sanitizeUser = (user, ctx) => {
   //return sanitize.contentAPI.output(user, strapi.getModel('plugin::users-permissions.user'), { auth }) as Promise<User>;

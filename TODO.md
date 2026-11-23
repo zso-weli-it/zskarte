@@ -1,6 +1,6 @@
 # TODO
 
-Stand: 2026-11-22. Erledigtes ist kurz zusammengefasst, Details stehen in der Git-Historie.
+Stand: 2026-11-23. Erledigtes ist kurz zusammengefasst, Details stehen in der Git-Historie.
 
 ## Offen
 
@@ -33,9 +33,17 @@ Stand: 2026-11-22. Erledigtes ist kurz zusammengefasst, Details stehen in der Gi
 ### OpenLayers-Patch
 - [ ] Bei jedem Upgrade von `ol` (aktuell 10.11.0): `zskarte/patches/ol+10.11.0.patch` prüfen und neu erzeugen. Bricht der Build bei `patch-package` ab, passt der Patch nicht mehr.
 
+### Upgrades (zu aktualisieren)
+- [ ] `@pdfme/*` von 6.0.6 auf 6.2.8 aktualisieren. 6.2.x zieht über `@pdfme/converter` das Node-only-Paket `clawpdf` in den Browser-Build, der Build bricht dann ab. Mit `overrides` für `@pdfme/converter` auf 6.0.6 baut 6.2.8 durch, der PDF-Export ist damit aber noch nicht geprüft. Override in `zskarte/package.json` danach entfernen.
+- [ ] `shpjs` (Server) von 5.0.2 auf 6.x aktualisieren. Der CommonJS-Einstieg von 6.x ist ein Browser-Bundle (`self` fehlt), `strapi build` bricht ab. Warten auf ESM-Umbau des Servers oder ein Release mit Node-Einstieg.
+- [ ] TypeScript 7 (aktuell 6.0.3). Angular 22 verlangt TypeScript `>=6.0 <6.1`, und TypeScript 7 bietet die klassische Compiler-API nicht mehr. Erst mit einer Angular-Version, die TypeScript 7 unterstützt.
+- [ ] Biome 2 aufräumen: CSS- und HTML-Lint sind aus, drei Regeln sind aus (`useIterableCallbackReturn`, `noNonNullAssertedOptionalChain`, `noInvalidUseBeforeDeclaration`). Die Regeln prüfen und wieder einschalten, wo sie passen. Der Lint der Templates (`a11y`) ist ungeprüft.
+- [ ] Server-Tsconfig: TypeScript 6 meldet Deprecations (`baseUrl`, `moduleResolution: node10`) aus der Strapi-Basiskonfiguration. Vor TypeScript 7 beheben.
+
 ## Bewusst offen
 - Strapi-Warnungen (`glob@7`, `@koa/router@12`, `node-abort-controller`, `rimraf`, `inflight`, `uuid@8`): Lösung über Strapi-Updates. Strapi 5.63.0 ist das aktuelle latest.
-- Offene Major-Updates (`@pdfme` 6, `react` 19, `typescript` 7, `uuid` 14 u. a.): nur bei Bedarf.
+- Upgrade-Lauf 2026-11-23: Strapi, `strapi-plugin-config-sync`, `strapi-provider-upload-azure-storage` und `react`, `react-dom`, `react-router-dom` im Server (gehören zum Strapi-Admin) blieben unverändert, laut Vorgabe.
+- E2E „should add journal entry“ ist nicht stabil: die Zählung hängt vom Datenstand im Journal ab.
 - `zskarte.bat`: bleibt vorerst. Entscheidung, ob löschen oder synchron halten.
 - Strapi-Warnung `admin.auth.options.expiresIn` stammt aus Strapi-Defaults.
 - `rc-color-picker` React-16-Peer-Konflikt: nicht blockierend.
@@ -69,6 +77,7 @@ Stand: 2026-11-22. Erledigtes ist kurz zusammengefasst, Details stehen in der Gi
 
 ### Abhängigkeiten und Tooling
 - Strapi 5.63.0, Node 26, Python 3.15, glob 14.0.6.
+- Upgrade-Lauf 2026-11-23: jspdf 4.2.1 (kritische Lücken), Angular 22.3, TypeScript 6.0, ngx-quill 31, ol-mapbox-style 13, zone.js 0.16, immer 11, uuid 14, file-type 22, ts-md5 2, @types/jasmine 7, Biome 2, udsv 0.7, prettier 3.10, tsx 4.23, wait-on 9, immutable 5. Einzelne Schritte sind als Commits in `main` nachvollziehbar.
 - Deprecations, die über Strapi-Updates laufen, sind als erledigt markiert.
 - Changelog `zskarte/CHANGELOG.md` mit Eintrag 7.0.0 (ohne Backticks).
 

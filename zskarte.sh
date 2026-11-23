@@ -80,7 +80,7 @@ elif [ "$CMD" = "update" ]; then
     docker compose $ROOT_FILES down
 
     echo "Containers stopped."
-    ./zskarte.sh start
+    ./zskarte.sh start "$2"
 
     echo "Update complete. Run './zskarte.sh init' only when the map or search data must be refreshed."
 

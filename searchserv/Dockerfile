@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libpq5 && rm -r
 
 COPY --from=build /venv /venv
 
-COPY ./search.py .
+COPY ./search.py ./search_text.py .
 
 EXPOSE 8000
 

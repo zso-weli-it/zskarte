@@ -6,6 +6,8 @@ from contextlib import asynccontextmanager
 from typing import List
 import os
 
+from search_text import escape_like
+
 pool = AsyncConnectionPool(
   "host=offlinekarte-search-db "
   f"port={os.environ.get('SEARCH_DB_PORT', 5432)} "
@@ -50,7 +52,7 @@ class QueryBuilder:
 
     def nameCheck(self, col, text):
         self.conds += [f"{col} like lower(%s || '%%')"]
-        self._extendArgs(text)
+        self._extendArgs(escape_like(text))
         return self
 
     def orderBy(self, col, bbox, sortbbox):

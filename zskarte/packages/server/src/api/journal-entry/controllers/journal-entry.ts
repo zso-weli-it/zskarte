@@ -4,9 +4,22 @@
 
 import { factories } from '@strapi/strapi';
 import { updateJournal } from '../../../state/journal';
-import { chooseMessageNumber } from '../lib/message-number';
+import { chooseMessageNumber, isNumberTaken } from '../lib/message-number';
 import { errors } from '@strapi/utils';
 import fp from 'lodash/fp';
+
+// documentIds of the entries in the operation that use this message number
+const findNumberUsage = async (messageNumber: number, operationId: string, organizationId: string): Promise<string[]> =>
+  (
+    await strapi.documents('api::journal-entry.journal-entry').findMany({
+      filters: {
+        messageNumber,
+        operation: { documentId: { $eq: operationId } },
+        organization: { documentId: { $eq: organizationId } },
+      },
+      fields: ['documentId' as any],
+    })
+  ).map((entry) => entry.documentId);
 
 export default factories.createCoreController('api::journal-entry.journal-entry', ({ strapi }) => ({
   async byNumber(ctx) {
@@ -178,27 +191,27 @@ export default factories.createCoreController('api::journal-entry.journal-entry'
         ctx.status = 409;
         return { message: `messageNumber ${sanitizedInputData.messageNumber} not valid` };
       }
-      //if messageNumber is submitted on update, make sure it's unique: used by itself or nowhere
-      const usage = await strapi.documents('api::journal-entry.journal-entry').findMany({
-        filters: {
-          messageNumber: sanitizedInputData.messageNumber,
-          operation: { documentId: { $eq: operationId } },
-          organization: { documentId: { $eq: organizationId } },
-        },
-        fields: ['documentId' as any],
-      });
-      if ((usage.length === 1 && usage[0].documentId !== documentId) || usage.length > 1) {
-        ctx.status = 409;
-        return { message: `messageNumber ${sanitizedInputData.messageNumber} already exist` };
-      }
     }
 
-    //update journal entry
-    const entity = await strapi.documents('api::journal-entry.journal-entry').update({
-      documentId,
-      ...sanitizedQuery,
-      data: sanitizedInputData,
+    //check the number and update under the same per-operation lock as create, so two saves cannot take one number
+    const { db } = strapi;
+    const { entity, numberTaken } = await db.transaction(async ({ trx }) => {
+      await trx.raw('select pg_advisory_xact_lock(hashtext(?))', [`journal:${operationId}`]);
+      if ('messageNumber' in sanitizedInputData) {
+        const usedBy = await findNumberUsage(sanitizedInputData.messageNumber, operationId, organizationId);
+        if (isNumberTaken(usedBy, documentId)) return { entity: null, numberTaken: true };
+      }
+      const updated = await strapi.documents('api::journal-entry.journal-entry').update({
+        documentId,
+        ...sanitizedQuery,
+        data: sanitizedInputData,
+      });
+      return { entity: updated, numberTaken: false };
     });
+    if (numberTaken) {
+      ctx.status = 409;
+      return { message: `messageNumber ${sanitizedInputData.messageNumber} already exist` };
+    }
 
     const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
     updateJournal(identifier, operationId, { ...sanitizedInputData, documentId, uuid });

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { chooseMessageNumber } from '../../src/api/journal-entry/lib/message-number';
+import { chooseMessageNumber, isNumberTaken } from '../../src/api/journal-entry/lib/message-number';
 
 const taken = (...numbers: number[]) => async (n: number) => numbers.includes(n);
 const highest = (n: number) => async () => n;
@@ -36,4 +36,20 @@ test('no number or zero gets highest + 1', async () => {
     messageNumber: 1,
     automatic: true,
   });
+});
+
+test('a number used by nobody is free for an update', () => {
+  assert.equal(isNumberTaken([], 'entry-1'), false);
+});
+
+test('a number used only by the entry itself is not a conflict', () => {
+  assert.equal(isNumberTaken(['entry-1'], 'entry-1'), false);
+});
+
+test('a number used by another entry is a conflict', () => {
+  assert.equal(isNumberTaken(['entry-2'], 'entry-1'), true);
+});
+
+test('a number used by several entries is a conflict, even when one of them is this entry', () => {
+  assert.equal(isNumberTaken(['entry-1', 'entry-2'], 'entry-1'), true);
 });

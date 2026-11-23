@@ -23,3 +23,7 @@ export const chooseMessageNumber = async (
   }
   return { conflict: false, messageNumber: (await highestExisting()) + 1, automatic: true };
 };
+
+/** A number is taken by an update when another entry uses it, or more than one entry does. */
+export const isNumberTaken = (usedByDocumentIds: string[], documentId: string): boolean =>
+  (usedByDocumentIds.length === 1 && usedByDocumentIds[0] !== documentId) || usedByDocumentIds.length > 1;

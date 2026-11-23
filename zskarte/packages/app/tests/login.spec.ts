@@ -16,7 +16,7 @@ test('shows no warning when organizations are loaded', async ({ page }) => {
   );
 
   await page.goto('./login');
-  await page.getByRole('button', { name: 'Login' }).waitFor();
+  await page.getByRole('button', { name: 'Login', exact: true }).waitFor();
 
   await expect(page.getByRole('alert')).toHaveCount(0);
 });

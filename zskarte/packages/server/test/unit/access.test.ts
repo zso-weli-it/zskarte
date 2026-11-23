@@ -31,3 +31,13 @@ test('operation filter keeps the organisation restriction from accessControl', (
 test('operation filter works without a filter from accessControl', () => {
   assert.deepEqual(withOperationFilter(undefined, 'op-1').$and[0], {});
 });
+
+test('clients that stopped failing are forgotten when another client fails', () => {
+  const limiter = createFailedTryLimiter(3, 60_000);
+  const t = 1_000_000;
+  limiter.recordFailure('1.2.3.4', t);
+  limiter.recordFailure('5.6.7.8', t);
+  assert.equal(limiter.trackedClients(), 2);
+  limiter.recordFailure('9.9.9.9', t + 60_000);
+  assert.equal(limiter.trackedClients(), 1, 'the two old clients are gone, only the new one is tracked');
+});

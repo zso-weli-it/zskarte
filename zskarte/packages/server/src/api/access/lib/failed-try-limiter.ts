@@ -12,10 +12,17 @@ export const createFailedTryLimiter = (maxTries: number, windowMs: number) => {
     return kept;
   };
 
+  // clients that stopped failing are dropped too, otherwise the map grows with every address that ever failed
+  const forgetExpired = (now: number) => {
+    for (const key of [...failures.keys()]) recent(key, now);
+  };
+
   return {
     isBlocked: (key: string, now = Date.now()): boolean => recent(key, now).length >= maxTries,
     recordFailure: (key: string, now = Date.now()): void => {
+      forgetExpired(now);
       failures.set(key, [...recent(key, now), now]);
     },
+    trackedClients: (): number => failures.size,
   };
 };

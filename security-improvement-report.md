@@ -1,6 +1,6 @@
 # Security-Verbesserungen: Vorher/Nachher
 
-Stand: 2026-11-22. Befunde pip-audit ohne Duplikate (je Dienst, Paket und Advisory). Vergleich: Commit `6947bc4` (Stand vor den Audit-Arbeiten) gegen HEAD `92b282f`.
+Stand: 2026-11-23 (Nachtrag: Upgrade-Lauf). Befunde pip-audit ohne Duplikate (je Dienst, Paket und Advisory). Vergleich: Commit `6947bc4` (Stand vor den Audit-Arbeiten) gegen HEAD `5e1c97f` (Stand 2026-11-23).
 
 ## Zusammenfassung
 
@@ -8,14 +8,14 @@ Die Lockfile-Abhängigkeiten sind deutlich sicherer geworden. Container-Images s
 
 | Bereich | Vorher | Nachher |
 |---|---|---|
-| npm, Advisory-Paare critical / high / moderate / low | 14 / 156 / 200 / 43 | 2 / 20 / 21 / 3 |
-| npm, Advisory-Paare gesamt | 413 | 46 |
+| npm, Advisory-Paare critical / high / moderate / low | 14 / 156 / 200 / 43 | 0 / 8 / 15 / 3 |
+| npm, Advisory-Paare gesamt | 413 | 26 |
 | pip, Suche (`searchserv`) | 6 Befunde | 6 Befunde (unverändert) |
 | pip, Loader (`searchserv-db-init`) | 27 Befunde | 0 Befunde |
 
-- **npm behoben:** 369 Paket-Advisory-Paare, davon 362 eindeutige GHSA-IDs, die nicht mehr in der Ergebnisliste stehen.
-- **npm offen:** 44 Paare (weiter betroffen), darunter 2 critical (jsPDF).
-- **npm neu:** 2 Befunde, die mit den Updates hinzugekommen sind.
+- **npm behoben:** 369 Paket-Advisory-Paare, davon 362 eindeutige GHSA-IDs, die nicht mehr in der Ergebnisliste stehen. Im Upgrade-Lauf vom 2026-11-23 kamen 21 weitere Paare dazu (jsPDF, @modelcontextprotocol/sdk, picomatch, pacote, ajv), siehe eigener Abschnitt.
+- **npm offen:** 23 Paare (Stand 2026-11-23), keine critical mehr. Offen sind u. a. adm-zip, vite, zod, react-router, uuid, glob, minimatch und quill.
+- **npm neu:** 3 Paare. Zwei davon stammen aus der früheren Ergänzung, `GHSA-hq66` (pdfjs-dist) kam mit dem pdfme-Upgrade auf 6.0.6 dazu.
 - **pip offen:** Die Suche pinnt weiterhin `anyio`, `certifi` und `dnspython` in verwundbaren Versionen, obwohl für alle drei Fixes existieren. Der Loader hat keine Befunde mehr.
 
 ## Methode und Grenzen
@@ -408,7 +408,7 @@ Der Report deckt nur die Abhängigkeiten ab, die in den Lockfiles stehen: npm (`
 | CVE-2026-11525 | GHSA-g8m3-5g58-fq7m | low | undici | <6.27.0 | undici vulnerable to Set-Cookie SameSite attribute downgrade via permissive substring matching |
 | CVE-2026-18540 | GHSA-r53p-7pc4-xj5r | low | undici | <6.28.1 | undici vulnerable to downstream response splitting via retry interceptor |
 
-## npm: weiterhin offen (44 Paare)
+## npm: durch Upgrade-Lauf 2026-11-23 behoben (21 Paare)
 
 | CVE | GHSA | Schwere | Paket | Betroffene Version | Titel |
 |---|---|---|---|---|---|
@@ -419,11 +419,6 @@ Der Report deckt nur die Abhängigkeiten ab, die in den Lockfiles stehen: npm (`
 | CVE-2026-111768 | GHSA-46jr-4wx8-v453 | high | @modelcontextprotocol/sdk | >=1.3.0 <1.32.0 | MCP TypeScript SDK: One HTTP request within the default size limit could exhaust server memory during validation |
 | CVE-2026-104850 | GHSA-6qxp-vccf-f47h | high | @modelcontextprotocol/sdk | >=1.12.0 <1.31.0 | MCP TypeScript SDK: OAuth client could send credentials to an authorization server chosen by the MCP server |
 | – | GHSA-f897-62hf-6gxq | high | @modelcontextprotocol/sdk | >=1.10.0 <1.30.1 | MCP TypeScript SDK: HTTP server transports and handlers did not limit request body size or JSON-RPC batch length |
-| CVE-2026-77301 | GHSA-7q85-xj36-vmfc | high | adm-zip | <0.6.1 | adm-zip: Uncontrolled memory allocation via the declared uncompressed size (DoS) |
-| CVE-2026-114102 | GHSA-8238-w5pm-2374 | high | adm-zip | <=0.6.0 | adm-zip: Unhandled error event in async DEFLATE decompression crashes Node.js process (DoS) |
-| CVE-2026-102282 | GHSA-j5f4-cc29-5x44 | high | adm-zip | <=0.6.0 | adm-zip extraction preserves SUID/SGID bits from untrusted ZIPs -> local privilege escalation |
-| CVE-2026-92000 | GHSA-rcw4-f5rp-g42v | high | adm-zip | <=0.6.0 | adm-zip: Decompression-bomb protection (fix for CVE-2026-39244) can be bypassed by declaring uncompressed size as 0 |
-| CVE-2026-39244 | GHSA-xcpc-8h2w-3j85 | high | adm-zip | <0.6.0 | adm-zip: Crafted ZIP file triggers 4GB memory allocation |
 | CVE-2026-25535 | GHSA-67pg-wm7f-q7fj | high | jspdf | <4.2.0 | jsPDF Affected by Client-Side/Server-Side Denial of Service via Malicious GIF Dimensions |
 | CVE-2026-31898 | GHSA-7x6v-j9x4-qf24 | high | jspdf | <=4.2.0 | jsPDF has a PDF Object Injection via FreeText color |
 | CVE-2026-24133 | GHSA-95fx-jjr5-f39c | high | jspdf | <=4.0.0 | jsPDF Vulnerable to Denial of Service (DoS) via Unvalidated BMP Dimensions in BMPDecoder |
@@ -432,19 +427,29 @@ Der Report deckt nur die Abhängigkeiten ab, die in den Lockfiles stehen: npm (`
 | CVE-2026-24737 | GHSA-pqxr-3g65-p328 | high | jspdf | <=4.0.0 | jsPDF has PDF Injection in AcroFormChoiceField that allows Arbitrary JavaScript Execution |
 | CVE-2026-9496 | GHSA-w4pp-8pjf-rmxw | high | pacote | >=11.2.7 <21.5.1 | pacote is vulnerable to Denial of Service (DoS) via the addGitSha function |
 | CVE-2026-33671 | GHSA-c2c7-rcm5-vvqj | high | picomatch | >=4.0.0 <4.0.4 | Picomatch has a ReDoS vulnerability via extglob quantifiers |
-| CVE-2026-112942 | GHSA-587h-7wmj-h5pm | high | vite | >=7.0.0 <=7.3.6 | launch-editor: `fs.existsSync()` existence check can be bypassed on Windows |
-| CVE-2023-54404 | GHSA-mrhx-c7xc-m3w5 | high | zod | <4.6.6 | Zod can exhaust memory while validating oversized constrained collections |
 | CVE-2026-111769 | GHSA-6prh-2h8m-c8cw | moderate | @modelcontextprotocol/sdk | <1.32.0 | MCP TypeScript client SDK: HTTP client transports and OAuth requests followed cross-origin redirects and re-sent custom headers and request bodies |
 | CVE-2026-111771 | GHSA-rvq5-wwqv-78pq | moderate | @modelcontextprotocol/sdk | >=1.6.0 <1.32.0 | MCP TypeScript SDK: Server bearer authentication accepted tokens issued for another service |
+| CVE-2025-69873 | GHSA-2g4f-4pwh-qvx6 | moderate | ajv | >=7.0.0-alpha.0 <8.18.0 | ajv has ReDoS when using `$data` option |
+| CVE-2026-24040 | GHSA-cjw8-79x6-5cj4 | moderate | jspdf | <=4.0.0 | jsPDF has Shared State Race Condition in addJS Plugin |
+| CVE-2026-24043 | GHSA-vm32-vv63-w422 | moderate | jspdf | <=4.0.0 | jsPDF Vulnerable to Stored XMP Metadata Injection (Spoofing & Integrity Violation) |
+| CVE-2026-33672 | GHSA-3v7f-55p6-f55p | moderate | picomatch | >=4.0.0 <4.0.4 | Picomatch: Method Injection in POSIX Character Classes causes incorrect Glob Matching |
+
+## npm: weiterhin offen (23 Paare)
+
+| CVE | GHSA | Schwere | Paket | Betroffene Version | Titel |
+|---|---|---|---|---|---|
+| CVE-2026-77301 | GHSA-7q85-xj36-vmfc | high | adm-zip | <0.6.1 | adm-zip: Uncontrolled memory allocation via the declared uncompressed size (DoS) |
+| CVE-2026-114102 | GHSA-8238-w5pm-2374 | high | adm-zip | <=0.6.0 | adm-zip: Unhandled error event in async DEFLATE decompression crashes Node.js process (DoS) |
+| CVE-2026-102282 | GHSA-j5f4-cc29-5x44 | high | adm-zip | <=0.6.0 | adm-zip extraction preserves SUID/SGID bits from untrusted ZIPs -> local privilege escalation |
+| CVE-2026-92000 | GHSA-rcw4-f5rp-g42v | high | adm-zip | <=0.6.0 | adm-zip: Decompression-bomb protection (fix for CVE-2026-39244) can be bypassed by declaring uncompressed size as 0 |
+| CVE-2026-39244 | GHSA-xcpc-8h2w-3j85 | high | adm-zip | <0.6.0 | adm-zip: Crafted ZIP file triggers 4GB memory allocation |
+| CVE-2026-112942 | GHSA-587h-7wmj-h5pm | high | vite | >=7.0.0 <=7.3.6 | launch-editor: `fs.existsSync()` existence check can be bypassed on Windows |
+| CVE-2023-54404 | GHSA-mrhx-c7xc-m3w5 | high | zod | <4.6.6 | Zod can exhaust memory while validating oversized constrained collections |
 | CVE-2026-114103 | GHSA-c6fg-446q-cg94 | moderate | adm-zip | <=0.6.0 | adm-zip: getDataAsync() bypasses the maxOutputLength size guard enforced by the synchronous getData() path |
 | CVE-2026-114104 | GHSA-p634-w6r4-rjp2 | moderate | adm-zip | <=0.6.0 | adm-zip: Duplicate ZIP entry names: getEntry() and extractAllTo() resolve to different content |
 | CVE-2026-76845 | GHSA-vwc7-r8mq-g2x9 | moderate | adm-zip | >=0.5.9 <=0.6.0 | adm-zip extraction follows destination symlinks, allowing arbitrary file overwrite |
-| CVE-2025-69873 | GHSA-2g4f-4pwh-qvx6 | moderate | ajv | >=7.0.0-alpha.0 <8.18.0 | ajv has ReDoS when using `$data` option |
 | CVE-2026-118773 | GHSA-3g3m-2fjr-6pw4 | moderate | glob | >=9.0.0 <=14.0.1 | Glob: AbortSignal cancellation bypass allows post-timeout filesystem traversal |
-| CVE-2026-24040 | GHSA-cjw8-79x6-5cj4 | moderate | jspdf | <=4.0.0 | jsPDF has Shared State Race Condition in addJS Plugin |
-| CVE-2026-24043 | GHSA-vm32-vv63-w422 | moderate | jspdf | <=4.0.0 | jsPDF Vulnerable to Stored XMP Metadata Injection (Spoofing & Integrity Violation) |
 | CVE-2026-118764 | GHSA-g3hv-75wg-m249 | moderate | minimatch | >=7.0.0 <11.0.1 | minimatch has potential denial of service via globparts amplification |
-| CVE-2026-33672 | GHSA-3v7f-55p6-f55p | moderate | picomatch | >=4.0.0 <4.0.4 | Picomatch: Method Injection in POSIX Character Classes causes incorrect Glob Matching |
 | CVE-2026-53666 | GHSA-337j-9hxr-rhxg | moderate | react-router | >=6.4.0 <7.18.0 | React Router: Arbitrary Constructor Injection via deserializeErrors() in React Router SSR Hydration |
 | CVE-2026-53669 | GHSA-wrjc-x8rr-h8h6 | moderate | react-router | >=6.0.0 <7.18.0 | React Router: Open redirect via backslash in <Link> and useNavigate (CVE-2025-68470 bypass) |
 | CVE-2026-41907, CVE-2026-41988 | GHSA-w5hq-g745-h8pq | moderate | uuid | <11.1.1 | uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided |
@@ -457,12 +462,15 @@ Der Report deckt nur die Abhängigkeiten ab, die in den Lockfiles stehen: npm (`
 | CVE-2025-15056, CVE-2026-120350 | GHSA-v3m3-f69x-jf25 | low | quill | =2.0.3 | Quill is vulnerable to XSS via HTML export feature |
 | CVE-2026-112945 | GHSA-9jrq-w75r-8gcw | low | vite | >=7.0.0 <=7.3.6 | Vite: Cross origin script execution through Vite custom middleware |
 
-## npm: neu hinzugekommen (2 Paare)
+## npm: neu hinzugekommen (3 Paare)
 
 | CVE | GHSA | Schwere | Paket | Betroffene Version | Titel |
 |---|---|---|---|---|---|
 | CVE-2026-118663 | GHSA-rmxm-3fg6-px4f | moderate | @hono/node-server | >=1.19.10 <2.1.3 | @hono/node-server: `serveStatic` decodes the request path a second time, leading to bypass of middleware on static paths |
 | – | GHSA-g7r4-m6w7-qqqr | low | esbuild | >=0.27.3 <0.28.1 | esbuild allows arbitrary file read when running the development server on Windows |
+| CVE-2026-16633 | GHSA-hq66-cqwq-w95j | high | pdfjs-dist | >=5.6.83 <6.2.108 | PDF.js: Arbitrary JavaScript execution upon opening a malicious PDF |
+
+pdfjs-dist kommt über `@pdfme/converter` 6.0.6 (Override in `zskarte/package.json`) und ist durch das pdfme-Upgrade vom 2026-11-23 hinzugekommen. Der Fix liegt bei pdfjs-dist ≥ 6.2.108, das der Converter nicht zulässt. Ungeprüft: Override auf pdfjs-dist, siehe `TODO.md`.
 
 ## pip: Befunde vorher und nachher
 

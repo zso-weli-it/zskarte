@@ -31,8 +31,6 @@ app.add_middleware(CORSMiddleware,
         allow_origins = ["*"],
         allow_credentials=False, allow_methods=['*'], allow_headers=['*'])
 
-debugExplain = False
-
 class QueryBuilder:
     def __init__(self, columns, table):
         self.query = f"select {columns} from {table} "
@@ -80,10 +78,6 @@ class QueryBuilder:
 
     async def execOn(self, curs):
         query, args = self._finish()
-        if debugExplain:
-            await curs.execute("explain " + query, args)
-            print("\nquery:\n---\n", self.query, "\n---\n",
-              *await curs.fetchall(), "\n---")
         await curs.execute(query, args)
 
 def attrdict(label, lon, lat):
@@ -172,8 +166,6 @@ async def func(type: str = "",
             bbox = None
             sortbbox = False
     limit = max(1, min(limit, 100))
-    print("bbox:", bbox)
-    print("sortbbox:", sortbbox)
     searchText = searchText.strip();
     if type != "locations" or len(searchText) < 2: return {"results": {}}
     async with pool.connection() as conn:

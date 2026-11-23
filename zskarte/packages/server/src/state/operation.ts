@@ -43,13 +43,12 @@ const lifecycleOperation = async (lifecycleHook: StrapiLifecycleHook, operation:
   operation =
     ((await strapi.documents('api::operation.operation').findOne({
       documentId: operation.documentId,
-      populate: ['organization.users'],
+      populate: ['organization'],
     })) as Operation) || operation;
   if (lifecycleHook === StrapiLifecycleHooks.AFTER_CREATE) {
     const mapState = operation.mapState || {};
     operationCaches[operation.documentId] = { operation, connections: [], users: [], mapState, mapStateChanged: false };
     if (!operation.organization) return;
-    operationCaches[operation.documentId].users.push(...(operation.organization.users || []));
   }
   if (lifecycleHook === StrapiLifecycleHooks.AFTER_UPDATE) {
     if (operation.phase === OperationPhases.ARCHIVED) {
@@ -66,7 +65,6 @@ const lifecycleOperation = async (lifecycleHook: StrapiLifecycleHook, operation:
         mapStateChanged: false,
       };
       if (!operation.organization) return;
-      operationCaches[operation.documentId].users.push(...(operation.organization.users || []));
     } else {
       operationCaches[operation.documentId].operation = operation;
     }

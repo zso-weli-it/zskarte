@@ -1,11 +1,12 @@
 import { Socket } from 'socket.io/dist/socket';
 import _ from 'lodash';
 import { operationCaches } from './operation';
-import { OperationCache, PatchExtended, User, WebsocketEvent } from '../definitions';
+import { Operation, OperationCache, PatchExtended, User, WebsocketEvent } from '../definitions';
 import { Server } from 'socket.io';
 import { Core } from '@strapi/strapi';
 import { serialize as superjsonSerialize } from '../middlewares/superjson';
 import { appOrigin, isAllowedOrigin } from './allowed-origin';
+import { isMemberOfOperation } from './membership';
 
 const sanitizeUser = (user) => {
   delete user.password;
@@ -57,13 +58,14 @@ const socketConnection = async ({ strapi }, socket: Socket) => {
       socket.disconnect();
       return;
     }
-    // Check if the user is allowed to connect to the operation or if it is a token connection then pass the check
-    if (!tokenOperationId && !_.find(operationCache.users, (u) => u.id === user.id)) {
+    // Membership is read from the database now, so removed members are refused and new members are admitted.
+    // Token connections are checked by their token instead.
+    const operation = (await strapi.documents('api::operation.operation').findOne({
+      documentId: operationId,
+      populate: ['organization.users'],
+    })) as Operation | null;
+    if (!tokenOperationId && !isMemberOfOperation(user, operation)) {
       strapi.log.warn(`Socket: ${socket.id} - User: ${user.email} not allowed for operationId: ${operationId}`);
-      strapi.log.info(`Allowed users for operationId: ${operationId}`);
-      for (const user of operationCache.users) {
-        strapi.log.info(`   ${user.username}`);
-      }
       socket.disconnect();
       return;
     }

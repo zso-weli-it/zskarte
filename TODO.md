@@ -29,7 +29,6 @@ Stand: 2026-11-23. Erledigtes ist kurz zusammengefasst, Details stehen in der Gi
 
 ## Bewusst offen
 - Sicherheit, vom Betreiber akzeptiert: A2 (Beispiel-Secrets in der Server-`.env` bei `zskarte.sh start`) und A6 (Passwort-Fallback `supersecret123` für die Datenbank).
-- Upload-Größe für Kartenlayer (Audit 3, Befund 13): eine Obergrenze braucht eine Entscheidung. Bis dahin gilt das Body-Limit von 100 MB, und die Verarbeitung im Browser braucht entsprechend viel Speicher.
 - React, react-dom, react-router-dom und styled-components bleiben im Server: Strapi verlangt sie für den Admin (`strapi build` bricht ohne sie ab).
 - Strapi-Warnungen (`glob@7`, `@koa/router@12`, `node-abort-controller`, `rimraf`, `inflight`, `uuid@8`): Lösung über Strapi-Updates. Strapi 5.63.0 ist das aktuelle latest.
 - Upgrade-Lauf 2026-11-23: Strapi, `strapi-plugin-config-sync`, `strapi-provider-upload-azure-storage` und `react`, `react-dom`, `react-router-dom` im Server (gehören zum Strapi-Admin) blieben unverändert, laut Vorgabe.

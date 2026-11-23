@@ -1,13 +1,12 @@
 # TODO
 
-Stand: 2026-11-23. Erledigtes ist kurz zusammengefasst, Details stehen in der Git-Historie.
+Stand: 2026-11-23. Erledigte Punkte stehen nicht mehr hier, Details stehen in der Git-Historie.
 
 ## Offen
 
-### Sicherheit (Audit 2)
+### Sicherheit (Audit 2 und 3)
 - [ ] A1. Share-Login-Ratenbegrenzung wirkt hinter Traefik für alle Nutzer gemeinsam. Fix: `proxy: true` in `packages/server/config/server.ts`, danach den 11-Versuche-Test wiederholen.
 - [ ] A4. XSS über Adress-Token im Editor (`contenteditable/address-token.blot.ts:13, 15`). Fix: `textContent` statt `innerHTML`. Der Test `tests/journal-address-xss.spec.ts` schlägt bis dahin fehl.
-- [ ] A7. `zskarte.sh` bricht nicht ab, wenn bei `ZSK_TRAEFIK=true` eine Pflicht-Variable leer ist.
 
 ### PDF-Druck (pdfme)
 - [ ] Entscheidung: pdfme entfernen und die Standardvorlage (82 Elemente) im Code rendern (jsPDF, qrcode). Aufwand laut Einschätzung kleiner als gedacht. Referenz-PDF liegt unter `C:\Users\patrick\AppData\Local\Temp\baseline-pdfme-current-with-appurl.pdf`. Das entfernt auch die `core-js`- und `fix-esm`-Kette.
@@ -31,7 +30,7 @@ Stand: 2026-11-23. Erledigtes ist kurz zusammengefasst, Details stehen in der Gi
 - Sicherheit, vom Betreiber akzeptiert: A2 (Beispiel-Secrets in der Server-`.env` bei `zskarte.sh start`) und A6 (Passwort-Fallback `supersecret123` für die Datenbank).
 - React, react-dom, react-router-dom und styled-components bleiben im Server: Strapi verlangt sie für den Admin (`strapi build` bricht ohne sie ab).
 - Strapi-Warnungen (`glob@7`, `@koa/router@12`, `node-abort-controller`, `rimraf`, `inflight`, `uuid@8`): Lösung über Strapi-Updates. Strapi 5.63.0 ist das aktuelle latest.
-- Upgrade-Lauf 2026-11-23: Strapi, `strapi-plugin-config-sync`, `strapi-provider-upload-azure-storage` und `react`, `react-dom`, `react-router-dom` im Server (gehören zum Strapi-Admin) blieben unverändert, laut Vorgabe.
+- Upgrade-Lauf 2026-11-23: Strapi, `strapi-plugin-config-sync` und `strapi-provider-upload-azure-storage` blieben unverändert, laut Vorgabe.
 - E2E „should add journal entry“ ist nicht stabil: die Zählung hängt vom Datenstand im Journal ab.
 - `zskarte.bat`: bleibt vorerst. Entscheidung, ob löschen oder synchron halten.
 - Strapi-Warnung `admin.auth.options.expiresIn` stammt aus Strapi-Defaults.

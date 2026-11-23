@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.0.4
+- Build: Werte aus deploy.env werden sicher in die App geschrieben. Anführungszeichen brechen den Build nicht mehr.
+- Suche: % und _ im Suchbegriff wirken nicht mehr als Platzhalter.
+- Aufgeräumt: nicht genutzte Pakete entfernt (immutable, @types/uuid), toter Suchcode entfernt.
+
 ## 7.0.3
 - Sicherheit: falsch eingegebene Freigabe-Codes sind zusätzlich insgesamt begrenzt (100 in 15 Minuten). In dieser Zeit werden alle Code-Anmeldungen abgelehnt.
 - Sicherheit: Kurzcodes sind 000000 bis 999999 (der Code 999999 wurde nie ausgegeben).

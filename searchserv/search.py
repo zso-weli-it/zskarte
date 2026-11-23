@@ -1,9 +1,10 @@
 import math
+from dataclasses import dataclass
+from typing import Callable
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from psycopg_pool import AsyncConnectionPool
 from contextlib import asynccontextmanager
-from typing import List
 import os
 
 from search_text import escape_like
@@ -80,74 +81,52 @@ class QueryBuilder:
         query, args = self._finish()
         await curs.execute(query, args)
 
-def attrdict(label, lon, lat):
-    return {"attrs" : {"label": label, "lon": lon, "lat": lat}}
+POINT_ORT = "ST_Point(E :: double precision, N :: double precision, 4326)"
+POINT_WGS84 = "wgs_point"
 
-async def get_ort_by_PLZ(curs, text, bbox, sortbbox, limit):
-    if not all(x.isdigit() for x in text):
+@dataclass(frozen=True)
+class Source:
+    """One searchable table: the query columns, how the name is matched, and how a row is labelled.
+    The last two columns of every row are the longitude and latitude."""
+    table: str
+    columns: str
+    name_column: str
+    point: str
+    label: Callable[[tuple], str]
+    text: Callable[[str], str] = lambda text: text
+    applies: Callable[[str], bool] = lambda text: True
+
+# order matters: earlier sources fill the result list first
+SOURCES = [
+    Source("import.ortschaften", "ortschaftsname, PLZ, E, N", "PLZ", POINT_ORT,
+           lambda r: f"<i>Ort</i> <b>{r[1]} {r[0]}</b>", applies=lambda text: text.isdigit()),
+    Source("import.ortschaften", "ortschaftsname, PLZ, E, N", "lower(ortschaftsname)", POINT_ORT,
+           lambda r: f"<i>Ort</i> <b>{r[1]} {r[0]}</b>"),
+    Source("import.strassen", "STN_LABEL, ZIP_LABEL, ST_x(wgs_point), ST_y(wgs_point)", "full_str_lower", POINT_WGS84,
+           lambda r: f"<i>Str</i> <b>{r[0]}</b>, {r[1]}", text=lambda text: text.replace(',', '')),
+    Source("import.namen", "NAME, OBJEKTART, closest_town, closest_town_plz, ST_x(wgs_point), ST_y(wgs_point)",
+           "full_name_lower", POINT_WGS84,
+           lambda r: f"<i>{r[1]}</i> <b>{r[0]}</b>, <i>Nähe</i> {r[3]} {r[2]}", text=lambda text: text.replace(',', '')),
+    Source("import.adressen", "STN_LABEL, ADR_NUMBER, ZIP_LABEL, ST_x(wgs_point), ST_y(wgs_point)",
+           "full_addr_lower", POINT_WGS84,
+           lambda r: f"<i>Adr</i> <b> {r[0]} {r[1]}</b>, {r[2]}", text=lambda text: text.replace(',', '')),
+]
+
+async def search_source(curs, source: Source, text, bbox, sortbbox, limit):
+    if not source.applies(text):
         return []
     await (
-      QueryBuilder("ortschaftsname, PLZ, E, N", "import.ortschaften")
-        .nameCheck("PLZ", text)
-        .bbox("ST_Point(E :: double precision, N :: double precision, 4326)", bbox)
-        .orderBy("ST_Point(E :: double precision, N :: double precision, 4326)", bbox, sortbbox)
+      QueryBuilder(source.columns, source.table)
+        .nameCheck(source.name_column, source.text(text))
+        .bbox(source.point, bbox)
+        .orderBy(source.point, bbox, sortbbox)
         .limitBy(limit)
         .execOn(curs)
     )
-    return [attrdict(f"<i>Ort</i> <b>{plz} {name}</b>", e, n)
-            for name, plz, e, n, *_ in await curs.fetchall()]
+    return [attrdict(source.label(row), row[-2], row[-1]) for row in await curs.fetchall()]
 
-async def get_ort(curs, text, bbox, sortbbox, limit):
-    await (
-      QueryBuilder("ortschaftsname, PLZ, E, N", "import.ortschaften")
-        .nameCheck("lower(ortschaftsname)", text)
-        .bbox("ST_Point(E :: double precision, N :: double precision, 4326)", bbox)
-        .orderBy("ST_Point(E :: double precision, N :: double precision, 4326)", bbox, sortbbox)
-        .limitBy(limit)
-        .execOn(curs)
-    )
-    return [attrdict(f"<i>Ort</i> <b>{plz} {name}</b>", e, n)
-            for name, plz, e, n, *_ in await curs.fetchall()]
-
-async def get_strasse(curs, text, bbox, sortbbox, limit):
-    await (
-      QueryBuilder("STN_LABEL, ZIP_LABEL, ST_x(wgs_point), ST_y(wgs_point)",
-           "import.strassen")
-         .nameCheck("full_str_lower", text.replace(',',''))
-         .bbox("wgs_point", bbox)
-         .orderBy("wgs_point", bbox, sortbbox)
-         .limitBy(limit)
-         .execOn(curs)
-    )
-    return [attrdict(f"<i>Str</i> <b>{lbl}</b>, {zpl}", e, n)
-            for lbl, zpl, e, n, *_ in await curs.fetchall()]
-
-async def get_addr(curs, text, bbox, sortbbox, limit):
-    await (
-      QueryBuilder("STN_LABEL, ADR_NUMBER, ZIP_LABEL, ST_x(wgs_point), ST_y(wgs_point)",
-          "import.adressen")
-        .nameCheck("full_addr_lower", text.replace(',',''))
-        .bbox("wgs_point", bbox)
-        .orderBy("wgs_point", bbox, sortbbox)
-        .limitBy(limit)
-        .execOn(curs)
-    )
-    return [attrdict(f"<i>Adr</i> <b> {st} {an}</b>, {zl}", e, n)
-            for st, an, zl, e, n, *_ in await curs.fetchall()]
-
-async def get_lname(curs, text, bbox, sortbbox, limit):
-    await (
-      QueryBuilder("NAME, OBJEKTART, closest_town, closest_town_plz, "
-          "ST_x(wgs_point), ST_y(wgs_point)", "import.namen")
-        .nameCheck("full_name_lower", text.replace(',',''))
-        .bbox("wgs_point", bbox)
-        .orderBy("wgs_point", bbox, sortbbox)
-        .limitBy(limit)
-        .execOn(curs)
-    )
-    return [attrdict(f"<i>{oa}</i> <b>{name}</b>, <i>Nähe</i> {ctplz} {ct}", e, n)
-            for name, oa, ct, ctplz, e, n, *_ in await curs.fetchall()]
-
+def attrdict(label, lon, lat):
+    return {"attrs" : {"label": label, "lon": lon, "lat": lat}}
 
 @app.get("/search/")
 async def func(type: str = "",
@@ -170,15 +149,10 @@ async def func(type: str = "",
     if type != "locations" or len(searchText) < 2: return {"results": {}}
     async with pool.connection() as conn:
         async with conn.cursor() as curs:
-            l = []
-            l += await get_ort_by_PLZ(curs, searchText, bbox, sortbbox, limit)
-            if(len(l) < limit):
-                l += await get_ort(curs, searchText, bbox, sortbbox, limit-len(l))
-            if(len(l) < limit):
-                l += await get_strasse(curs, searchText, bbox, sortbbox, limit-len(l))
-            if(len(l) < limit):
-                l += await get_lname(curs, searchText, bbox, sortbbox, limit-len(l))
-            if(len(l) < limit):
-                l += await get_addr(curs, searchText, bbox, sortbbox, limit-len(l))
-            return {"results":l}
+            results = []
+            for source in SOURCES:
+                if len(results) >= limit:
+                    break
+                results += await search_source(curs, source, searchText, bbox, sortbbox, limit - len(results))
+            return {"results": results}
     

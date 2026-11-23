@@ -10,6 +10,7 @@ import crypto from 'crypto';
 import { AccessTokenTypes } from '../../../definitions/constants/AccessTokenType';
 import { createFailedTryLimiter } from '../lib/failed-try-limiter';
 import { withOperationFilter } from '../lib/list-filter';
+import { claimShortCode } from '../lib/short-code';
 const { sanitize } = utils;
 
 const MINUTES_15 = 1000 * 60 * 15;
@@ -83,19 +84,23 @@ export default factories.createCoreController('api::access.access', ({ strapi })
 
     if (!accessUser) return ctx.unauthorized(`Couldn't find the default access user for type ${access.type}`);
 
+    //short time access tokens are single use: claim them before a login token is issued
+    const isShortCode = accessToken.length < 32;
+    if (isShortCode) {
+      const claimed = await claimShortCode(
+        (params) => strapi.db.query('api::access.access').deleteMany(params),
+        access.documentId,
+        accessToken,
+      );
+      if (!claimed) return ctx.unauthorized('Invalid access token');
+    }
+
     const token = jwt.issue({
       id: accessUser.id,
       operationId: access.operation.documentId,
       organizationId: access.organization.documentId,
       permission: access.type,
     });
-
-    //delete if it's a short time access token only
-    if (accessToken.length < 32) {
-      await strapi.documents('api::access.access').delete({
-        documentId: access.documentId,
-      });
-    }
 
     ctx.send({
       jwt: token,

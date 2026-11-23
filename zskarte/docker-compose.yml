@@ -47,6 +47,7 @@ services:
       - DATABASE_HOST=postgresql-zskarte
       - DATABASE_PORT=5432
       - DATABASE_PASSWORD=supersecret123
+      - ZSK_APP_URL=${ZSK_APP_URL:-http://localhost:4300}
     restart: unless-stopped
     depends_on:
       postgresql-zskarte:

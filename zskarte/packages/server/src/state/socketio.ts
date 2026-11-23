@@ -5,6 +5,7 @@ import { OperationCache, PatchExtended, User, WebsocketEvent } from '../definiti
 import { Server } from 'socket.io';
 import { Core } from '@strapi/strapi';
 import { serialize as superjsonSerialize } from '../middlewares/superjson';
+import { isAllowedOrigin } from './allowed-origin';
 
 const sanitizeUser = (user) => {
   delete user.password;
@@ -16,11 +17,11 @@ const sanitizeUser = (user) => {
 let socketIo: Server;
 
 const connectSocketIo = (strapi: Core.Strapi) => {
+  const appUrl = process.env.ZSK_APP_URL || 'http://localhost:4300';
   socketIo = new Server(strapi.server.httpServer, {
     transports: ['websocket'],
-    cors: {
-      origin: '*',
-    },
+    // cors does not apply to websockets, so the origin is checked on the handshake
+    allowRequest: (req, callback) => callback(null, isAllowedOrigin(req.headers.origin, appUrl)),
   });
   socketIo.on('connection', (socket) => socketConnection({ strapi }, socket));
 };

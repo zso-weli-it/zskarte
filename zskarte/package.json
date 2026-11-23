@@ -25,7 +25,6 @@
     "format:types": "npm run lint:types -- --fix",
     "format:common": "npm run lint:common -- --fix",
     "build": "run-p build:*",
-    "build:app:dev": "cd packages/app && npm run ng:build:dev",
     "build:app": "cd packages/app && npm run ng:build:prod",
     "build:server": "cd packages/server && npm run build",
     "server:export": "cd packages/server && npm run export",

@@ -2,7 +2,6 @@
 .cache
 .angular
 Dockerfile
-.azure
 .github
 .dockerignore
 .git

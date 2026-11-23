@@ -46,7 +46,7 @@
     "lodash": "^4.17.21",
     "luxon": "^3.7.2",
     "material-icons": "^1.13.14",
-    "ngx-quill": "^30.0.1",
+    "ngx-quill": "^31.0.1",
     "ol-ext": "^4.0.37",
     "ol-mapbox-style": "^13.9.0",
     "ol-pmtiles": "^2.0.2",

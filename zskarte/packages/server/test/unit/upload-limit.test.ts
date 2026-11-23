@@ -11,6 +11,11 @@ test('the default upload limit is 50 MB', () => {
   assert.equal(uploadSizeLimitBytes(undefined), 50 * MB);
 });
 
+test('an empty setting means the default of 50 MB', () => {
+  assert.equal(uploadSizeLimitBytes(''), 50 * MB);
+  assert.equal(uploadSizeLimitBytes('  '), 50 * MB);
+});
+
 test('ZSK_MAX_UPLOAD_MB sets the limit in megabytes', () => {
   assert.equal(uploadSizeLimitBytes('20'), 20 * MB);
 });

@@ -19,7 +19,7 @@ Stand: 2026-11-23. Erledigte Punkte stehen nicht mehr hier, Details stehen in de
 - [ ] Bei jedem Upgrade von `ol` (aktuell 10.11.0): `zskarte/patches/ol+10.11.0.patch` prüfen und neu erzeugen. Bricht der Build bei `patch-package` ab, passt der Patch nicht mehr.
 
 ### Upgrades (zu aktualisieren)
-- [ ] `@pdfme/*` von 6.0.6 auf 6.2.8 aktualisieren. 6.2.x zieht über `@pdfme/converter` das Node-only-Paket `clawpdf` in den Browser-Build, der Build bricht dann ab. Mit `overrides` für `@pdfme/converter` auf 6.0.6 baut 6.2.8 durch, der PDF-Export ist damit aber noch nicht geprüft. Override in `zskarte/package.json` danach entfernen.
+- [ ] `@pdfme/converter` bleibt per `overrides` auf 6.0.6. Ohne den Override zieht 6.2.x das Node-only-Paket `clawpdf` in den Browser-Build. Prüfen, ob eine neuere 6.x-Version ohne `clawpdf` erscheint, dann Override entfernen.
 - [ ] `shpjs` (Server) von 5.0.2 auf 6.x aktualisieren. Der CommonJS-Einstieg von 6.x ist ein Browser-Bundle (`self` fehlt), `strapi build` bricht ab. Warten auf ESM-Umbau des Servers oder ein Release mit Node-Einstieg.
 - [ ] TypeScript 7 (aktuell 6.0.3). Angular 22 verlangt TypeScript `>=6.0 <6.1`, und TypeScript 7 bietet die klassische Compiler-API nicht mehr. Erst mit einer Angular-Version, die TypeScript 7 unterstützt.
 - [ ] Biome 2 aufräumen: CSS- und HTML-Lint sind aus, drei Regeln sind aus (`useIterableCallbackReturn`, `noNonNullAssertedOptionalChain`, `noInvalidUseBeforeDeclaration`). Die Regeln prüfen und wieder einschalten, wo sie passen. Der Lint der Templates (`a11y`) ist ungeprüft.

@@ -35,6 +35,33 @@ fi
 ZSK_FILES="-f zskarte/docker-compose.yml $TRAEFIK_ZSK"
 ROOT_FILES="-f docker-compose.yml $TRAEFIK_ROOT"
 
+# a change in these paths (or in deploy.env) means the images must be built again
+BUILD_INPUTS="zskarte/packages zskarte/package.json zskarte/package-lock.json zskarte/patches zskarte/.npmrc zskarte/.dockerignore zskarte/Dockerfile.app zskarte/Dockerfile.server zskarte/docker-compose.yml docker-compose.yml"
+BUILD_STATE=.build-state
+
+build_env_hash() {
+    sha256sum deploy.env | cut -d' ' -f1
+}
+
+# true if the working tree or the commit of the last build differs in the build inputs
+needs_build() {
+    if [ ! -f "$BUILD_STATE" ]; then
+        return 0
+    fi
+    read -r built_commit built_env_hash < "$BUILD_STATE"
+    if [ -n "$(git status --porcelain -- $BUILD_INPUTS)" ]; then
+        return 0
+    fi
+    if ! git diff --quiet "$built_commit" HEAD -- $BUILD_INPUTS; then
+        return 0
+    fi
+    [ "$built_env_hash" != "$(build_env_hash)" ]
+}
+
+record_build() {
+    echo "$(git rev-parse HEAD) $(build_env_hash)" > "$BUILD_STATE"
+}
+
 if [ "$CMD" = "init" ]; then
     echo "Running INIT workflow..."
 
@@ -53,20 +80,18 @@ elif [ "$CMD" = "update" ]; then
     docker compose $ROOT_FILES down
 
     echo "Containers stopped."
-    ./zskarte.sh init
+    ./zskarte.sh start
 
-    echo "Starting zskarte services..."
-    ./zskarte.sh start -b
-    echo "Init complete for zskarte."
+    echo "Update complete. Run './zskarte.sh init' only when the map or search data must be refreshed."
 
 elif [ "$CMD" = "start" ]; then
     BUILD_ARG=""
 
-    if [ "$2" = "-b" ]; then
+    if [ "$2" = "-b" ] || needs_build; then
         BUILD_ARG="--build"
-        echo "Starting services and forcing build..."
+        echo "Starting services and building images..."
     else
-        echo "Starting services..."
+        echo "Starting services, images unchanged..."
     fi
     echo "Mode: ZSK_TRAEFIK=${ZSK_TRAEFIK:-false}, frontend API URL: $ZSK_API_URL"
 
@@ -75,6 +100,9 @@ elif [ "$CMD" = "start" ]; then
     for e in search search-db; do [ -f searchserv/$e.env ] || cp searchserv/$e.env.example searchserv/$e.env; done
     docker compose $ROOT_FILES up -d $BUILD_ARG
 
+    if [ -n "$BUILD_ARG" ]; then
+        record_build
+    fi
     echo "Services started."
 
 elif [ "$CMD" = "stop" ]; then

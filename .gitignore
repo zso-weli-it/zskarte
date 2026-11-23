@@ -3,3 +3,6 @@ shell.nix
 
 # deployment config with real hostnames (see deploy.env.example)
 deploy.env
+
+# commit and deploy.env hash of the last image build (zskarte.sh start)
+.build-state

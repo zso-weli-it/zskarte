@@ -15,9 +15,10 @@ interface JournalEntry {
 }
 
 async function createJournalEntry(entry: JournalEntry, page: Page) {
-  const rowCount = await page.locator('tbody').getByRole('row').count();
-
   await page.getByRole('tab', { name: 'Journal' }).click();
+  // count only after the list has loaded, otherwise rows that arrive later are counted as new
+  await page.waitForLoadState('networkidle');
+  const rowCount = await page.locator('tbody').getByRole('row').count();
   await page.getByRole('button', { name: 'Add' }).click();
 
   const modal = page.locator('app-journal-entry-create-modal');

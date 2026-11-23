@@ -31,7 +31,6 @@ Stand: 2026-11-23. Erledigte Punkte stehen nicht mehr hier, Details stehen in de
 - React, react-dom, react-router-dom und styled-components bleiben im Server: Strapi verlangt sie für den Admin (`strapi build` bricht ohne sie ab).
 - Strapi-Warnungen (`glob@7`, `@koa/router@12`, `node-abort-controller`, `rimraf`, `inflight`, `uuid@8`): Lösung über Strapi-Updates. Strapi 5.63.0 ist das aktuelle latest.
 - Upgrade-Lauf 2026-11-23: Strapi, `strapi-plugin-config-sync` und `strapi-provider-upload-azure-storage` blieben unverändert, laut Vorgabe.
-- E2E „should add journal entry“ ist nicht stabil: die Zählung hängt vom Datenstand im Journal ab.
 - `zskarte.bat`: bleibt vorerst. Entscheidung, ob löschen oder synchron halten.
 - Strapi-Warnung `admin.auth.options.expiresIn` stammt aus Strapi-Defaults.
 - `rc-color-picker` React-16-Peer-Konflikt: nicht blockierend.

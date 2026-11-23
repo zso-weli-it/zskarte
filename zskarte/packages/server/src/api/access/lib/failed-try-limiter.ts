@@ -12,8 +12,12 @@ export const createFailedTryLimiter = (maxTries: number, windowMs: number) => {
     return kept;
   };
 
-  // clients that stopped failing are dropped too, otherwise the map grows with every address that ever failed
+  // clients that stopped failing are dropped too, otherwise the map grows with every address that ever failed.
+  // Scanning the whole map on every failure would cost time per failure, so it runs once per window.
+  let lastForget = -Infinity;
   const forgetExpired = (now: number) => {
+    if (now - lastForget < windowMs) return;
+    lastForget = now;
     for (const key of [...failures.keys()]) recent(key, now);
   };
 

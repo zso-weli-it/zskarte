@@ -41,3 +41,13 @@ test('clients that stopped failing are forgotten when another client fails', () 
   limiter.recordFailure('9.9.9.9', t + 60_000);
   assert.equal(limiter.trackedClients(), 1, 'the two old clients are gone, only the new one is tracked');
 });
+
+test('many clients failing in one window are all counted, and expired ones are dropped at the next window', () => {
+  const limiter = createFailedTryLimiter(3, 60_000);
+  const t = 1_000_000;
+  for (let i = 0; i < 500; i++) limiter.recordFailure(`10.0.0.${i}`, t + i);
+  assert.equal(limiter.trackedClients(), 500);
+  assert.equal(limiter.isBlocked('10.0.0.1', t + 600), false, 'one failure is below the limit of three');
+  limiter.recordFailure('11.0.0.1', t + 60_500);
+  assert.equal(limiter.trackedClients(), 1);
+});

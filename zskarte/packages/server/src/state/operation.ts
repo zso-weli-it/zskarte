@@ -167,7 +167,7 @@ const archiveOperations = async (strapi: Core.Strapi) => {
       limit: -1,
     })) as Operation[];
     for (const operation of activeOperations) {
-      if (new Date(operation.updatedAt).getTime() + WEEK > new Date().getTime()) continue;
+      if (new Date(operation.updatedAt).getTime() + WEEK > Date.now()) continue;
       await strapi.documents('api::operation.operation').update({
         documentId: operation.documentId,
         data: {
@@ -220,7 +220,7 @@ const createMapStateSnapshots = async (strapi: Core.Strapi) => {
     for (const operation of activeOperations) {
       const fiveMins = MIN * 5;
       // If the operation has not been updated in the last 5mins don't create a snapshot
-      if (new Date(operation.updatedAt).getTime() + fiveMins < new Date().getTime()) continue;
+      if (new Date(operation.updatedAt).getTime() + fiveMins < Date.now()) continue;
 
       strapi.log.debug(`Creating snapshot for operation [${operation.documentId}] ${operation.name}`);
 

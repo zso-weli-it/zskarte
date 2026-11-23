@@ -1,3 +1,5 @@
+import { uploadSizeLimitBytes } from './upload-limit';
+
 export default [
   'strapi::errors',
   {
@@ -30,7 +32,7 @@ export default [
       jsonLimit: '100mb',
       textLimit: '100mb',
       formidable: {
-        maxFileSize: 100 * 1024 * 1024,
+        maxFileSize: uploadSizeLimitBytes(process.env.ZSK_MAX_UPLOAD_MB),
       },
     },
   },

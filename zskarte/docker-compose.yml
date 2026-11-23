@@ -48,6 +48,7 @@ services:
       - DATABASE_PORT=5432
       - DATABASE_PASSWORD=supersecret123
       - ZSK_APP_URL=${ZSK_APP_URL:-http://localhost:4300}
+      - ZSK_MAX_UPLOAD_MB=${ZSK_MAX_UPLOAD_MB:-50}
     restart: unless-stopped
     depends_on:
       postgresql-zskarte:

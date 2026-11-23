@@ -1,9 +1,11 @@
+import { uploadSizeLimitBytes } from './upload-limit';
+
 const uploadProviders = (env) => {
+  const sizeLimit = uploadSizeLimitBytes(env('ZSK_MAX_UPLOAD_MB'));
   const providers = {
     local: {
       config: {
-        //100mb
-        sizeLimit: 100 * 1024 * 1024,
+        sizeLimit,
         localServer: {
           maxage: 300000,
         },
@@ -21,6 +23,7 @@ const uploadProviders = (env) => {
           defaultPath: '',
           maxConcurrent: 10,
         },
+        sizeLimit,
       },
     },
   };

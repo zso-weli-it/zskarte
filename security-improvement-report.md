@@ -523,16 +523,15 @@ pdfjs-dist kommt über `@pdfme/converter` 6.0.6 (Override in `zskarte/package.js
 | searchserv | dnspython | 2.8.0 | CVE-2026-114605 | CVE-2026-114605 | 2.9.0 |
 | searchserv | dnspython | 2.8.0 | CVE-2026-128089 | CVE-2026-128089 | 2.9.2 |
 
-## Offene Punkte aus dem Code (`TODO.md`, Audit 2)
+## Offene Punkte aus dem Code (`TODO.md`, Audit 2 und 3)
 
+Erledigt im Audit-3-Lauf (Commits ab `ca600bf`): A3 (Proxy-Route), A5 (Journal-Nummer), A8 (Socket-Origin), A9 (Log-Kodierung), A10 (Fehlversuche-Zähler), A11 (Build-Werte), dazu Kurzcodes nur einmal einlösbar, Gesamtgrenze für Fehlversuche, 999999 als Kurzcode, Suche ohne Platzhalter.
+
+Offen:
 - A1 Share-Login-Ratenbegrenzung hinter Traefik (`proxy: true`).
-- A2 Beispiel-Secrets aus `.env.example` bei `zskarte.sh start`.
-- A3 Offener Proxy `GET /api/proxy?url=`.
 - A4 XSS über Adress-Token im Editor (`address-token.blot.ts`).
-- A5 Journal-Nummer beim Ändern ohne Sperre.
-- A6 DB-Passwort-Fallback `supersecret123`.
 - A7 `zskarte.sh` bricht bei leerer Pflicht-Variable mit `ZSK_TRAEFIK=true` nicht ab.
-- A8 Socket.io mit `origin: '*'`.
-- A9 Rohe Benutzereingaben in den Logs.
-- A10 Rate-Limit-Map wächst unbegrenzt.
-- A11 `write-environment.js` ohne Escaping.
+
+Vom Betreiber akzeptiert:
+- A2 Beispiel-Secrets aus `.env.example` bei `zskarte.sh start`.
+- A6 DB-Passwort-Fallback `supersecret123`.

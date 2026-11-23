@@ -4,7 +4,7 @@
 
 import { factories } from '@strapi/strapi';
 import { Operation, PatchExtended, OperationPhases } from '../../../definitions';
-import { operationCaches, updateCurrentLocation, updateMapState } from '../../../state/operation';
+import { getOperationCache, updateCurrentLocation, updateMapState } from '../../../state/operation';
 import _ from 'lodash';
 
 const allowedMetaFields = ['name', 'description', 'eventStates'];
@@ -16,7 +16,7 @@ export default factories.createCoreController('api::operation.operation', ({ str
     const sanitizedQuery = await this.sanitizeQuery(ctx);
     const entity = await strapi.service('api::operation.operation').findOne(id, sanitizedQuery);
     const sanitizedEntity = (await this.sanitizeOutput(entity, ctx)) as Operation;
-    const operationCache = operationCaches[entity.documentId];
+    const operationCache = await getOperationCache(entity.documentId);
     if (operationCache) {
       sanitizedEntity.mapState = operationCache.mapState;
     }

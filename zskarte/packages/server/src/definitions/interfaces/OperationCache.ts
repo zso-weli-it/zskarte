@@ -6,4 +6,5 @@ export interface OperationCache {
   connections: Connection[];
   mapState: object;
   mapStateChanged: boolean;
+  lastUsed: number;
 }

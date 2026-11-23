@@ -1,5 +1,5 @@
 import { migrateOperationMapStates, migrateOperationStatusesToPhases } from './migrations';
-import { loadOperations, persistMapStates } from './state/operation';
+import { persistMapStates } from './state/operation';
 import { connectSocketIo } from './state/socketio';
 
 export default {
@@ -23,7 +23,6 @@ export default {
   async bootstrap({ strapi }) {
     await migrateOperationMapStates(strapi);
     await migrateOperationStatusesToPhases(strapi);
-    await loadOperations(strapi);
     // periodic saves of changed map states run from the cron job in config/cron-tasks.ts (every 15 s)
   },
 

@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io/dist/socket';
 import _ from 'lodash';
-import { operationCaches } from './operation';
+import { getOperationCache } from './operation';
 import { Operation, OperationCache, PatchExtended, User, WebsocketEvent } from '../definitions';
 import { Server } from 'socket.io';
 import { Core } from '@strapi/strapi';
@@ -51,7 +51,7 @@ const socketConnection = async ({ strapi }, socket: Socket) => {
       return;
     }
     const user = (await userService.fetch(userId)) as User;
-    const operationCache = operationCaches[operationId];
+    const operationCache = await getOperationCache(operationId);
     // Check if the operationCache exists
     if (!operationCache) {
       strapi.log.warn(`Socket: ${socket.id} - No operationCache for operationId: ${operationId}`);

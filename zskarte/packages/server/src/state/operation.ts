@@ -12,29 +12,54 @@ import {
   User,
 } from '../definitions';
 import { broadcastConnections, broadcastPatches } from './socketio';
+import { isEvictable } from './cache-eviction';
 
 const WEEK = 1000 * 60 * 60 * 24 * 7;
 const MIN = 1000 * 60;
 
 enablePatches();
 
-const operationCaches: { [key: number]: OperationCache } = {};
+const operationCaches: { [key: string]: OperationCache } = {};
+const loadingCaches = new Map<string, Promise<OperationCache | undefined>>();
 
-/** Loads all active operations initially and generates the in-memory cache */
-const loadOperations = async (strapi: Core.Strapi) => {
-  try {
-    const activeOperations = (await strapi.documents('api::operation.operation').findMany({
-      filters: { phase: OperationPhases.ACTIVE },
-      populate: ['organization'],
-      limit: -1,
-    })) as Operation[];
-    for (const operation of activeOperations) {
-      await lifecycleOperation(StrapiLifecycleHooks.AFTER_CREATE, operation);
-    }
-  } catch (error) {
-    strapi.log.error(error);
-    strapi.log.info('Error while loading the active operations, shutdown the strapi server.');
-    process.exit(1);
+/** Returns the cache of an operation, loading it from the database the first time it is needed. */
+export const getOperationCache = async (operationId: string): Promise<OperationCache | undefined> => {
+  const cache = operationCaches[operationId];
+  if (cache) {
+    cache.lastUsed = Date.now();
+    return cache;
+  }
+  // concurrent requests for the same operation share one load, so no second copy with lost patches is made
+  if (!loadingCaches.has(operationId)) {
+    loadingCaches.set(
+      operationId,
+      loadOperationCache(operationId).finally(() => loadingCaches.delete(operationId)),
+    );
+  }
+  return loadingCaches.get(operationId);
+};
+
+const loadOperationCache = async (operationId: string): Promise<OperationCache | undefined> => {
+  const operation = (await strapi.documents('api::operation.operation').findOne({
+    documentId: operationId,
+    populate: ['organization'],
+  })) as Operation | null;
+  if (!operation || operation.phase === OperationPhases.ARCHIVED) return undefined;
+  operationCaches[operationId] = {
+    operation,
+    connections: [],
+    mapState: operation.mapState || {},
+    mapStateChanged: false,
+    lastUsed: Date.now(),
+  };
+  return operationCaches[operationId];
+};
+
+/** Drops caches that nobody uses any more; they are loaded again when needed. */
+const evictIdleCaches = () => {
+  const now = Date.now();
+  for (const [operationId, cache] of Object.entries(operationCaches)) {
+    if (isEvictable(cache, now)) delete operationCaches[operationId];
   }
 };
 
@@ -47,7 +72,13 @@ const lifecycleOperation = async (lifecycleHook: StrapiLifecycleHook, operation:
     })) as Operation) || operation;
   if (lifecycleHook === StrapiLifecycleHooks.AFTER_CREATE) {
     const mapState = operation.mapState || {};
-    operationCaches[operation.documentId] = { operation, connections: [], users: [], mapState, mapStateChanged: false };
+    operationCaches[operation.documentId] = {
+      operation,
+      connections: [],
+      mapState,
+      mapStateChanged: false,
+      lastUsed: Date.now(),
+    };
     if (!operation.organization) return;
   }
   if (lifecycleHook === StrapiLifecycleHooks.AFTER_UPDATE) {
@@ -60,9 +91,9 @@ const lifecycleOperation = async (lifecycleHook: StrapiLifecycleHook, operation:
       operationCaches[operation.documentId] = {
         operation,
         connections: [],
-        users: [],
         mapState,
         mapStateChanged: false,
+        lastUsed: Date.now(),
       };
       if (!operation.organization) return;
     } else {
@@ -91,7 +122,7 @@ const validatePatches = (patches: PatchExtended[]) => {
 
 /** Uses the immer library to patch the server map state */
 const updateMapState = async (operationId: string, identifier: string, patches: PatchExtended[]) => {
-  const operationCache: OperationCache = operationCaches[operationId];
+  const operationCache = await getOperationCache(operationId);
   if (!operationCache) return;
   const validatedPatches = validatePatches(patches);
   if (!validatedPatches.length) return;
@@ -118,7 +149,7 @@ const updateCurrentLocation = async (
   identifier: string,
   longLat: { long: number; lat: number },
 ) => {
-  const operationCache: OperationCache = operationCaches[operationId];
+  const operationCache = await getOperationCache(operationId);
   if (!operationCache) return;
   for (const connection of operationCache.connections) {
     try {
@@ -155,6 +186,7 @@ const persistMapStates = async (strapi: Core.Strapi) => {
   } catch (error) {
     strapi.log.error(error);
   }
+  evictIdleCaches();
 };
 
 /** Archive operations who are active and are not updated since 7 days */
@@ -237,7 +269,6 @@ const createMapStateSnapshots = async (strapi: Core.Strapi) => {
 
 export {
   operationCaches,
-  loadOperations,
   lifecycleOperation,
   updateMapState,
   updateCurrentLocation,

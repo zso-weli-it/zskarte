@@ -1,3 +1,4 @@
+import { readZipEntry } from './zip-entry';
 import { Core } from '@strapi/strapi';
 import { MapLayer, MapLayerTypes } from '../definitions';
 import { join } from 'node:path';
@@ -226,7 +227,7 @@ export async function downloadAndExtractEntrance(
     }
     const fileNeedSplit = targetEntry.header.size > ENTRANCE_NEED_SPLIT_SIZE;
     if (params.allwaysCreateDistrict || fileNeedSplit) {
-      const geojsonText = targetEntry.getData().toString('utf8');
+      const geojsonText = readZipEntry(targetEntry).toString('utf8');
       const fullTmpPath = join(params.tmpDir, params.cantonFile);
       fileCache.set(fullTmpPath, JSON.parse(geojsonText) as FeatureCollection);
     }

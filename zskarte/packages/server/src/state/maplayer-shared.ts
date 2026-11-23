@@ -1,3 +1,4 @@
+import { readZipEntry } from './zip-entry';
 import { Core } from '@strapi/strapi';
 import { MapLayerType } from '../definitions';
 import { fileTypeFromFile } from 'file-type';
@@ -216,7 +217,7 @@ export async function extractFilesToNewZip(inputZip: any, filterBasename: string
   let foundFiles = 0;
   for (const entry of inputZip.getEntries()) {
     if (basename(entry.entryName).startsWith(filterBasename)) {
-      outputZip.addFile(entry.entryName, entry.getData(), '');
+      outputZip.addFile(entry.entryName, readZipEntry(entry), '');
       foundFiles++;
     }
   }

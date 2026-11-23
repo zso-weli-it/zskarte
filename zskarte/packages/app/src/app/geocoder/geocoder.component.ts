@@ -1,5 +1,6 @@
 import { signal, Component, ElementRef, OnDestroy, inject, viewChild, effect } from '@angular/core';
 import { I18NService } from '../state/i18n.service';
+import { sortByDistanceIfUnfiltered } from '../search/distance-sort';
 import { ZsMapStateService } from '../state/state.service';
 import { SessionService } from '../session/session.service';
 import { Subject, takeUntil } from 'rxjs';
@@ -73,7 +74,7 @@ export class GeocoderComponent implements OnDestroy {
       .pipe(takeUntil(this._ngUnsubscribe))
       .subscribe((config: IZsGlobalSearchConfig) => {
         this.searchConfig = { ...config };
-        updateSearchConfig(this.searchConfig);
+        updateSearchConfig(sortByDistanceIfUnfiltered(this.searchConfig));
       });
 
     searchResults$.pipe(takeUntil(this._ngUnsubscribe)).subscribe((newResultSets) => {

@@ -16,6 +16,13 @@ export ZSK_WORK_LOCAL="${ZSK_WORK_LOCAL:-true}"
 # app version for the service worker: hash of the app folder, so a new version shows only when the app changes
 export COMMIT_SHA="$(git rev-parse --short=7 HEAD:zskarte/packages/app 2>/dev/null || echo unknown)"
 if [ "${ZSK_TRAEFIK:-false}" = "true" ]; then
+    # without these the public URLs and the Traefik labels would be broken, so stop before anything starts
+    for required in ZSK_APP_HOST ZSK_API_HOST ZSK_SEARCH_HOST ZSK_TILES_HOST ZSK_TRAEFIK_NETWORK ZSK_TRAEFIK_ENTRYPOINT ZSK_TRAEFIK_CERTRESOLVER; do
+        if [ -z "${!required:-}" ]; then
+            echo "ZSK_TRAEFIK=true, but $required is empty in deploy.env" >&2
+            exit 1
+        fi
+    done
     export ZSK_API_URL="https://${ZSK_API_HOST}"
     export ZSK_SEARCH_URL="https://${ZSK_SEARCH_HOST}/search/"
     export ZSK_TILE_URL="https://${ZSK_TILES_HOST}/styles/osm-bright"

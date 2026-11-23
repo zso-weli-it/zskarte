@@ -121,6 +121,21 @@ Postgres and pgAdmin are only reachable from the local machine (`127.0.0.1`).
 
 > ⚠️ These are example passwords. Change them before you use the system anywhere else.
 
+#### Changing the database and pgAdmin passwords
+
+The passwords are not set in `deploy.env`. They are written in several files, and all of them must match:
+
+- `zskarte/docker-compose.yml`: `POSTGRES_PASSWORD` and `DATABASE_PASSWORD` (server), `PGADMIN_DEFAULT_EMAIL` and `PGADMIN_DEFAULT_PASSWORD` (pgAdmin)
+- `zskarte/packages/server/config/database.ts`: fallback value of the database password
+- `zskarte/packages/server/init/servers.json`: the password pgAdmin uses for the "postgres-local" connection
+- `searchserv/search-db.env` and `searchserv/search.env`: password of the search database (separate from the main database)
+
+Postgres and pgAdmin read their initial values only when their data volume is empty. On an existing installation:
+
+1. Change the password inside the database: `docker exec -it postgresql-zskarte psql -U postgres -c "ALTER USER postgres PASSWORD 'new-password';"`
+2. Change the same password in the files above and restart with `./zskarte.sh restart -b`.
+3. For the pgAdmin login, change the password in the pgAdmin web UI (user menu at the top right, "Change Password"), or delete the `pgadmin-zskarte` volume to start over (this removes pgAdmin's saved settings).
+
 ### Database versions
 
 | Service | Image (pinned in) | Version |

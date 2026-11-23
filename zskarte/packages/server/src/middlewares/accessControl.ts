@@ -4,6 +4,7 @@
 
 import { Core, UID } from '@strapi/strapi';
 import { AccessControlConfig, AccessControlTypes, OperationPhases } from '../definitions';
+import { formatAccessViolation } from './format-access-violation';
 import type { HasOperationType, HasOrganizationType, AccessCheckableType } from '../definitions/TypeGuards';
 import {
   isOperation,
@@ -17,7 +18,14 @@ import {
 export default <T extends UID.ContentType>(config: AccessControlConfig<T>, { strapi }: { strapi: Core.Strapi }) => {
   const logAccessViolation = (ctx, message: string, userOrganisationId, jwtOperationId) => {
     strapi.log.warn(
-      `[global::accessControl]: ${message}, url:${ctx.request.url}, userOrganisationId:${userOrganisationId}, jwtOperationId:${jwtOperationId}, ip:${ctx.request.ip}, user-agent:${ctx.request.headers['user-agent']}`,
+      formatAccessViolation({
+        message,
+        url: ctx.request.url,
+        ip: ctx.request.ip,
+        userAgent: ctx.request.headers['user-agent'],
+        userOrganisationId,
+        jwtOperationId,
+      }),
     );
   };
   const doCreateChecks = async (ctx, next, userOrganisationId, jwtOperationId, jwtOrganizationId) => {

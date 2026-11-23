@@ -13,12 +13,6 @@ Zivilschutz-Karte is a powerful JavaScript application (based on Angular) design
 - 📱 Responsive design
 - 🔒 Secure authentication
 
-## 👀 Demo
-
-You can run Zivilschutz-Karte without installation from [https://zskarte.ch](https://zskarte.ch). This is the production application. Please request access from your civil defence organisation or use the guest mode to try out.
-
-<img alt="Screenshot of ZS-Karte" src="https://github.com/user-attachments/assets/c06261e2-7505-4d57-9834-1cee7aa5b8a4" />
-
 ## 🚀 Getting Started
 
 ### 🛠️ Prerequisites
@@ -56,14 +50,6 @@ Zivilschutz-Karte is optimized and tested for use with Google Chrome - neverthel
 
 1. http://localhost:4300
 2. Login with credentials: User -> zso_development, Password -> Supersecret123
-
-## 💡 Help & Feedback
-
-Need assistance or want to share your thoughts? We'd love to hear from you!
-
-- 🐛 Create an issue on GitHub
-- 📧 Send feedback to [feedback@zskarte.ch](mailto:feedback@zskarte.ch)
-- 💬 Join our community discussions
 
 ## ⚖️ Terms of Use
 
@@ -209,16 +195,6 @@ The old setup (commit `6947bc4`) ran PostgreSQL 16.3 with a bind mount in `zskar
 
 More informations for developers for internal logic / tasks can be found in [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md).
 
-## 🤝 Contributing
-
-We welcome contributions! Here's how you can help:
-
-- 🐛 Report bugs
-- 💡 Suggest new features
-- 🔧 Submit pull requests
-- 📚 Improve documentation
-
 ## 📝 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-

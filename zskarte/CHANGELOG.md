@@ -1,5 +1,14 @@
 # Changelog
 
+## 7.0.5
+- Upload-Grenze für Kartenlayer: standardmäßig 50 MB, in deploy.env über ZSK_MAX_UPLOAD_MB einstellbar.
+- Kartensuche: Ergebnisse werden nach der Kartenmitte sortiert, nicht mehr nach dem festen Punkt im Such-Dienst.
+- Sicherheit: Eingefügte Adress-Token mit HTML werden nur noch als Text angezeigt (XSS-Lücke geschlossen).
+- Sicherheit: Einmal-Freigabecodes und Fehlversuche werden strenger geprüft, Socket-Verbindungen nur von der App-Adresse.
+- PDF-Druck: pdfme 6.2.8.
+- zskarte.sh: mit ZSK_TRAEFIK=true bricht der Start ab, wenn eine Traefik-Einstellung fehlt.
+- Aufgeräumt: ungenutzter Code entfernt, Suche in einer Funktion zusammengeführt.
+
 ## 7.0.4
 - Build: Werte aus deploy.env werden sicher in die App geschrieben. Anführungszeichen brechen den Build nicht mehr.
 - Suche: % und _ im Suchbegriff wirken nicht mehr als Platzhalter.

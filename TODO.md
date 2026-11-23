@@ -6,7 +6,6 @@ Stand: 2026-11-23. Erledigte Punkte stehen nicht mehr hier, Details stehen in de
 
 ### Sicherheit (Audit 2 und 3)
 - [ ] A1. Share-Login-Ratenbegrenzung wirkt hinter Traefik für alle Nutzer gemeinsam. Fix: `proxy: true` in `packages/server/config/server.ts`, danach den 11-Versuche-Test wiederholen.
-- [ ] A4. XSS über Adress-Token im Editor (`contenteditable/address-token.blot.ts:13, 15`). Fix: `textContent` statt `innerHTML`. Der Test `tests/journal-address-xss.spec.ts` schlägt bis dahin fehl.
 
 ### PDF-Druck (pdfme)
 - [ ] Entscheidung: pdfme entfernen und die Standardvorlage (82 Elemente) im Code rendern (jsPDF, qrcode). Aufwand laut Einschätzung kleiner als gedacht. Referenz-PDF liegt unter `C:\Users\patrick\AppData\Local\Temp\baseline-pdfme-current-with-appurl.pdf`. Das entfernt auch die `core-js`- und `fix-esm`-Kette.

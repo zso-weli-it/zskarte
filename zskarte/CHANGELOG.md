@@ -1,5 +1,13 @@
 # Changelog
 
+## 7.0.1
+- Sicherheit: jsPDF 4.2.1 (schliesst kritische Lücken), Abhängigkeiten aktualisiert.
+- Angular 22, TypeScript 6, Biome 2, ngx-quill 31, ol-mapbox-style 13, zone.js 0.16.
+- PDF-Druck: pdfme 6.0.6.
+- Weitere Bibliotheken: immer 11, uuid 14, file-type 22, shpjs 5, udsv 0.7.
+- Deployment: `zskarte.sh update` holt den Code per git pull, startet ohne init und baut die Images nur bei Änderungen neu.
+- Deployment: `zskarte.sh init` nur bei Bedarf für Karten- und Suchdaten ausführen.
+
 ## 7.0.0
 - Node.js 26, PostgreSQL 18 (Datenbank per Dump und Restore übernehmen), Strapi 5.63.
 - Versionsangabe <version>-<commit> auf der Login-Seite.

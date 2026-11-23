@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.0.2
+- Sicherheit: Freigabe-Codes sind nur einmal einlösbar. Parallele Einlösungen erhalten nur eine Anmeldung.
+- Journal: Nummern beim Ändern werden unter derselben Sperre geprüft wie beim Anlegen. Keine doppelten Nummern mehr.
+- Sicherheit: offene Proxy-Route /api/proxy entfernt.
+
 ## 7.0.1
 - Sicherheit: jsPDF 4.2.1 (schliesst kritische Lücken), Abhängigkeiten aktualisiert.
 - Angular 22, TypeScript 6, Biome 2, ngx-quill 31, ol-mapbox-style 13, zone.js 0.16.

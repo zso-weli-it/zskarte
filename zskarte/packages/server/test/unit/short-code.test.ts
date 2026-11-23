@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { claimShortCode } from '../../src/api/access/lib/short-code';
+import crypto from 'crypto';
+import { claimShortCode, createShortCode } from '../../src/api/access/lib/short-code';
 
 // A fake table whose delete removes the row matching the where clause, like the database does.
 const tableWith = (rows: { documentId: string; accessToken: string }[]) => async ({ where }) => {
@@ -35,4 +36,15 @@ test('claiming one code does not remove another', async () => {
   ];
   assert.equal(await claimShortCode(tableWith(rows), 'a1', '123456'), true);
   assert.equal(rows.length, 1);
+});
+
+test('the highest six digit code 999999 can be issued', (t) => {
+  const randomInt = t.mock.method(crypto, 'randomInt', () => 999_999);
+  assert.equal(createShortCode(), '999999');
+  assert.equal(randomInt.mock.calls[0].arguments[0], 1_000_000, 'the range covers 0 to 999999');
+});
+
+test('short codes keep their leading zeros', (t) => {
+  t.mock.method(crypto, 'randomInt', () => 42);
+  assert.equal(createShortCode(), '000042');
 });

@@ -10,7 +10,7 @@ import crypto from 'crypto';
 import { AccessTokenTypes } from '../../../definitions/constants/AccessTokenType';
 import { createCodeGuessGuard } from '../lib/code-guess-guard';
 import { withOperationFilter } from '../lib/list-filter';
-import { claimShortCode } from '../lib/short-code';
+import { claimShortCode, createShortCode } from '../lib/short-code';
 const { sanitize } = utils;
 
 const MINUTES_15 = 1000 * 60 * 15;
@@ -138,7 +138,7 @@ export default factories.createCoreController('api::access.access', ({ strapi })
     const accessToken =
       tokenType === AccessTokenTypes.LONG ?
         crypto.randomBytes(16).toString('hex')
-      : crypto.randomInt(999999).toString().padStart(6, '0');
+      : createShortCode();
 
     const expiresOn = tokenType === AccessTokenTypes.LONG ? null : new Date(Date.now() + MINUTES_15);
 

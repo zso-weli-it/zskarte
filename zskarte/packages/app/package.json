@@ -15,7 +15,8 @@
     "build": "run-p ng:build:prod",
     "start": "run-p ng:serve",
     "start:dev": "run-p ng:serve:dev",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:scripts": "node --test scripts/"
   },
   "private": true,
   "dependencies": {

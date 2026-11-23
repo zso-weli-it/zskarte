@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-module.exports = (config, { strapi }) => {
+module.exports = (_config, { strapi }) => {
   return async (ctx, next) => {
     const token = ctx.cookies.get('jwtToken');
     if (!token) return ctx.unauthorized();

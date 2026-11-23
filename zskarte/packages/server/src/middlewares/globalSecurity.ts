@@ -5,7 +5,7 @@
 import { Core } from '@strapi/strapi';
 import { Context } from 'koa';
 
-export default (config, { strapi }: { strapi: Core.Strapi }) => {
+export default (_config, { strapi }: { strapi: Core.Strapi }) => {
   return async (ctx: Context, next) => {
     //handle only api endpoints
     if (!ctx.request.url.startsWith('/api')) {

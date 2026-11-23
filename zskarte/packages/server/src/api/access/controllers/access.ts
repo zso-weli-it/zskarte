@@ -3,7 +3,6 @@
  */
 
 import { factories } from '@strapi/strapi';
-import utils from '@strapi/utils';
 import _ from 'lodash';
 import { Access, AccessTypes, Operation, User } from '../../../definitions';
 import crypto from 'crypto';
@@ -11,8 +10,6 @@ import { AccessTokenTypes } from '../../../definitions/constants/AccessTokenType
 import { createCodeGuessGuard } from '../lib/code-guess-guard';
 import { withOperationFilter } from '../lib/list-filter';
 import { claimShortCode, createShortCode } from '../lib/short-code';
-const { sanitize } = utils;
-
 const MINUTES_15 = 1000 * 60 * 15;
 
 // Short codes are only 6 digits, so guessing must be slow: max 10 wrong codes per IP per minute,
@@ -22,10 +19,8 @@ const failedTokenLimiter = createCodeGuessGuard(
   { maxTries: 100, windowMs: MINUTES_15 },
 );
 
-const sanitizeUser = (user, ctx) => {
-  //return sanitize.contentAPI.output(user, strapi.getModel('plugin::users-permissions.user'), { auth }) as Promise<User>;
-  // there is no ctx.state.auth available in this context (in strapi.requestContext.get();)
-  // remove private fields by hand...
+// there is no ctx.state.auth here, so the private fields are removed by hand
+const sanitizeUser = (user) => {
   delete user.password;
   delete user.resetPasswordToken;
   delete user.confirmationToken;
@@ -44,7 +39,7 @@ export default factories.createCoreController('api::access.access', ({ strapi })
 
     ctx.send({
       jwt: token,
-      user: await sanitizeUser(user, ctx),
+      user: await sanitizeUser(user),
     });
   },
   async token(ctx) {
@@ -107,7 +102,7 @@ export default factories.createCoreController('api::access.access', ({ strapi })
 
     ctx.send({
       jwt: token,
-      user: await sanitizeUser(accessUser, ctx),
+      user: await sanitizeUser(accessUser),
     });
   },
   async generate(ctx) {

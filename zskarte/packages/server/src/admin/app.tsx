@@ -21,7 +21,7 @@ const handleClickUpdateMapLayer = async () => {
         alert(`Fehler: ${data?.json?.error?.message}`);
       }
     }
-  } catch (error) {
+  } catch {
     alert('Netzwerkfehler beim Triggern.');
   }
 };

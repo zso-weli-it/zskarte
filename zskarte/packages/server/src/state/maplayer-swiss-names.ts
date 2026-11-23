@@ -251,7 +251,7 @@ export async function updateSwissNames(
           media = await updateOrCreateMedia(strapi, mediaFolder, fileName, fullTmpPath);
           strapi.log.info(`updateSwissNames for ${canton}: media ${fileName} saved: ${media.id}`);
         } finally {
-          await unlink(fullTmpPath).catch((err) => {
+          await unlink(fullTmpPath).catch(() => {
             strapi.log.warn(`updateSwissNames for ${canton}: remove temp file failed: "${fullTmpPath}"`);
           });
         }

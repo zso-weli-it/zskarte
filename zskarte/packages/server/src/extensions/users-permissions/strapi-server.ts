@@ -1,6 +1,3 @@
-import _ from 'lodash';
-import { Organization } from '../../definitions';
-
 export default (plugin) => {
   const me = plugin.controllers.user.me;
   const injectOrganization = async (ctx) => {

@@ -67,7 +67,7 @@
     "@angular/cli": "~21.0.4",
     "@angular/compiler-cli": "^21.0.6",
     "@playwright/test": "^1.57.0",
-    "@types/jasmine": "~5.1.5",
+    "@types/jasmine": "^7.0.0",
     "@types/lodash": "^4.17.21",
     "@types/luxon": "^3.7.1",
     "@types/ol-ext": "npm:@siedlerchr/types-ol-ext@^3.6.5",

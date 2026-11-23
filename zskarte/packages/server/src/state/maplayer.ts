@@ -4,10 +4,10 @@ export * from './maplayer-boundaries';
 export * from './maplayer-entrances';
 export * from './maplayer-shared';
 import { Core } from '@strapi/strapi';
-import shp from 'shpjs';
 import type { FeatureCollection } from 'geojson';
 import { Worker } from 'node:worker_threads';
 import { getMediaFetchUrl } from './maplayer-shared';
+import { loadShpFromUrl } from './shp-loader';
 import { updateEntrance } from './maplayer-entrances';
 import { updateSwissBoundaries, getCantonFeature, getDistrictFeatures } from './maplayer-boundaries';
 import { updateSwissNamesNational, updateSwissNames } from './maplayer-swiss-names';
@@ -44,7 +44,7 @@ export async function getAndVerifyMapLayerGenerationConfig(strapi: Core.Strapi) 
 }
 
 export async function loadShpFile(mediaUrl: string): Promise<FeatureCollection> {
-  return shp(mediaUrl);
+  return loadShpFromUrl(mediaUrl);
 }
 
 export async function updateMapLayerMedias(strapi: Core.Strapi) {

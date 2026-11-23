@@ -1,8 +1,10 @@
 import zlib from 'node:zlib';
-import type { IZipEntry } from 'adm-zip';
+import AdmZip, { IZipEntry } from 'adm-zip';
 
 // The uncompressed size of one file in an uploaded zip is capped: a small zip can expand to gigabytes.
 export const MAX_ZIP_ENTRY_BYTES = 200 * 1024 * 1024;
+// all files of one zip together: many small files could otherwise add up to a huge amount
+export const MAX_ZIP_TOTAL_BYTES = 500 * 1024 * 1024;
 
 const STORED = 0;
 const DEFLATED = 8;
@@ -21,5 +23,15 @@ export const readZipEntry = (entry: IZipEntry, maxBytes = MAX_ZIP_ENTRY_BYTES): 
       return zlib.inflateRawSync(compressed, { maxOutputLength: maxBytes });
     default:
       throw new Error(`zip entry ${entry.entryName} uses an unsupported compression method`);
+  }
+};
+
+/** Reads every file of a zip and throws if the files together are larger than maxTotalBytes. */
+export const assertZipWithinLimits = (zipContent: Buffer, maxTotalBytes = MAX_ZIP_TOTAL_BYTES): void => {
+  let total = 0;
+  for (const entry of new AdmZip(zipContent).getEntries()) {
+    if (entry.isDirectory) continue;
+    total += readZipEntry(entry).length;
+    if (total > maxTotalBytes) throw new RangeError('zip is too large when unpacked');
   }
 };

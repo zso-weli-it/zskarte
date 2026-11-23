@@ -9,8 +9,8 @@ export default [
         useDefaults: true,
         directives: {
           'connect-src': ["'self'", 'https:'],
-          'img-src': ["'self'", 'data:', 'blob:', process.env.STORAGE_URL],
-          'media-src': ["'self'", 'data:', 'blob:', process.env.STORAGE_URL],
+          'img-src': ["'self'", 'data:', 'blob:'],
+          'media-src': ["'self'", 'data:', 'blob:'],
           upgradeInsecureRequests: null,
         },
       },

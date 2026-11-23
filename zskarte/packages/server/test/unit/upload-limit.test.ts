@@ -25,14 +25,9 @@ test('a limit that is not a positive number is refused at startup', () => {
   assert.throws(() => uploadSizeLimitBytes('0'), /ZSK_MAX_UPLOAD_MB/);
 });
 
-test('the local storage provider uses the default limit', () => {
-  const plugins: any = pluginsConfig({ env: envWith({ STORAGE_PROVIDER: 'local' }) });
+test('the upload storage uses the default limit', () => {
+  const plugins: any = pluginsConfig({ env: envWith({}) });
   assert.equal(plugins.upload.config.sizeLimit, 50 * MB);
-});
-
-test('the azure storage provider uses the configured limit', () => {
-  const plugins: any = pluginsConfig({ env: envWith({ STORAGE_PROVIDER: 'azure', ZSK_MAX_UPLOAD_MB: '20' }) });
-  assert.equal(plugins.upload.config.sizeLimit, 20 * MB);
 });
 
 test('the body parser uses the default limit when none is set', () => {

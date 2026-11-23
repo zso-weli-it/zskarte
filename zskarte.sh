@@ -47,6 +47,8 @@ if [ "$CMD" = "init" ]; then
 elif [ "$CMD" = "update" ]; then
     echo "Running UPDATE workflow for zskarte..."
 
+    git pull
+
     docker compose $ZSK_FILES down
     docker compose $ROOT_FILES down
 

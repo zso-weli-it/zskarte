@@ -2,8 +2,8 @@
 export const appOrigin = (appUrl: string): string => {
   try {
     return new URL(appUrl).origin;
-  } catch (error) {
-    throw new Error(`ZSK_APP_URL is not a valid URL: "${appUrl}"`, { cause: error });
+  } catch {
+    throw new Error(`ZSK_APP_URL is not a valid URL: "${appUrl}"`);
   }
 };
 

@@ -111,16 +111,17 @@ export async function prepareSwissNamesContent(params: { namesMediaUrl: string; 
     .then((csvContent) => {
       const schema = inferSchema(csvContent);
       const parser = initParser(schema);
-      const csvLines = parser.typedObjs(csvContent, (rows, append) => {
-        const filteredExtendedRows = [];
-        rows.forEach((row) => {
-          if (
-            isNaN(row[swissNAMES3D_fieldX]) ||
-            isNaN(row[swissNAMES3D_fieldY]) ||
-            (row[swissNAMES3D_fieldX] === 0 && row[swissNAMES3D_fieldY] === 0)
-          ) {
-            return;
-          }
+      const csvLines = parser
+        .typedObjs(csvContent)
+        .filter(
+          (row) =>
+            !(
+              isNaN(row[swissNAMES3D_fieldX]) ||
+              isNaN(row[swissNAMES3D_fieldY]) ||
+              (row[swissNAMES3D_fieldX] === 0 && row[swissNAMES3D_fieldY] === 0)
+            ),
+        )
+        .map((row) => {
           const x = parseFloat(row[swissNAMES3D_fieldX]);
           const y = parseFloat(row[swissNAMES3D_fieldY]);
           const newRow: SwissNamesRow = {};
@@ -130,10 +131,8 @@ export async function prepareSwissNamesContent(params: { namesMediaUrl: string; 
           //shpjs does a automatic reprojection to EPSG:4326 - WGS84, the original was EPSG:2056 – CH1903+ / LV95 (as defined in prj file)
           //to allow compare need to reproject namesContent also
           newRow.coord = coordConverter.forward([x, y]);
-          filteredExtendedRows.push(newRow);
+          return newRow;
         });
-        append(filteredExtendedRows);
-      });
       return csvLines;
     });
 }

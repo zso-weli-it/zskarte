@@ -146,26 +146,23 @@ export class GeoJSONService {
         //force number type for coord fields
         schema.cols.filter((c) => c.name === layer.fieldX || c.name === layer.fieldY).forEach((c) => (c.type = 'n'));
         const parser = initParser(schema);
-        const csvLines = parser.typedObjs(csvContent, (rows, append) => {
-          rows = rows.filter((row) => {
-            if (
-              isNaN(row[layer.fieldX]) ||
-              isNaN(row[layer.fieldY]) ||
-              (row[layer.fieldX] === 0 && row[layer.fieldY] === 0)
-            ) {
+        const csvLines = parser.typedObjs(csvContent).filter((row) => {
+          if (
+            isNaN(row[layer.fieldX]) ||
+            isNaN(row[layer.fieldY]) ||
+            (row[layer.fieldX] === 0 && row[layer.fieldY] === 0)
+          ) {
+            return false;
+          }
+          if (regexPatterns?.length) {
+            const matches = regexPatterns
+              .map((pattern) => row[pattern.field].match(pattern.regex))
+              .filter((match) => match) as RegExpMatchArray[];
+            if (!matches || matches.length !== regexPatterns.length) {
               return false;
             }
-            if (regexPatterns?.length) {
-              const matches = regexPatterns
-                .map((pattern) => row[pattern.field].match(pattern.regex))
-                .filter((match) => match) as RegExpMatchArray[];
-              if (!matches || matches.length !== regexPatterns.length) {
-                return false;
-              }
-            }
-            return true;
-          });
-          append(rows);
+          }
+          return true;
         });
 
         if (csvLines?.length && mercatorProjection) {

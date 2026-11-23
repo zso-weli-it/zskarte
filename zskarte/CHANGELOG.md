@@ -1,5 +1,12 @@
 # Changelog
 
+## 7.0.3
+- Sicherheit: falsch eingegebene Freigabe-Codes sind zusätzlich insgesamt begrenzt (100 in 15 Minuten). In dieser Zeit werden alle Code-Anmeldungen abgelehnt.
+- Sicherheit: Kurzcodes sind 000000 bis 999999 (der Code 999999 wurde nie ausgegeben).
+- Sicherheit: Socket-Verbindungen nur von der App-Adresse (ZSK_APP_URL).
+- Sicherheit: Zugriffs-Logs kodieren Werte aus dem Request, Zeilenumbrüche erzeugen keine fremden Logzeilen.
+- Speicher: Fehlversuche-Zähler vergisst abgelaufene Adressen.
+
 ## 7.0.2
 - Sicherheit: Freigabe-Codes sind nur einmal einlösbar. Parallele Einlösungen erhalten nur eine Anmeldung.
 - Journal: Nummern beim Ändern werden unter derselben Sperre geprüft wie beim Anlegen. Keine doppelten Nummern mehr.

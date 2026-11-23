@@ -1,5 +1,12 @@
 import BlockEmbed from 'quill/blots/embed';
 
+const createSpan = (className: string, text = '') => {
+  const span = document.createElement('span');
+  span.className = className;
+  span.textContent = text;
+  return span;
+};
+
 export class AddressTokenBlot extends BlockEmbed {
   static override blotName = 'addressToken';
   static override tagName = 'span';
@@ -7,12 +14,20 @@ export class AddressTokenBlot extends BlockEmbed {
 
   static override create(value: { address: string; option?: string }) {
     const node = super.create() as HTMLElement;
-    //on BlockEmebed blot there is automatically an additional element with contenteditable=false that then contain the innerHTML content
+    //the address comes from user input: textContent keeps it as text, innerHTML would run markup in it
     if (value.option) {
       node.setAttribute('data-geo', value.option);
-      node.innerHTML = `<span class="addr-show"></span><span class="text addr-search">${value.address}</span><span class="addr-edit"></span>`;
+      node.replaceChildren(
+        createSpan('addr-show'),
+        createSpan('text addr-search', value.address),
+        createSpan('addr-edit'),
+      );
     } else {
-      node.innerHTML = `<span class="addr-show addr-unknown"></span><span class="text">${value.address}</span><span class="addr-edit"></span>`;
+      node.replaceChildren(
+        createSpan('addr-show addr-unknown'),
+        createSpan('text', value.address),
+        createSpan('addr-edit'),
+      );
     }
     return node;
   }

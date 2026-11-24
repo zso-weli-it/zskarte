@@ -1,5 +1,8 @@
 # Changelog
 
+## 7.0.6
+- Sicherheit: Die Karten-Webseite sendet jetzt eine Content-Security-Policy und verbietet Browsern das Zwischenspeichern der Startseite.
+
 ## 7.0.5
 - Upload-Grenze für Kartenlayer: standardmäßig 50 MB, in deploy.env über ZSK_MAX_UPLOAD_MB einstellbar.
 - Kartensuche: Ergebnisse werden nach der Kartenmitte sortiert, nicht mehr nach dem festen Punkt im Such-Dienst.

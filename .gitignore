@@ -6,3 +6,6 @@ deploy.env
 
 # commit and deploy.env hash of the last image build (zskarte.sh start)
 .build-state
+
+# local reports, not part of the repository
+reports/

@@ -1,5 +1,8 @@
 # Changelog
 
+## 7.0.8
+- Sicherheit: Die Karten-Webseite kann nur noch von der eigenen Seite in einem iframe eingebettet werden (Schutz gegen Clickjacking).
+
 ## 7.0.7
 - Sicherheit: Die Karten-Webseite sendet einen HSTS-Header, der Browser zwingt, die Seite über HTTPS zu öffnen.
 - Sicherheit: Der Server gibt keine Herstellerangabe mehr im Header `X-Powered-By` aus.

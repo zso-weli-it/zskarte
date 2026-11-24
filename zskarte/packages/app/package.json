@@ -1,6 +1,6 @@
 {
   "name": "@zskarte/app",
-  "version": "7.0.7",
+  "version": "7.0.8",
   "engines": {
     "node": ">=20"
   },

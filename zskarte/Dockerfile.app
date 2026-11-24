@@ -45,6 +45,8 @@ server {
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     # shortcut: no-cache also applies to hashed bundles, so they are revalidated on every load; add immutable caching for hashed assets if load time matters
     add_header Cache-Control "no-cache" always;
+    # shortcut: max-age only, no includeSubDomains or preload; add them once every subdomain is served over HTTPS
+    add_header Strict-Transport-Security "max-age=31536000" always;
     # shortcut: https:/http: wildcards because API, tile and search hosts are set per deployment; pin them to the real origins when known
     add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http: https:; font-src 'self' data:; connect-src 'self' http: https:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" always;
 

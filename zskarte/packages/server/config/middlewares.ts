@@ -22,7 +22,6 @@ export default [
       headers: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'Identifier', 'OperationId'],
     },
   },
-  'strapi::poweredBy',
   'strapi::logger',
   'strapi::query',
   {

@@ -36,8 +36,11 @@ RUN NODE_ENV=production npm run build:app && rm -rf /app/packages/app/src
 FROM nginx:1.29.3-alpine
 
 
+# The nginx image fills this template from ZSK_* environment variables at container start
+ENV NGINX_ENVSUBST_FILTER=^ZSK_
+
 # EOF with single quotes to suppress $-expansion
-COPY <<'EOF' /etc/nginx/conf.d/default.conf
+COPY <<'EOF' /etc/nginx/templates/default.conf.template
 server {
     listen       80;
     server_tokens off;
@@ -48,7 +51,8 @@ server {
     # shortcut: max-age only, no includeSubDomains or preload; add them once every subdomain is served over HTTPS
     add_header Strict-Transport-Security "max-age=31536000" always;
     # shortcut: https:/http: wildcards because API, tile and search hosts are set per deployment; pin them to the real origins when known
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http: https:; font-src 'self' data:; connect-src 'self' http: https:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" always;
+    # frame-ancestors does not fall back to default-src, so it is set explicitly; ZSK_EMBED_PARENTS lists the host origins allowed to embed zskarte
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http: https:; font-src 'self' data:; connect-src 'self' http: https:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self' ${ZSK_EMBED_PARENTS}" always;
 
     root   /usr/share/nginx/html;
     index index.html;

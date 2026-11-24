@@ -69,8 +69,6 @@ services:
         ZSK_WORK_LOCAL: ${ZSK_WORK_LOCAL:-true}
         COMMIT_SHA: ${COMMIT_SHA:-}
     container_name: app-zskarte
-    environment:
-      - ZSK_EMBED_PARENTS=${ZSK_EMBED_PARENTS:-}
     ports: [ 4300:80 ]
     restart: unless-stopped
 

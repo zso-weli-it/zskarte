@@ -15,9 +15,6 @@ export ZSK_CODE_LOGIN="${ZSK_CODE_LOGIN:-true}"
 export ZSK_WORK_LOCAL="${ZSK_WORK_LOCAL:-true}"
 # app version for the service worker: hash of the app folder, so a new version shows only when the app changes
 export COMMIT_SHA="$(git rev-parse --short=7 HEAD:zskarte/packages/app 2>/dev/null || echo unknown)"
-export ZSK_EMBED_PARENTS="${ZSK_EMBED_PARENTS:-}"
-. ./zskarte/scripts/embed-parents.sh
-check_embed_parents "$ZSK_EMBED_PARENTS" || exit 1
 if [ "${ZSK_TRAEFIK:-false}" = "true" ]; then
     # without these the public URLs and the Traefik labels would be broken, so stop before anything starts
     for required in ZSK_APP_HOST ZSK_API_HOST ZSK_SEARCH_HOST ZSK_TILES_HOST ZSK_TRAEFIK_NETWORK ZSK_TRAEFIK_ENTRYPOINT ZSK_TRAEFIK_CERTRESOLVER; do

@@ -30,7 +30,6 @@
     "server:export": "cd packages/server && npm run export",
     "server:import": "cd packages/server && npm run import",
     "cleanup": "tsx scripts/cleanup.ts",
-    "test:scripts": "node --test scripts/",
     "postinstall": "patch-package"
   },
   "devDependencies": {

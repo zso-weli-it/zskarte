@@ -1,6 +1,6 @@
 # Security-Verbesserungen: Vorher/Nachher
 
-Stand: 2026-11-23 (Nachtrag: Upgrade-Lauf). Befunde pip-audit ohne Duplikate (je Dienst, Paket und Advisory). Vergleich: Commit `6947bc4` (Stand vor den Audit-Arbeiten) gegen HEAD `5e1c97f` (Stand 2026-11-23).
+Stand: 2026-11-27 (Nachtrag: Strapi 5.64.0 und Code-Audit, siehe unten). Frühere Stände: 2026-11-23 (Upgrade-Lauf). Befunde pip-audit ohne Duplikate (je Dienst, Paket und Advisory). Vergleich: Commit `6947bc4` (Stand vor den Audit-Arbeiten) gegen HEAD `5e1c97f` (Stand 2026-11-23).
 
 ## Zusammenfassung
 
@@ -33,6 +33,73 @@ Der Report deckt nur die Abhängigkeiten ab, die in den Lockfiles stehen: npm (`
 - Container-Images (Basis- und Laufzeit-Images, OS-Pakete darin): `postgres:18.1`, `postgis/postgis:18-3.6`, `dpage/pgadmin4:9`, `maptiler/tileserver-gl`, `alpine:latest`, `curlimages/curl`, Node- und Python-Images, die eigenen Images `zskarte-server-zskarte` und `offlinekarte-offlinekarte-search`. Hier sind alte CVEs aus OS-Paketen zu erwarten. Ein Image-Scan steht aus.
 - nginx und Betriebssystem des Hosts.
 - Befunde im eigenen Code haben keine CVE-IDs. Die offenen Punkte stehen unten unter „Offene Punkte aus dem Code“ (A1–A11 aus `TODO.md`).
+
+## Nachtrag 2026-11-27: Strapi 5.64.0 und Code-Audit
+
+Stand: 2026-11-27. Vergleich: `6947bc4` (vor den Audit-Arbeiten) gegen den Lockfile-Stand von `feb9f92` (Strapi-Upgrade). Beide Seiten sind mit derselben Advisory-Datenbank vom 2026-11-27 gemessen (`npm audit --package-lock-only`). Deshalb weichen die Zahlen für `6947bc4` von der Tabelle oben ab: seit 2026-11-23 sind neue Advisories dazugekommen.
+
+| Bereich | Vorher (`6947bc4`) | Nachher (`feb9f92`) |
+|---|---|---|
+| npm, Advisory-Paare critical / high / moderate / low | 14 / 187 / 222 / 49 | 0 / 8 / 15 / 3 |
+| npm, Advisory-Paare gesamt | 472 | 26 |
+| npm, betroffene Pakete gesamt | 169 | 32 |
+| pip | nicht neu gemessen, siehe unten | nicht neu gemessen |
+
+### Strapi-Upgrade 5.63.0 auf 5.64.0
+
+- Core und `@strapi/plugin-users-permissions` wurden auf 5.64.0 gehoben. `strapi-plugin-config-sync` und `strapi-provider-upload-azure-storage` blieben unverändert.
+- Die Liste der 26 Advisory-Paare ist vor und nach dem Upgrade gleich. Das Upgrade schließt also keinen Befund.
+- Sieben Strapi-Pakete (`@strapi/cloud-cli`, `database`, `generators`, `openapi`, `permissions`, `provider-upload-local`, `utils`) gelten nicht mehr als betroffen. Sie hingen über `zod` an einem verwundbaren Paket. Deshalb sank die Zahl der betroffenen Pakete von 39 auf 32.
+- Die verbleibende Strapi-Warnung kommt nur über `zod` 3.25.76. Dieses Paket ziehen `koa-body` und `koa-session` aus dem Strapi-Core. Es gibt kein eigenes Advisory für Strapi. Die Lösung liegt bei einem Strapi-Update, siehe TODO.md.
+- Pip ist nicht neu gemessen. Die Abhängigkeiten der Suche haben sich nicht geändert, die Befunde aus dem Abschnitt „pip“ bleiben gültig.
+
+### Offene npm-Advisories (Stand 2026-11-27, 26 Paare)
+
+| Schwere | Paket | Betroffene Version | GHSA | Titel |
+|---|---|---|---|---|
+| high | adm-zip | <0.6.0 | GHSA-xcpc-8h2w-3j85 | adm-zip: Crafted ZIP file triggers 4GB memory allocation |
+| high | adm-zip | <0.6.1 | GHSA-7q85-xj36-vmfc | adm-zip: Uncontrolled memory allocation via the declared uncompressed size (DoS) |
+| high | adm-zip | <=0.6.0 | GHSA-rcw4-f5rp-g42v | adm-zip: Decompression-bomb protection (fix for CVE-2026-39244) can be bypassed by declaring uncompressed size as 0 |
+| high | adm-zip | <=0.6.0 | GHSA-j5f4-cc29-5x44 | adm-zip extraction preserves SUID/SGID bits from untrusted ZIPs -> local privilege escalation |
+| high | adm-zip | <=0.6.0 | GHSA-8238-w5pm-2374 | adm-zip: Unhandled error event in async DEFLATE decompression crashes Node.js process (DoS) |
+| high | pdfjs-dist | >=5.6.83 <6.2.108 | GHSA-hq66-cqwq-w95j | PDF.js: Arbitrary JavaScript execution upon opening a malicious PDF  |
+| high | vite | <=6.4.3 | GHSA-587h-7wmj-h5pm | launch-editor: `fs.existsSync()` existence check can be bypassed on Windows |
+| high | zod | <4.6.6 | GHSA-mrhx-c7xc-m3w5 | Zod can exhaust memory while validating oversized constrained collections |
+| moderate | @hono/node-server | >=1.19.10 <2.1.3 | GHSA-rmxm-3fg6-px4f | @hono/node-server: `serveStatic` decodes the request path a second time, leading to bypass of middleware on static paths |
+| moderate | adm-zip | >=0.5.9 <=0.6.0 | GHSA-vwc7-r8mq-g2x9 | adm-zip extraction follows destination symlinks, allowing arbitrary file overwrite |
+| moderate | adm-zip | <=0.6.0 | GHSA-p634-w6r4-rjp2 | adm-zip: Duplicate ZIP entry names: getEntry() and extractAllTo() resolve to different content |
+| moderate | adm-zip | <=0.6.0 | GHSA-c6fg-446q-cg94 | adm-zip: getDataAsync() bypasses the maxOutputLength size guard enforced by the synchronous getData() path |
+| moderate | glob | >=9.0.0 <=14.0.1 | GHSA-3g3m-2fjr-6pw4 | Glob: AbortSignal cancellation bypass allows post-timeout filesystem traversal |
+| moderate | minimatch | >=7.0.0 <11.0.1 | GHSA-g3hv-75wg-m249 | minimatch has potential denial of service via globparts amplification |
+| moderate | react-router | >=6.0.0 <7.18.0 | GHSA-wrjc-x8rr-h8h6 | React Router: Open redirect via backslash in <Link> and useNavigate (CVE-2025-68470 bypass) |
+| moderate | react-router | >=6.4.0 <7.18.0 | GHSA-337j-9hxr-rhxg | React Router: Arbitrary Constructor Injection via deserializeErrors() in React Router SSR Hydration |
+| moderate | uuid | <11.1.1 | GHSA-w5hq-g745-h8pq | uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided |
+| moderate | vite | <=6.4.1 | GHSA-4w7w-66w2-5vf9 | Vite Vulnerable to Path Traversal in Optimized Deps `.map` Handling |
+| moderate | vite | <=6.4.2 | GHSA-v6wh-96g9-6wx3 | launch-editor: NTLMv2 hash disclosure via UNC path handling on Windows |
+| moderate | vite | <=6.4.3 | GHSA-698v-4r3x-3vcv | launch-editor: escapeCmdArgs() omits % escaping on Windows |
+| moderate | vite | <=6.4.3 | GHSA-r825-w8mm-5pxw | launch-editor: Editor CLI flag misinterpretation causing arbitrary command execution for some editors |
+| moderate | vite | <=6.4.3 | GHSA-rq7h-c2jc-7f22 | Vite: Files outside `server.fs.allow` could be served when project paths match system paths on non-Windows machine |
+| moderate | vite | <=6.4.2 | GHSA-fx2h-pf6j-xcff | vite: `server.fs.deny` bypass on Windows alternate paths |
+| low | esbuild | >=0.27.3 <0.28.1 | GHSA-g7r4-m6w7-qqqr | esbuild allows arbitrary file read when running the development server on Windows |
+| low | quill | =2.0.3 | GHSA-v3m3-f69x-jf25 | Quill is vulnerable to XSS via HTML export feature |
+| low | vite | <=6.4.3 | GHSA-9jrq-w75r-8gcw | Vite: Cross origin script execution through Vite custom middleware |
+
+### Sicherheitsrelevante Änderungen aus dem Code-Audit (Version 7.0.9)
+
+- **Freigabe-Links:** Ein gelöschter Link sperrt jetzt das Login-Token, den Refresh und offene Socket-Verbindungen. Vorher blieb ein Token bis zu 30 Tage gültig (`25e89cf`).
+- **Kartenänderungen:** Andere Nutzer bekommen nur Änderungen, die der Server übernommen hat (`f6725ec`).
+- **Freigabetyp „all“:** Der Typ wurde entfernt. Er ließ sich anlegen, aber nie nutzen (`11c5725`).
+- **Standort:** Der Breitengrad wird geprüft. Vorher wurde nur die Länge zweimal geprüft (`91cee7b`).
+- **Zugriffsregeln:** Tests prüfen Freigabe-Links auf fremde Operationen, gelöschte Links und Anfragen ohne Anmeldung (`2eb5a2f`).
+- **Suche:** Die Escape-Zeichen für `LIKE` stehen jetzt in Raw-Strings. Das verhindert Warnungen und künftige Fehler (`4489bb0`).
+
+### Prüfung nach dem Upgrade
+
+- Server-Unit-Tests: 83 von 83 bestanden. Typprüfung: ohne Fehler.
+- Produktionsbuild des Servers und der App: erfolgreich. Der lokale Build der App brauchte einen vorherigen Lauf von `write-environment.js`, siehe TODO.md.
+- Lokaler Start mit Strapi 5.64.0: Die API antwortet, die Anmeldung funktioniert. Ein Freigabe-Link ist vor dem Löschen nutzbar (200). Nach dem Löschen liefern Zugriff und Refresh 401.
+- Der Suchdienst lief im Container und beantwortete Suchen. Der Zugriff über den Host-Port war auf diesem Rechner gesperrt.
+- Nicht geprüft: die Playwright-Tests, die Socket-Trennung bei einem Widerruf im Live-Betrieb und die Container-Images.
 
 ## npm: behobene Advisories (369 Paare)
 

@@ -63,6 +63,13 @@ const evictIdleCaches = () => {
   }
 };
 
+/** Drops the cache of an archived operation. Unsaved map changes are written first; if that fails, the cache stays. */
+const dropCacheWhenSaved = async (operationId: string) => {
+  const operationCache = operationCaches[operationId];
+  if (operationCache) await saveMapState(strapi, operationId, operationCache);
+  if (!operationCache?.mapStateChanged) delete operationCaches[operationId];
+};
+
 /** The implementation of the Strapi Lifecylce hooks of the operation collection type */
 const lifecycleOperation = async (lifecycleHook: StrapiLifecycleHook, operation: Operation) => {
   operation =
@@ -83,7 +90,7 @@ const lifecycleOperation = async (lifecycleHook: StrapiLifecycleHook, operation:
   }
   if (lifecycleHook === StrapiLifecycleHooks.AFTER_UPDATE) {
     if (operation.phase === OperationPhases.ARCHIVED) {
-      delete operationCaches[operation.documentId];
+      await dropCacheWhenSaved(operation.documentId);
       return;
     } else if (!(operation.documentId in operationCaches)) {
       //maybe an "unarchive" operation
@@ -163,25 +170,30 @@ const updateCurrentLocation = async (
   }
 };
 
+/** Writes the map state of one operation to the database if it has changed since the last write. */
+const saveMapState = async (strapi: Core.Strapi, operationId: string, operationCache: OperationCache) => {
+  if (!operationCache.mapStateChanged) return;
+  // clear the flag before the write: a change arriving during the save sets it again and is saved next time
+  operationCache.mapStateChanged = false;
+  try {
+    await strapi.documents('api::operation.operation').update({
+      documentId: operationId,
+      data: {
+        mapState: operationCache.mapState as any,
+      },
+    });
+    strapi.log.info(`MapState of operation ${operationId} Persisted`);
+  } catch (error) {
+    operationCache.mapStateChanged = true;
+    strapi.log.error(error);
+  }
+};
+
 /** Persist the map state to the database if something has changed */
 const persistMapStates = async (strapi: Core.Strapi) => {
   try {
     for (const [operationId, operationCache] of Object.entries(operationCaches)) {
-      if (!operationCache.mapStateChanged) continue;
-      // clear the flag before the write: a change arriving during the save sets it again and is saved next time
-      operationCache.mapStateChanged = false;
-      try {
-        await strapi.documents('api::operation.operation').update({
-          documentId: operationId,
-          data: {
-            mapState: operationCache.mapState as any,
-          },
-        });
-        strapi.log.info(`MapState of operation ${operationId} Persisted`);
-      } catch (error) {
-        operationCache.mapStateChanged = true;
-        strapi.log.error(error);
-      }
+      await saveMapState(strapi, operationId, operationCache);
     }
   } catch (error) {
     strapi.log.error(error);

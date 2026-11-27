@@ -49,7 +49,7 @@ server {
     add_header Strict-Transport-Security "max-age=31536000" always;
     # shortcut: https:/http: wildcards because API, tile and search hosts are set per deployment; pin them to the real origins when known
     # frame-ancestors does not fall back to default-src, so it is set explicitly
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http: https:; font-src 'self' data:; connect-src 'self' http: https:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http: https:; font-src 'self' data:; connect-src 'self' http: https: ws: wss:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'" always;
 
     root   /usr/share/nginx/html;
     index index.html;

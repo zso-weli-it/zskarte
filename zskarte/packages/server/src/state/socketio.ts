@@ -1,12 +1,13 @@
 import { Socket } from 'socket.io/dist/socket';
 import _ from 'lodash';
-import { getOperationCache } from './operation';
+import { getOperationCache, operationCaches } from './operation';
 import { Operation, OperationCache, PatchExtended, User, WebsocketEvent } from '../definitions';
 import { Server } from 'socket.io';
 import { Core } from '@strapi/strapi';
 import { serialize as superjsonSerialize } from '../middlewares/superjson';
 import { appOrigin, isAllowedOrigin } from './allowed-origin';
 import { isMemberOfOperation } from './membership';
+import { isShareLinkUsable } from '../api/access/lib/share-access';
 
 const sanitizeUser = (user) => {
   delete user.password;
@@ -41,7 +42,11 @@ const socketConnection = async ({ strapi }, socket: Socket) => {
       return;
     }
     const { jwt, user: userService } = strapi.plugins['users-permissions'].services;
-    const { id: userId, operationId: tokenOperationId }: { id: number; operationId: string } = await jwt.verify(token);
+    const {
+      id: userId,
+      operationId: tokenOperationId,
+      accessId,
+    }: { id: number; operationId: string; accessId: string } = await jwt.verify(token);
     // Check if the token operationId matches the query operationId
     if (tokenOperationId && operationId !== tokenOperationId) {
       strapi.log.warn(
@@ -50,6 +55,13 @@ const socketConnection = async ({ strapi }, socket: Socket) => {
       socket.disconnect();
       return;
     }
+    if (tokenOperationId && !(await isShareLinkUsable(strapi, accessId))) {
+      strapi.log.warn(`Socket: ${socket.id} - share link of the access token is no longer active`);
+      socket.disconnect();
+      return;
+    }
+    // remembered so the connection can be closed when its share link is deleted
+    socket.data.accessId = accessId;
     const user = (await userService.fetch(userId)) as User;
     const operationCache = await getOperationCache(operationId);
     // Check if the operationCache exists
@@ -77,6 +89,15 @@ const socketConnection = async ({ strapi }, socket: Socket) => {
   } catch (error) {
     socket.disconnect();
     strapi.log.error(error);
+  }
+};
+
+/** Closes every live connection that came in with the given share link. */
+const disconnectShareSockets = (accessId: string) => {
+  for (const operationCache of Object.values(operationCaches)) {
+    for (const connection of [...operationCache.connections]) {
+      if (connection.socket.data.accessId === accessId) connection.socket.disconnect();
+    }
   }
 };
 
@@ -134,4 +155,11 @@ const broadcastJournal = (operationCache: OperationCache, identifier: string, da
   }
 };
 
-export { connectSocketIo, socketConnection, broadcastConnections, broadcastPatches, broadcastJournal };
+export {
+  connectSocketIo,
+  socketConnection,
+  broadcastConnections,
+  broadcastPatches,
+  broadcastJournal,
+  disconnectShareSockets,
+};

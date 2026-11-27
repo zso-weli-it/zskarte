@@ -5,6 +5,7 @@
 import { Core, UID } from '@strapi/strapi';
 import { AccessControlConfig, AccessControlTypes, OperationPhases } from '../definitions';
 import { formatAccessViolation } from './format-access-violation';
+import { isShareLinkUsable } from '../api/access/lib/share-access';
 import type { HasOperationType, HasOrganizationType, AccessCheckableType } from '../definitions/TypeGuards';
 import {
   isOperation,
@@ -436,7 +437,14 @@ export default <T extends UID.ContentType>(config: AccessControlConfig<T>, { str
 
     const { documentId: userOrganisationId } = ctx.state?.user?.organization ?? {};
     const { jwt } = strapi.plugins['users-permissions'].services;
-    const { operationId: jwtOperationId, organizationId: jwtOrganizationId } = (await jwt.getToken(ctx)) ?? {};
+    const {
+      operationId: jwtOperationId,
+      organizationId: jwtOrganizationId,
+      accessId: jwtAccessId,
+    } = (await jwt.getToken(ctx)) ?? {};
+    if (jwtOperationId && !(await isShareLinkUsable(strapi, jwtAccessId))) {
+      return ctx.unauthorized('This share link is no longer active.');
+    }
     if (!userOrganisationId && !jwtOperationId /*&& !jwtOrganizationId*/) {
       if (hasPublic(config.type)) {
         if (config.check === AccessControlTypes.LIST) {

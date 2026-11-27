@@ -10,6 +10,8 @@ import { AccessTokenTypes } from '../../../definitions/constants/AccessTokenType
 import { createCodeGuessGuard } from '../lib/code-guess-guard';
 import { withOperationFilter } from '../lib/list-filter';
 import { claimShortCode, createShortCode } from '../lib/short-code';
+import { isShareAccessUsable, isShareLinkUsable } from '../lib/share-access';
+import { disconnectShareSockets } from '../../../state/socketio';
 const MINUTES_15 = 1000 * 60 * 15;
 
 // Short codes are only 6 digits, so guessing must be slow: max 10 wrong codes per IP per minute,
@@ -35,6 +37,9 @@ export default factories.createCoreController('api::access.access', ({ strapi })
     const { jwt } = strapi.plugins['users-permissions'].services;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { exp, iat, ...origToken } = await jwt.getToken(ctx);
+    if (origToken.operationId && !(await isShareLinkUsable(strapi, origToken.accessId))) {
+      return ctx.unauthorized('Access is not active anymore');
+    }
     const token = jwt.issue({ ...origToken, id });
 
     ctx.send({
@@ -68,9 +73,7 @@ export default factories.createCoreController('api::access.access', ({ strapi })
       failedTokenLimiter.recordFailure(ctx.ip);
       return ctx.unauthorized('Invalid access token');
     }
-    if (!access.active) return ctx.unauthorized('Access is not active anymore');
-    if (access.expiresOn && new Date(access.expiresOn).getTime() < Date.now())
-      return ctx.unauthorized('Access is not active anymore');
+    if (!isShareAccessUsable(access)) return ctx.unauthorized('Access is not active anymore');
     if (!access.operation) return ctx.unauthorized('Access has no operation assigned');
     if (!access.organization) return ctx.unauthorized('Access has no organization assigned');
 
@@ -97,6 +100,7 @@ export default factories.createCoreController('api::access.access', ({ strapi })
       id: accessUser.id,
       operationId: access.operation.documentId,
       organizationId: access.organization.documentId,
+      accessId: access.documentId,
       permission: access.type,
     });
 
@@ -157,5 +161,12 @@ export default factories.createCoreController('api::access.access', ({ strapi })
       ctx.query.filters = withOperationFilter(ctx.query.filters, ctx.query.operationId as string);
     }
     return await super.find(ctx);
+  },
+  async delete(ctx) {
+    const { id } = ctx.params;
+    const response = await super.delete(ctx);
+    // a deleted share link must not keep its open live connections
+    disconnectShareSockets(id);
+    return response;
   },
 }));

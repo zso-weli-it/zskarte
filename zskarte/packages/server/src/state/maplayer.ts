@@ -159,15 +159,28 @@ export async function updateMapLayerMedias(strapi: Core.Strapi) {
     }
   } catch (error) {
     strapi.log.error(error);
+  } finally {
+    await finishWithWorker(() => markRunEnded(strapi, configId), stopWorker);
   }
-  if (configId) {
-    await strapi.documents('api::map-layer-generation-config.map-layer-generation-config').update({
-      documentId: configId,
-      data: { lastEndDate: new Date() },
-    });
-  }
-  await stopWorker();
 }
+
+/** Stamps the end of the run in the config. Without a config id no run was started, so nothing is written. */
+const markRunEnded = async (strapi: Core.Strapi, configId: string | undefined) => {
+  if (!configId) return;
+  await strapi.documents('api::map-layer-generation-config.map-layer-generation-config').update({
+    documentId: configId,
+    data: { lastEndDate: new Date() },
+  });
+};
+
+/** Runs the final step and stops the worker afterwards, also when the step fails. */
+export const finishWithWorker = async (finish: () => Promise<void>, stopWorker: () => Promise<void>) => {
+  try {
+    await finish();
+  } finally {
+    await stopWorker();
+  }
+};
 
 export function startWorker(strapi: Core.Strapi) {
   const worker = new Worker('./dist/src/workers/map-layer-processor.js');

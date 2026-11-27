@@ -138,38 +138,9 @@ export default <T extends UID.ContentType>(config: AccessControlConfig<T>, { str
     const operationIdFilter = ctx.query?.operationId;
     if (hasOperation(config.type)) {
       if (jwtOperationId) {
-        if (hasPublic(config.type)) {
-          ctx.query.filters = {
-            $or: [{ operation: { documentId: { $eq: jwtOperationId } } }, { public: { $eq: true } }],
-          };
-        } else {
-          ctx.query.filters = { operation: { documentId: { $eq: jwtOperationId } } };
-        }
-        /*
-        //only needed if there are access tokens allow full access to organization not specific operation only
-      } else if (jwtOrganizationId) {
-        if (hasPublic(config.type)) {
-          ctx.query.filters = {
-            $or: [
-              { operation: { organization: { documentId: { $eq: jwtOrganizationId } } } },
-              { public: { $eq: true } },
-            ],
-          };
-        } else {
-          ctx.query.filters = { operation: { organization: { documentId: { $eq: jwtOrganizationId } } } };
-        }
-        */
+        ctx.query.filters = { operation: { documentId: { $eq: jwtOperationId } } };
       } else {
-        if (hasPublic(config.type)) {
-          ctx.query.filters = {
-            $or: [
-              { operation: { organization: { documentId: { $eq: userOrganisationId } } } },
-              { public: { $eq: true } },
-            ],
-          };
-        } else {
-          ctx.query.filters = { operation: { organization: { documentId: { $eq: userOrganisationId } } } };
-        }
+        ctx.query.filters = { operation: { organization: { documentId: { $eq: userOrganisationId } } } };
         if (operationIdFilter) {
           ctx.query.filters.operation.documentId = { $eq: operationIdFilter };
         }
@@ -180,14 +151,7 @@ export default <T extends UID.ContentType>(config: AccessControlConfig<T>, { str
         if (jwtOperationId) {
           ctx.query.filters = { documentId: { $eq: jwtOperationId } };
         } else {
-          /*
-          //only needed if there are access tokens allow full access to organization not specific operation only
-          if (jwtOrganizationId) {
-            ctx.query.filters = { organization: { documentId: { $eq: jwtOrganizationId } } };
-          } else {
-          */
-            ctx.query.filters = { organization: { documentId: { $eq: userOrganisationId } } };
-          //}
+          ctx.query.filters = { organization: { documentId: { $eq: userOrganisationId } } };
           if (operationIdFilter) {
             ctx.query.filters.documentId = { $eq: operationIdFilter };
           }
@@ -282,28 +246,14 @@ export default <T extends UID.ContentType>(config: AccessControlConfig<T>, { str
 
   const getOperation = async (contentType: HasOperationType, entryId: string) => {
     if (entryId) {
-      if (hasPublic(contentType)) {
-        /*
-        //there is currently no HasOperationType that is also HasPublicType so compilation would fail
-        const entry = (await strapi.documents(contentType).findOne({
-          documentId: entryId,
-          fields: ['documentId', 'public'],
-          populate: {
-            operation: { fields: ['documentId'], populate: { organization: { fields: ['documentId'] } } },
-          },
-        })) as { documentId: string; public: boolean; operation: { documentId: string; phase: string } };
-        return entry;
-        */
-      } else {
-        const entry = (await strapi.documents(contentType).findOne({
-          documentId: entryId,
-          fields: ['documentId'],
-          populate: {
-            operation: { fields: ['documentId', 'phase'], populate: { organization: { fields: ['documentId'] } } },
-          },
-        })) as { documentId: string; operation: { documentId: string; phase: string } };
-        return entry;
-      }
+      const entry = (await strapi.documents(contentType).findOne({
+        documentId: entryId,
+        fields: ['documentId'],
+        populate: {
+          operation: { fields: ['documentId', 'phase'], populate: { organization: { fields: ['documentId'] } } },
+        },
+      })) as { documentId: string; operation: { documentId: string; phase: string } };
+      return entry;
     }
     return null;
   };
@@ -397,7 +347,6 @@ export default <T extends UID.ContentType>(config: AccessControlConfig<T>, { str
       //it's a public object, read is allowed
     } else if (!operation && !organization) {
       //entry not found
-      //return ctx.notFound();
       //don't leak this information
       return ctx.forbidden('This action is forbidden.');
     } else {
@@ -445,7 +394,7 @@ export default <T extends UID.ContentType>(config: AccessControlConfig<T>, { str
     if (jwtOperationId && !(await isShareLinkUsable(strapi, jwtAccessId))) {
       return ctx.unauthorized('This share link is no longer active.');
     }
-    if (!userOrganisationId && !jwtOperationId /*&& !jwtOrganizationId*/) {
+    if (!userOrganisationId && !jwtOperationId) {
       if (hasPublic(config.type)) {
         if (config.check === AccessControlTypes.LIST) {
           return doListChecks(ctx, next, userOrganisationId, jwtOperationId, jwtOrganizationId);

@@ -256,6 +256,20 @@ const deleteGuestOperations = async (strapi: Core.Strapi) => {
   }
 };
 
+/** Snapshots are full copies of a map, so they are kept for a limited time only. */
+export const SNAPSHOT_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+
+/** Deletes the map snapshots that are older than the retention period. */
+export const deleteOldSnapshots = async (strapi: Core.Strapi, now = Date.now()) => {
+  try {
+    await strapi.db.query('api::map-snapshot.map-snapshot').deleteMany({
+      where: { createdAt: { $lt: new Date(now - SNAPSHOT_RETENTION_MS) } },
+    });
+  } catch (error) {
+    strapi.log.error(error);
+  }
+};
+
 const createMapStateSnapshots = async (strapi: Core.Strapi) => {
   try {
     const activeOperations = (await strapi.documents('api::operation.operation').findMany({

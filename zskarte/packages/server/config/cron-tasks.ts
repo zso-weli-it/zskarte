@@ -3,6 +3,7 @@ import {
   archiveOperations,
   createMapStateSnapshots,
   deleteGuestOperations,
+  deleteOldSnapshots,
   persistMapStates,
 } from '../src/state/operation';
 import { updateMapLayerMedias } from '../src/state/maplayer';
@@ -13,6 +14,7 @@ export default {
   '0 * * * *': async ({ strapi }: { strapi: Core.Strapi }) => {
     await archiveOperations(strapi);
     await deleteExpiredAccessTokens(strapi);
+    await deleteOldSnapshots(strapi);
   },
   // Every fifteen seconds
   '*/15 * * * * *': async ({ strapi }: { strapi: Core.Strapi }) => persistMapStates(strapi),

@@ -4,11 +4,11 @@
 
 import { factories } from '@strapi/strapi';
 import { updateJournal } from '../../../state/journal';
-import { chooseMessageNumber, isNumberTaken } from '../lib/message-number';
+import { chooseMessageNumber, isLosingRace, isNumberTaken, renumberUntilFree } from '../lib/message-number';
 import { errors } from '@strapi/utils';
 import fp from 'lodash/fp';
 
-// documentIds of the entries in the operation that use this message number
+// documentIds of the entries in the operation that use this message number, the earliest saved first
 const findNumberUsage = async (messageNumber: number, operationId: string, organizationId: string): Promise<string[]> =>
   (
     await strapi.documents('api::journal-entry.journal-entry').findMany({
@@ -17,6 +17,7 @@ const findNumberUsage = async (messageNumber: number, operationId: string, organ
         operation: { documentId: { $eq: operationId } },
         organization: { documentId: { $eq: organizationId } },
       },
+      sort: { createdAt: 'asc' },
       fields: ['documentId' as any],
     })
   ).map((entry) => entry.documentId);
@@ -51,33 +52,13 @@ export default factories.createCoreController('api::journal-entry.journal-entry'
       // serialise number assignment per operation: concurrent saves would otherwise read the same max number
       // (messageNumber has no unique index). The lock is released automatically at commit/rollback.
       await trx.raw('select pg_advisory_xact_lock(hashtext(?))', [`journal:${sanitizedInputData.operation}`]);
-      async function countOcurrence(messageNumber: number) {
-        return await strapi.documents('api::journal-entry.journal-entry').count({
-          filters: {
-            messageNumber: messageNumber,
-            operation: { documentId: { $eq: sanitizedInputData.operation } },
-            organization: { documentId: { $eq: sanitizedInputData.organization } },
-          },
-        });
-      }
-      async function earliestOcurrenceId(messageNumber: number) {
-        return (
-          await strapi.documents('api::journal-entry.journal-entry').findFirst({
-            filters: {
-              messageNumber: messageNumber,
-              operation: { documentId: { $eq: sanitizedInputData.operation } },
-              organization: { documentId: { $eq: sanitizedInputData.organization } },
-            },
-            sort: { createdAt: 'asc' },
-            fields: ['documentId' as any],
-          })
-        ).documentId;
-      }
+      const usageOf = (messageNumber: number) =>
+        findNumberUsage(messageNumber, sanitizedInputData.operation, sanitizedInputData.organization);
 
       const messageNumber = sanitizedInputData.messageNumber;
       const choice = await chooseMessageNumber(
         messageNumber,
-        async (n) => (await countOcurrence(n)) > 0,
+        async (n) => (await usageOf(n)).length > 0,
         async () => {
           //if not submitted find highest number
           const entry = await strapi.documents('api::journal-entry.journal-entry').findFirst({
@@ -107,29 +88,18 @@ export default factories.createCoreController('api::journal-entry.journal-entry'
       });
       const sanitizedEntity = (await this.sanitizeOutput(entity, ctx)) as any;
 
-      //check if just inserted entry have a unique messageNumber (e.g. race condition)
-      if ((await countOcurrence(sanitizedEntity.messageNumber)) > 1) {
-        const keepDocumentId = await earliestOcurrenceId(sanitizedEntity.messageNumber);
-        //check if this is not the earlier one
-        if (sanitizedEntity.documentId !== keepDocumentId) {
-          if (nextMessageNumber === null) {
-            //if not unique and number was submitted: throw error, which will rollback the transaction
-            throw new errors.ValidationError(`messageNumber ${messageNumber} already exist`);
-          }
-          //if automatic number: update entry as long as needed to make the number unique
-          while (
-            (await countOcurrence(sanitizedEntity.messageNumber)) > 1 &&
-            (await earliestOcurrenceId(sanitizedEntity.messageNumber)) !== sanitizedEntity.documentId
-          ) {
-            sanitizedEntity.messageNumber += 1;
-            await strapi.documents('api::journal-entry.journal-entry').update({
-              documentId: sanitizedEntity.documentId,
-              data: {
-                messageNumber: sanitizedEntity.messageNumber,
-              },
-            });
-          }
+      //a race can give the new entry a number that another entry just took
+      if (isLosingRace(await usageOf(sanitizedEntity.messageNumber), sanitizedEntity.documentId)) {
+        //a submitted number cannot be changed, so the save fails and the transaction is rolled back
+        if (nextMessageNumber === null) {
+          throw new errors.ValidationError(`messageNumber ${messageNumber} already exist`);
         }
+        await renumberUntilFree(sanitizedEntity, usageOf, async (documentId, number) => {
+          await strapi.documents('api::journal-entry.journal-entry').update({
+            documentId,
+            data: { messageNumber: number },
+          });
+        });
       }
       updateJournal(identifier, sanitizedInputData.operation, sanitizedEntity);
       ctx.status = 201;

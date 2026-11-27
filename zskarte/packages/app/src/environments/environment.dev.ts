@@ -9,7 +9,7 @@ export const environment = {
   showNavLink: true,
   buildVersion: 'dev',
   appUrl: 'http://localhost:4300',
-  gitUrl: 'https://github.com/itzsoweli/offlinekarte',
+  gitUrl: 'https://github.com/zso-weli-it/zskarte',
   codeLoginEnabled: true,
   workLocalEnabled: true,
 };

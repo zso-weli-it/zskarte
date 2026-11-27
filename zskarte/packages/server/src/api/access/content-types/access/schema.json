@@ -27,8 +27,7 @@
       "type": "enumeration",
       "enum": [
         "read",
-        "write",
-        "all"
+        "write"
       ],
       "required": true,
       "default": "read"

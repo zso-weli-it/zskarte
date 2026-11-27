@@ -116,7 +116,7 @@ export default factories.createCoreController('api::access.access', ({ strapi })
 
     if (!type) return ctx.badRequest('You must define the "type" property');
     if (!Object.values(AccessTypes).includes(type))
-      return ctx.badRequest('The "type" property has an invalid value. Allowed values are: [read, write, all]');
+      return ctx.badRequest('The "type" property has an invalid value. Allowed values are: [read, write]');
 
     if (!operationId) return ctx.badRequest('You must define the "operationId" property');
     const operations = (await strapi.documents('api::operation.operation').findMany({

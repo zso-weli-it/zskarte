@@ -1,4 +1,4 @@
-import { applyPatches, enablePatches, Patch } from 'immer';
+import { applyPatches, enablePatches } from 'immer';
 import { Core } from '@strapi/types';
 import _ from 'lodash';
 
@@ -112,7 +112,7 @@ const lifecycleOperation = async (lifecycleHook: StrapiLifecycleHook, operation:
   }
 };
 
-const isValidImmerPatch = (patch: Patch) => {
+const isValidImmerPatch = (patch: PatchExtended) => {
   if (typeof patch !== 'object' || patch === null) return false;
   if (!['replace', 'add', 'remove'].includes(patch.op)) return false;
   if (!Array.isArray(patch.path)) return false;
@@ -127,27 +127,33 @@ const validatePatches = (patches: PatchExtended[]) => {
   return _.orderBy(_.filter(patches, isValidImmerPatch), ['timestamp'], ['asc']);
 };
 
-/** Uses the immer library to patch the server map state */
-const updateMapState = async (operationId: string, identifier: string, patches: PatchExtended[]) => {
-  const operationCache = await getOperationCache(operationId);
-  if (!operationCache) return;
-  const validatedPatches = validatePatches(patches);
-  if (!validatedPatches.length) return;
-  const oldMapState = operationCache.mapState;
-  for (const patch of validatedPatches) {
+/** Applies the patches one by one. Returns the new state and only the patches that changed it. */
+const applyEachPatch = (mapState: object, patches: PatchExtended[]) => {
+  let state = mapState;
+  const applied: PatchExtended[] = [];
+  for (const patch of patches) {
     try {
-      operationCache.mapState = applyPatches(operationCache.mapState, [patch]);
+      const next = applyPatches(state, [patch]);
+      // immer returns the same object when a patch changes nothing, so a reference check is enough
+      if (next !== state) applied.push(patch);
+      state = next;
     } catch (error) {
       strapi.log.error(error);
     }
   }
-  // immer returns the same object when a patch changes nothing, so a reference check is enough
-  const stateChanged = operationCache.mapState !== oldMapState;
+  return { mapState: state, applied };
+};
 
-  if (!stateChanged) return;
-
+/** Uses the immer library to patch the server map state and sends the applied patches to the other users */
+const updateMapState = async (operationId: string, identifier: string, patches: PatchExtended[]) => {
+  const operationCache = await getOperationCache(operationId);
+  if (!operationCache) return;
+  const { mapState, applied } = applyEachPatch(operationCache.mapState, validatePatches(patches));
+  if (!applied.length) return;
+  operationCache.mapState = mapState;
   operationCache.mapStateChanged = true;
-  broadcastPatches(operationCache, identifier, patches);
+  // other users must get exactly what the server kept, or their maps differ from the server's
+  broadcastPatches(operationCache, identifier, applied);
 };
 
 /** Updates the current location of a connection */

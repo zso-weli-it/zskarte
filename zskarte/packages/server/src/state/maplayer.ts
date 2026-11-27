@@ -13,6 +13,13 @@ import { updateSwissBoundaries, getCantonFeature, getDistrictFeatures } from './
 import { updateSwissNamesNational, updateSwissNames } from './maplayer-swiss-names';
 import { prepareMediaFolders, configureDefaultStyleMedias } from './maplayer-styles';
 
+/** Every canton in the list must be a code without spaces, so a space after a comma cannot hide a canton. */
+export function assertCantonList(cantons: string): void {
+  if (cantons.trim().split(',').some((canton) => canton.includes(' '))) {
+    throw new Error('updateMapLayerMedias failed: cantons need to be splited by ","');
+  }
+}
+
 export async function getAndVerifyMapLayerGenerationConfig(strapi: Core.Strapi) {
   //read and verify config
   const config = await strapi.documents('api::map-layer-generation-config.map-layer-generation-config').findFirst({
@@ -27,9 +34,7 @@ export async function getAndVerifyMapLayerGenerationConfig(strapi: Core.Strapi) 
   if (!config.cantons?.trim()) {
     throw new Error('updateMapLayerMedias failed: cantons to update is empty');
   }
-  if (config.cantons.split(',')[0].includes(' ')) {
-    throw new Error('updateMapLayerMedias failed: cantons need to be splited by ","');
-  }
+  assertCantonList(config.cantons);
 
   if (!config.style_entrances || !config.style_swissBOUNDARIES3D || !config.style_swissNAMES3D) {
     //try to autofix and continue

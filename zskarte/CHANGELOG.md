@@ -1,5 +1,17 @@
 # Changelog
 
+## 7.0.9
+- Sicherheit: Ein gelöschter Freigabe-Link funktioniert nicht mehr, auch nicht mit einem alten Login. Offene Verbindungen dazu werden getrennt. Wer vor dem Update über einen Freigabe-Link arbeitet, meldet sich einmal mit dem Freigabe-Code neu an.
+- Sicherheit: Freigaben mit dem Typ "all" werden nicht mehr angelegt, sie konnten nie genutzt werden.
+- Karte: Beim Archivieren einer Operation werden noch nicht gespeicherte Änderungen zuerst gesichert.
+- Karte: Andere Nutzer bekommen nur Änderungen, die der Server übernommen hat. So stimmen die Karten überein.
+- Standort: Ein ungültiger Breitengrad wird abgelehnt. Wer das Teilen des Standorts beendet, verschwindet sauber von der Karte.
+- Kartenlayer: Jeder Kanton in der Liste wird geprüft, nicht nur der erste.
+- Kartenlayer: Der Hintergrundprozess wird auch dann beendet, wenn das Speichern am Ende fehlschlägt.
+- Such-Dienst: Nach einem Update wird er neu gebaut, wenn sich seine Dateien geändert haben.
+- Kartenschnappschüsse werden nach 30 Tagen gelöscht, damit die Datenbank nicht unbegrenzt wächst.
+- Aufgeräumt: tote Zweige und auskommentierter Code in den Zugriffsregeln entfernt, Journal-Nummern vereinfacht.
+
 ## 7.0.8
 - Sicherheit: Die Karten-Webseite kann nur noch von der eigenen Seite in einem iframe eingebettet werden (Schutz gegen Clickjacking).
 

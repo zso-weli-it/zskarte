@@ -28,11 +28,15 @@ Stand: 2026-11-23. Erledigte Punkte stehen nicht mehr hier, Details stehen in de
 ## Audit 2026-11-27 (offen)
 - [ ] Shapefile-Laden (`zskarte/packages/server/src/state/shp-loader.ts`): Eine Datei ohne ZIP wird zweimal vollständig geladen, einmal zum Prüfen der Kennung und einmal von `shpjs`. Die Abkürzung braucht eine andere `shpjs`-Schnittstelle, weil ein einzelnes `.shp` seine `.dbf`-Nachbardatei über die URL findet. Die Quellen-ZIPs sind der Standard, die entpackten `.shp` des Servers laufen aber über denselben Pfad, deshalb blieb der Zweig bestehen.
 
+- [ ] `zod` 3.25.76 (Advisory GHSA-mrhx-c7xc-m3w5, high): kommt über `koa-body` und `koa-session` aus dem Strapi-Core. Lösung nur über ein Strapi-Update, das diese Pakete aktualisiert.
+- [ ] `zskarte/packages/app/src/environments/environment.prod.ts` ist veraltet (ohne `codeLoginEnabled` und `workLocalEnabled`). `npm run build:app` lokal bricht deshalb ab. Der Docker-Build erzeugt die Datei vorher selbst. Lösung: die Datei per `node packages/app/scripts/write-environment.js` neu erzeugen und einchecken, oder den lokalen Build-Schritt anpassen.
+
 ## Bewusst offen
 - Sicherheit, vom Betreiber akzeptiert: A2 (Beispiel-Secrets in der Server-`.env` bei `zskarte.sh start`) und A6 (Passwort-Fallback `supersecret123` für die Datenbank).
 - React, react-dom, react-router-dom und styled-components bleiben im Server: Strapi verlangt sie für den Admin (`strapi build` bricht ohne sie ab).
-- Strapi-Warnungen (`glob@7`, `@koa/router@12`, `node-abort-controller`, `rimraf`, `inflight`, `uuid@8`): Lösung über Strapi-Updates. Strapi 5.63.0 ist das aktuelle latest.
+- Strapi-Warnungen (`glob@7`, `@koa/router@12`, `node-abort-controller`, `rimraf`, `inflight`, `uuid@8`): Lösung über Strapi-Updates. Strapi 5.64.0 ist das aktuelle latest (seit 2026-11-27 eingesetzt).
 - Upgrade-Lauf 2026-11-23: Strapi, `strapi-plugin-config-sync` und `strapi-provider-upload-azure-storage` blieben unverändert, laut Vorgabe.
+- Strapi-Upgrade 2026-11-27 auf Anweisung: Core und `@strapi/plugin-users-permissions` auf 5.64.0. `strapi-plugin-config-sync` und `strapi-provider-upload-azure-storage` blieben unverändert.
 - `zskarte.bat`: bleibt vorerst. Entscheidung, ob löschen oder synchron halten.
 - Strapi-Warnung `admin.auth.options.expiresIn` stammt aus Strapi-Defaults.
 - `rc-color-picker` React-16-Peer-Konflikt: nicht blockierend.

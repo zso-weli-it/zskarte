@@ -160,7 +160,7 @@ const updateMapState = async (operationId: string, identifier: string, patches: 
 const updateCurrentLocation = async (
   operationId: string,
   identifier: string,
-  longLat: { long: number; lat: number },
+  longLat: { long: number; lat: number } | undefined,
 ) => {
   const operationCache = await getOperationCache(operationId);
   if (!operationCache) return;

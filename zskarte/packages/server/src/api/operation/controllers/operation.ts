@@ -6,6 +6,7 @@ import { factories } from '@strapi/strapi';
 import { Operation, PatchExtended, OperationPhases } from '../../../definitions';
 import { getOperationCache, updateCurrentLocation, updateMapState } from '../../../state/operation';
 import _ from 'lodash';
+import { isValidLocation } from '../lib/location';
 
 const allowedMetaFields = ['name', 'description', 'eventStates'];
 
@@ -39,13 +40,15 @@ export default factories.createCoreController('api::operation.operation', ({ str
       ctx.status = 400;
       return { message: 'Missing headers: identifier or operationId' };
     }
-    const { long, lat } = ctx.request.body;
-    if (!_.isEmpty(ctx.request.body) && (typeof long !== 'number' || typeof long !== 'number')) {
-      //if value submitted but not number, prevent save / populate to other user
+    const body = ctx.request.body ?? {};
+    //if value submitted but not number, prevent save / populate to other user
+    if (!isValidLocation(body)) {
       ctx.status = 400;
       return { message: 'invalid coordinates' };
     }
-    await updateCurrentLocation(operationid, identifier, { long, lat });
+    // an empty body clears the position, so no empty object is stored for the other users
+    const location = _.isEmpty(body) ? undefined : { long: body.long, lat: body.lat };
+    await updateCurrentLocation(operationid, identifier, location);
     ctx.status = 200;
     return { success: true };
   },

@@ -25,6 +25,9 @@ Stand: 2026-11-23. Erledigte Punkte stehen nicht mehr hier, Details stehen in de
 - [ ] Biome 2 aufräumen: CSS- und HTML-Lint sind aus, drei Regeln sind aus (`useIterableCallbackReturn`, `noNonNullAssertedOptionalChain`, `noInvalidUseBeforeDeclaration`). Die Regeln prüfen und wieder einschalten, wo sie passen. Der Lint der Templates (`a11y`) ist ungeprüft.
 - [ ] Server-Tsconfig: TypeScript 6 meldet Deprecations (`baseUrl`, `moduleResolution: node10`) aus der Strapi-Basiskonfiguration. Vor TypeScript 7 beheben.
 
+## Audit 2026-11-27 (offen)
+- [ ] Shapefile-Laden (`zskarte/packages/server/src/state/shp-loader.ts`): Eine Datei ohne ZIP wird zweimal vollständig geladen, einmal zum Prüfen der Kennung und einmal von `shpjs`. Die Abkürzung braucht eine andere `shpjs`-Schnittstelle, weil ein einzelnes `.shp` seine `.dbf`-Nachbardatei über die URL findet. Die Quellen-ZIPs sind der Standard, die entpackten `.shp` des Servers laufen aber über denselben Pfad, deshalb blieb der Zweig bestehen.
+
 ## Bewusst offen
 - Sicherheit, vom Betreiber akzeptiert: A2 (Beispiel-Secrets in der Server-`.env` bei `zskarte.sh start`) und A6 (Passwort-Fallback `supersecret123` für die Datenbank).
 - React, react-dom, react-router-dom und styled-components bleiben im Server: Strapi verlangt sie für den Admin (`strapi build` bricht ohne sie ab).

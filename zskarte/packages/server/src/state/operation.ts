@@ -19,6 +19,7 @@ const MIN = 1000 * 60;
 
 enablePatches();
 
+// shortcut: live maps are kept in this process's memory, one server process only; a shared store is needed before scaling out
 const operationCaches: { [key: string]: OperationCache } = {};
 const loadingCaches = new Map<string, Promise<OperationCache | undefined>>();
 

@@ -43,7 +43,7 @@ ZSK_FILES="-f zskarte/docker-compose.yml $TRAEFIK_ZSK"
 ROOT_FILES="-f docker-compose.yml $TRAEFIK_ROOT"
 
 # a change in these paths (or in deploy.env) means the images must be built again
-BUILD_INPUTS="zskarte/packages zskarte/package.json zskarte/package-lock.json zskarte/patches zskarte/.npmrc zskarte/.dockerignore zskarte/Dockerfile.app zskarte/Dockerfile.server zskarte/docker-compose.yml docker-compose.yml"
+BUILD_INPUTS="zskarte/packages zskarte/package.json zskarte/package-lock.json zskarte/patches zskarte/.npmrc zskarte/.dockerignore zskarte/Dockerfile.app zskarte/Dockerfile.server zskarte/docker-compose.yml docker-compose.yml searchserv/Dockerfile searchserv/requirements.txt searchserv/search.py searchserv/search_text.py"
 BUILD_STATE=.build-state
 
 build_env_hash() {

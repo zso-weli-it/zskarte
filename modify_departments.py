@@ -20,7 +20,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent
+if sys.version_info < (3, 12):
+    sys.exit(f"modify_departments.py needs Python 3.12 or newer, but this is Python {sys.version.split()[0]}.")
+
+REPO =Path(__file__).resolve().parent
 SCHEMA = REPO / "zskarte/packages/server/src/api/journal-entry/content-types/journal-entry/schema.json"
 TYPES = REPO / "zskarte/packages/app/src/app/journal/journal.types.ts"
 TRANSLATIONS = REPO / "zskarte/packages/app/src/app/state/translations/journal.translations.ts"

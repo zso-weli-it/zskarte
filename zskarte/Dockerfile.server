@@ -26,14 +26,15 @@ FROM node:26.13.1-slim AS release
 
 WORKDIR /app
 ENV HOST=0.0.0.0
-# the upload folder is a volume; it must exist and belong to node so the volume is writable on first use
-RUN mkdir -p /app/packages/server/public/uploads && chown node:node /app/packages/server/public/uploads
-USER node
 EXPOSE 1337
 
 COPY --from=build --chown=node:node /app/node_modules /app/node_modules
 COPY --from=build --chown=node:node /app/packages/server /app/packages/server
 COPY --from=build --chown=node:node /app/package.json /app/package.json
+
+# the upload folder is a volume; Strapi also writes below packages/server, so both must belong to node
+RUN mkdir -p /app/packages/server/public/uploads && chown node:node /app/packages/server /app/packages/server/public /app/packages/server/public/uploads
+USER node
 
 # start command
 CMD ["npm", "run", "start:server:prod"] 

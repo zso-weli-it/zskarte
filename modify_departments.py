@@ -114,7 +114,7 @@ def generated_with(generated_text: str, departments: list[str]) -> str:
 def run_sql(sql: str, variables: dict[str, str]) -> list[list[str]]:
     """Runs SQL in the database container. Values go in as psql variables, never into the SQL text."""
     command = ["docker", "exec", "-i", CONTAINER, "psql", "-U", DB_USER, "-d", DB_NAME,
-               "-v", "ON_ERROR_STOP=1", "-At", "-F", "\t"]
+               "-v", "ON_ERROR_STOP=1", "-q", "-At", "-F", "\t"]
     for key, value in variables.items():
         command += ["-v", f"{key}={value}"]
     try:

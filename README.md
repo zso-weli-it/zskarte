@@ -4,6 +4,8 @@
 
 Zivilschutz-Karte is a powerful JavaScript application (based on Angular) designed for creating detailed situation maps for disaster management. Developed specifically for Swiss civil defense organisations, it works seamlessly on both standard computers and interactive whiteboards. 🖥️ 📱
 
+This project is a fork of https://github.com/zso-freiamt-it/offlinekarte/tree/master and https://github.com/zskarte/zskarte.
+
 ## 🔍 Key Features
 
 - 🎨 Intuitive drawing interface

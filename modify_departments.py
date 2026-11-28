@@ -11,6 +11,8 @@ At the end the script asks whether to run ./zskarte.sh restart -b, because the a
 are built from these files.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import re

@@ -96,6 +96,19 @@ class ValidationTest(unittest.TestCase):
             md.validate_new_department("fb-neu", {**self.labels, "fr": "  "})
 
 
+class StoredRowTest(unittest.TestCase):
+    def test_one_row_gives_its_id(self):
+        self.assertEqual(md.single_row_id([["7"]]), "7")
+
+    def test_two_rows_are_refused(self):
+        with self.assertRaises(md.DatabaseError):
+            md.single_row_id([["7"], ["8"]])
+
+    def test_no_row_is_refused(self):
+        with self.assertRaises(md.DatabaseError):
+            md.single_row_id([])
+
+
 class ArgumentsTest(unittest.TestCase):
     def test_add_needs_all_three_labels(self):
         with self.assertRaises(SystemExit):

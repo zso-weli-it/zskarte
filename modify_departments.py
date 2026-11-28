@@ -141,16 +141,24 @@ def find_affected_entries(department: str) -> list[list[str]]:
     return run_sql(sql, {"department": department})
 
 
+def single_row_id(rows: list[list[str]]) -> str:
+    """Only one stored schema row may exist; with two, it is unclear which one Strapi reads."""
+    if len(rows) != 1:
+        raise DatabaseError(f"expected one stored schema row for '{STORE_KEY}', found {len(rows)}. Nothing was changed.")
+    return rows[0][0]
+
+
 def update_stored_schema(departments: list[str]) -> None:
     """Strapi keeps a copy of the content type schema in the database. It is updated here to match the code."""
+    row_id = single_row_id(run_sql("select id from strapi_core_store_settings where key = :'store_key';", {"store_key": STORE_KEY}))
     path = "ARRAY[" + ",".join(f"'{part}'" for part in ENUM_PATH) + "]"
     sql = (
         f"update strapi_core_store_settings set value = jsonb_set(value::jsonb, {path}, :'enum_json'::jsonb)::text "
-        "where key = :'store_key' returning id;"
+        "where id = :'row_id' returning id;"
     )
-    rows = run_sql(sql, {"enum_json": json.dumps(departments), "store_key": STORE_KEY})
+    rows = run_sql(sql, {"enum_json": json.dumps(departments), "row_id": row_id})
     if len(rows) != 1:
-        raise DatabaseError(f"stored schema row '{STORE_KEY}' not found ({len(rows)} rows updated)")
+        raise DatabaseError(f"stored schema row {row_id} was not updated. Nothing was written to the files.")
 
 
 def print_affected(department: str, rows: list[list[str]]) -> None:

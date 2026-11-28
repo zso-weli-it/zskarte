@@ -26,6 +26,8 @@ FROM node:26.13.1-slim AS release
 
 WORKDIR /app
 ENV HOST=0.0.0.0
+# the upload folder is a volume; it must exist and belong to node so the volume is writable on first use
+RUN mkdir -p /app/packages/server/public/uploads && chown node:node /app/packages/server/public/uploads
 USER node
 EXPOSE 1337
 

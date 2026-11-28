@@ -42,6 +42,9 @@ services:
     networks:
       - zskarte
     ports: [ 1337:1337 ]
+    # uploaded logos and map media live here; without the volume a rebuild deletes them
+    volumes:
+      - server-uploads-zskarte:/app/packages/server/public/uploads
     env_file: ./packages/server/.env
     environment:
       - DATABASE_HOST=postgresql-zskarte
@@ -75,6 +78,7 @@ services:
 volumes:
   pgdata-zskarte:
   pgadmin-zskarte:
+  server-uploads-zskarte:
 
 networks:
   zskarte:
